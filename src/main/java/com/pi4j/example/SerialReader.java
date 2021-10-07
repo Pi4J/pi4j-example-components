@@ -11,26 +11,45 @@ public class SerialReader implements Runnable {
     private final Console console;
     private final Serial serial;
 
+    private boolean continueReading = true;
+
     public SerialReader(Console console, Serial serial) {
         this.console = console;
         this.serial = serial;
     }
 
+    public void stopReading() {
+        continueReading = false;
+    }
+
     @Override
     public void run() {
-        // temperature readings are sent line based, so we use a BufferedReader to read line by line
+        // We use a buffered reader to handle the data received from the serial port
         BufferedReader br = new BufferedReader(new InputStreamReader(serial.getInputStream()));
 
         try {
+            // Data from the GPS is recieved in lines
             String line = "";
 
-            // read data until there's an empty line (=broken connection or so)
-            while (line != null) {
-                // !!! VERY IMPORTANT !!! Data can only be read as long as there is some data to read. So check for available data first, every time!
-                // The read() command for pigio-serial is a NON-BLOCKING call, in contrast to typical java input streams ...
-                if (serial.available() > 0) {
-                    line = br.readLine();
-                    console.println("Date received from serial: '" + line + "'");
+            // Read data until the flag is false
+            while (continueReading) {
+                // First we need to check if there is data available to read.
+                // The read() command for pigio-serial is a NON-BLOCKING call, in contrast to typical java input streams.
+                var available = serial.available();
+                if (available > 0) {
+                    for (int i = 0; i < available; i++) {
+                        byte b = (byte) br.read();
+                        if (b < 32) {
+                            // All non-string bytes are handled as line breaks
+                            if (!line.isEmpty()) {
+                                // Here we should add code to parse the data to a GPS data object
+                                console.println("Data: '" + line + "'");
+                                line = "";
+                            }
+                        } else {
+                            line += (char) b;
+                        }
+                    } 
                 } else {
                     Thread.sleep(10);
                 }

@@ -1,5 +1,6 @@
 /.idea/
 /target/
-/.gradle/
-/build/
-/pi4j-example-minimal.iml
+/*.iml
+.classpath
+.project
+*.prefs

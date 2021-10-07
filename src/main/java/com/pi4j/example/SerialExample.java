@@ -113,14 +113,17 @@ public class SerialExample {
         PrintInfo.printRegistry(console, pi4j);
 
         // Start a thread to handle the incoming data from the serial port
-        Thread serialReader = new Thread(new SerialReader(console, serial), "SerialReader");
-        serialReader.setDaemon(true);
-        serialReader.start();
+        SerialReader serialReader = new SerialReader(console, serial);
+        Thread serialReaderThread = new Thread(serialReader, "SerialReader");
+        serialReaderThread.setDaemon(true);
+        serialReaderThread.start();
 
         while (serial.isOpen()) {
             Thread.sleep(500);
         }
 
+        serialReader.stopReading();
+        
         console.println("Serial is no longer open");
 
         // ------------------------------------------------------------
