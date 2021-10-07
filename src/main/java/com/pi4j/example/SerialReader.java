@@ -56,6 +56,7 @@ public class SerialReader implements Runnable {
             }
         } catch (Exception e) {
             console.println("Error reading data from serial: " + e.getMessage());
+            System.out.println(e.getStackTrace());
         }
     }
 }
