@@ -12,7 +12,16 @@ on [the Pi4J website](https://v2.pi4j.com/getting-started/minimal-example-applic
 
 The goal of the example project is to show how to set up a Pi4J Maven project for the Raspberry Pi.
 
-## WIRING
+### WIRING
+
+The GPS module used in this example: NEO-7M.
+
+| NEO-7M    | Raspberry Pi            |
+| :---      | :---                    |
+| VCC       | Power 5V (e.g. pin 2)   |
+| GND       | Ground (e.g. pin 6)     |
+| RX        | UART TX, GPIO 15        |
+| TX        | UART RX, GPIO 16        |
 
 ### TEST IN TERMINAL
 
@@ -63,16 +72,12 @@ $ sudo ./run.sh
 [main] INFO com.pi4j.util.Console - 
 [main] INFO com.pi4j.util.Console - Serial port is open
 ...
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPRMC,,V,,,,,,,,,,N*53'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPVTG,,,,,,,,,N*30'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGGA,,,,,,0,00,99.99,,,,,,*48'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGSA,A,1,,,,,,,,,,,,,99.99,99.99,99.99*30'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGSV,1,1,01,20,,,28*70'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGLL,,,,,,V,N*64'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPRMC,,V,,,,,,,,,,N*53'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPVTG,,,,,,,,,N*30'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGGA,,,,,,0,00,99.99,,,,,,*48'
-[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGSA,A,1,,,,,,,,,,,,,99.99,99.99,99.99*30'
+[SerialReader] INFO com.pi4j.util.Console - Data: '$GPVTG,,T,,M,2.349,N,4.351,K,A*2C'
+[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGGA,143723.00,5054.02265,N,00301.10531,E,1,04,10.46,86.2,M,45.9,M,,*5C'
+[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGSA,A,3,09,16,05,07,,,,,,,,,17.19,10.46,13.64*33'
+[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGSV,2,1,06,05,33,304,20,07,67,101,21,09,39,079,29,11,38,228,20*7E'
+[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGSV,2,2,06,16,11,030,24,20,63,283,*73'
+[SerialReader] INFO com.pi4j.util.Console - Data: '$GPGLL,5054.02265,N,00301.10531,E,143723.00,A,A*6A'
 ```
 
 ## RUNTIME DEPENDENCIES
@@ -84,45 +89,6 @@ This project uses Pi4J V.2 which has the following runtime dependency requiremen
 - [**PIGPIO Library**](http://abyz.me.uk/rpi/pigpio) (for the Raspberry Pi) - This dependency comes pre-installed on
   recent Raspbian images. However, you can also download and install it yourself using the instructions found
   [here](http://abyz.me.uk/rpi/pigpio/download.html).
-
-## BUILD DEPENDENCIES & INSTRUCTIONS
-
-This project can be built with [Apache Maven](https://maven.apache.org/) 3.6
-(or later) and Java 11 OpenJDK (or later). These prerequisites must be installed prior to building this project. The
-following command can be used to download all project dependencies and compile the Java module. You can build this
-project directly on a Raspberry Pi with Java 11+.
-
-```
-mvn clean package
-```
-
-### Compiled application to run on the Raspberry Pi
-
-Once the build is complete and was successful, you can find the compiled artifacts in the `target` (Maven) or `build` (
-Gradle) folder. Specifically all dependency modules (JARs) and a simple `run.sh` bash script will be located in the
-`target/distribution` (Maven) or `build/distribution` (Gradle) folder.
-
-These are all the required files needed to distribute (copy) to your Raspberry Pi to run this project. If you are using
-the native bindings running locally on the Raspberry Pi, then you make have to run the program using `sudo`
-to gain the necessary access permissions to the hardware I/O.
-
-This is the list of files created by the build process of this example application:
-
-* pi4j-core
-* pi4j-example-serial
-* pi4j-library-pigpio
-* pi4j-plugin-pigpio
-* pi4j-plugin-raspberrypi
-* slf4j-api
-* slf4j-simple
-* run.sh --> this is the actual start file which will run pi4j-example-minimal
-
-Make the run script executable and start it like this:
-
-```
-chmod +x run.sh
-sudo ./run.sh
-```
 
 ## LICENSE
 
