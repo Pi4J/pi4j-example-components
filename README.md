@@ -23,6 +23,8 @@ The GPS module used in this example: NEO-7M.
 | RX        | UART TX, GPIO 15        |
 | TX        | UART RX, GPIO 16        |
 
+![Wiring between Raspberry Pi and GPS module](assets/raspberrypi_gps.png)
+
 ### TEST IN TERMINAL
 
 ```
