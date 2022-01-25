@@ -1,4 +1,4 @@
-package com.pi4j.example;
+package com.pi4j.example.serial.gps;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.util.Console;
@@ -49,7 +49,7 @@ public class SerialReader implements Runnable {
                         } else {
                             line += (char) b;
                         }
-                    } 
+                    }
                 } else {
                     Thread.sleep(10);
                 }

@@ -38,4 +38,6 @@ module com.pi4j.example {
 
     // allow access to classes in the following namespaces for Pi4J annotation processing
     opens com.pi4j.example to com.pi4j;
+    opens com.pi4j.example.util to com.pi4j;
+    opens com.pi4j.example.serial.gps to com.pi4j;
 }

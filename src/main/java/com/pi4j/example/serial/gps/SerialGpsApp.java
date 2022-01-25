@@ -1,4 +1,4 @@
-package com.pi4j.example;
+package com.pi4j.example.serial.gps;
 
 /*-
  * #%L
@@ -29,6 +29,7 @@ package com.pi4j.example;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
+import com.pi4j.example.util.PrintInfo;
 import com.pi4j.io.serial.FlowControl;
 import com.pi4j.io.serial.Parity;
 import com.pi4j.io.serial.Serial;
@@ -41,7 +42,7 @@ import com.pi4j.util.Console;
  * @author Frank Delporte (<a href="https://www.webtechie.be">https://www.webtechie.be</a>)
  * @version $Id: $Id
  */
-public class SerialExample {
+public class SerialGpsApp {
 
     private static final String SERIAL_ADDRESS = "/dev/ttyS0";
 
@@ -123,7 +124,7 @@ public class SerialExample {
         }
 
         serialReader.stopReading();
-        
+
         console.println("Serial is no longer open");
 
         // ------------------------------------------------------------

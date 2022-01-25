@@ -1,4 +1,4 @@
-package com.pi4j.example;
+package com.pi4j.example.util;
 
 import com.pi4j.context.Context;
 import com.pi4j.platform.Platform;
