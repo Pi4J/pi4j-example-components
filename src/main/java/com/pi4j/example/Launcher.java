@@ -1,10 +1,9 @@
 package com.pi4j.example;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.applications.*;
+import com.pi4j.example.applications.SimpleButton_App;
 import com.pi4j.example.helpers.CrowPiPlatform;
 import com.pi4j.example.helpers.SingletonAppHelper;
-import com.pi4j.example.applications.SimpleLED_App;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -19,7 +18,7 @@ public final class Launcher implements Runnable {
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
     public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
-        new SimpleLED_App()
+        new SimpleButton_App()
     ));
 
     /**
