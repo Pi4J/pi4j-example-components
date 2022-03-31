@@ -12,6 +12,19 @@
 
     <!-- BUILD PROPERTIES -->
     <properties>
+		
+		<!-- Project Properties -->
+        <example.launcher.class>com.pi4j.example/com.pi4j.example.Launcher</example.launcher.class>
+        <example.launcher.args/>
+
+        <!-- Raspberry Remote Deployment -->
+        <example.remote.host/>
+        <example.remote.port>22</example.remote.port>
+        <example.remote.username>pi</example.remote.username>
+        <example.remote.password>crowpi</example.remote.password>
+        <example.remote.target>/home/pi/deploy</example.remote.target>
+        <example.remote.jvmOptions/>
+	
         <!-- PROJECT ENCODING PROPERTIES -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -179,4 +192,101 @@
             </plugin>
         </plugins>
     </build>
+	
+	<profiles>
+        <!-- Run the JAR file locally -->
+        <profile>
+            <id>local-run</id>
+            <activation>
+                <property>
+                    <name>!example.remote.host</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>sudo</executable>
+                            <commandlineArgs>java --module-path ${project.build.directory}/distribution --module ${example.launcher.class} ${crowpi.launcher.args}</commandlineArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Transfer and run JAR with dependencies on remote Raspberry -->
+        <profile>
+            <id>remote-run</id>
+            <activation>
+                <property>
+                    <name>example.remote.host</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>transfer</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Ensure target directory exists on Raspberry -->
+                                        <sshexec host="${example.remote.host}" port="${example.remote.port}"
+                                                 username="${example.remote.username}" password="${example.remote.password}"
+                                                 trust="true" command="mkdir --parents ${example.remote.target}"/>
+
+                                        <!-- Transfer distribution folder to Raspberry via SCP -->
+                                        <scp trust="true"
+                                             todir="${example.remote.username}:${example.remote.password}@${example.remote.host}:${example.remote.target}"
+                                             port="${example.remote.port}">
+                                            <fileset dir="${project.build.directory}/distribution"/>
+                                        </scp>
+
+                                        <!-- Run application on Raspberry Pi -->
+                                        <sshexec host="${example.remote.host}" port="${example.remote.port}"
+                                                 username="${example.remote.username}" password="${example.remote.password}" trust="true"
+                                                 failonerror="false" usepty="true" useSystemIn="true"
+                                                 command="sudo java ${example.remote.jvmOptions} --module-path ${example.remote.target} --module ${example.launcher.class} ${example.launcher.args}"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant-jsch</artifactId>
+                                <version>${ant-jsch.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Activate JDWP server on CrowPi, can be used for local and remote runs -->
+        <profile>
+            <id>debug</id>
+            <properties>
+                <crowpi.remote.jvmOptions>
+                    -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
+                </crowpi.remote.jvmOptions>
+            </properties>
+        </profile>
+    </profiles>
 </project>
