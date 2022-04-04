@@ -3,6 +3,7 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.example.components.events.DigitalEventProvider;
 import com.pi4j.example.components.events.SimpleEventHandler;
+import com.pi4j.example.helpers.SimpleInput;
 import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalInputConfig;
 import com.pi4j.io.gpio.digital.DigitalState;
@@ -11,7 +12,7 @@ import com.pi4j.io.gpio.digital.PullResistance;
 /**
  * Implementation of a button using GPIO with Pi4J
  */
-public class SimpleButton extends Component implements DigitalEventProvider<SimpleButton.ButtonState> {
+public class SimpleButton extends Component implements DigitalEventProvider<SimpleButton.ButtonState>, SimpleInput {
     /**
      * Default debounce time in microseconds
      */
@@ -73,6 +74,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @return True if button is pressed
      */
+    @Override
     public boolean isDown() {
         return getState() == ButtonState.DOWN;
     }
@@ -82,6 +84,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @return True if button is depressed
      */
+    @Override
     public boolean isUp() {
         return getState() == ButtonState.UP;
     }
@@ -125,6 +128,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @param handler Event handler to call or null to disable
      */
+    @Override
     public void onDown(SimpleEventHandler handler) {
         this.onDown = handler;
     }
@@ -136,6 +140,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @param handler Event handler to call or null to disable
      */
+    @Override
     public void onUp(SimpleEventHandler handler) {
         this.onUp = handler;
     }

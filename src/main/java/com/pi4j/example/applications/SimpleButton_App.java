@@ -12,11 +12,11 @@ package com.pi4j.example.applications;
 public class SimpleButton_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        // Initialize all four button components
+        // Initialize the button component
         final var button = new SimpleButton(pi4j, 26, Boolean.TRUE);
 
 
-        // Register event handlers to print a message for each button when pressed (onDown) and depressed (onUp)
+        // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
         button.onDown(() -> System.out.println("Pressing the Button"));
         button.onUp(() -> System.out.println("Stopped pressing."));
 
@@ -25,7 +25,6 @@ public class SimpleButton_App implements Application {
         sleep(15000);
 
         // Unregister all event handlers to exit this application in a clean way
-        // To keep the code more compact, we create a list of all four buttons and loop over it, unregistering both handlers for each
         button.onDown(null);
         button.onUp(null);
     }

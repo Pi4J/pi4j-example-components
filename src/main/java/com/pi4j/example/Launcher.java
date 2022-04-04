@@ -1,9 +1,16 @@
 package com.pi4j.example;
 
+import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.example.applications.SimpleButton_App;
-import com.pi4j.example.helpers.CrowPiPlatform;
 import com.pi4j.example.helpers.SingletonAppHelper;
+import com.pi4j.library.pigpio.PiGpio;
+import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
+import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalOutputProvider;
+import com.pi4j.plugin.pigpio.provider.i2c.PiGpioI2CProvider;
+import com.pi4j.plugin.pigpio.provider.pwm.PiGpioPwmProvider;
+import com.pi4j.plugin.pigpio.provider.serial.PiGpioSerialProvider;
+import com.pi4j.plugin.pigpio.provider.spi.PiGpioSpiProvider;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -95,7 +102,18 @@ public final class Launcher implements Runnable {
         // This loop will either run only once or forever, depending on the state of `demoMode`
         do {
             // Initialize Pi4J context
-            pi4j = CrowPiPlatform.buildNewContext();
+            final var piGpio = PiGpio.newNativeInstance();
+            pi4j = Pi4J.newContextBuilder()
+                    .noAutoDetect()
+                    .add(
+                            PiGpioDigitalInputProvider.newInstance(piGpio),
+                            PiGpioDigitalOutputProvider.newInstance(piGpio),
+                            PiGpioPwmProvider.newInstance(piGpio),
+                            PiGpioI2CProvider.newInstance(piGpio),
+                            PiGpioSerialProvider.newInstance(piGpio),
+                            PiGpioSpiProvider.newInstance(piGpio)
+                    )
+                    .build();;
             // Run the application
             getTargetInteractively(targets).run();
             // Clean up

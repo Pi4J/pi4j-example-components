@@ -217,7 +217,7 @@
                         </executions>
                         <configuration>
                             <executable>sudo</executable>
-                            <commandlineArgs>java --module-path ${project.build.directory}/distribution --module ${example.launcher.class} ${crowpi.launcher.args}</commandlineArgs>
+                            <commandlineArgs>java --module-path ${project.build.directory}/distribution --module ${example.launcher.class} ${example.launcher.args}</commandlineArgs>
                         </configuration>
                     </plugin>
                 </plugins>
