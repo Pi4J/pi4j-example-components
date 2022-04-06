@@ -1,7 +1,7 @@
 package com.pi4j.example.components.events;
 
 /**
- * Generic functional interface used for for event handlers.
+ * Generic functional interface used for event handlers.
  *
  * @param <V> Type of event value
  */

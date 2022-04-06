@@ -13,7 +13,7 @@ public class SimpleButton_App implements Application {
     @Override
     public void execute(Context pi4j) {
         // Initialize the button component
-        final var button = new SimpleButton(pi4j, 26, Boolean.TRUE);
+        final var button = new SimpleButton(pi4j, 26, Boolean.FALSE);
 
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
