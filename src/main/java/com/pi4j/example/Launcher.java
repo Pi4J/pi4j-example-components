@@ -2,7 +2,7 @@ package com.pi4j.example;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.example.applications.SimpleButton_App;
+import com.pi4j.example.applications.LEDButton_App;
 import com.pi4j.example.helpers.SingletonAppHelper;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
@@ -11,7 +11,6 @@ import com.pi4j.plugin.pigpio.provider.i2c.PiGpioI2CProvider;
 import com.pi4j.plugin.pigpio.provider.pwm.PiGpioPwmProvider;
 import com.pi4j.plugin.pigpio.provider.serial.PiGpioSerialProvider;
 import com.pi4j.plugin.pigpio.provider.spi.PiGpioSpiProvider;
-import com.pi4j.plugin.raspberrypi.platform.RaspberryPiPlatform;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -26,7 +25,7 @@ public final class Launcher implements Runnable {
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
     public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
-        new SimpleButton_App()
+        new LEDButton_App()
     ));
 
     /**
