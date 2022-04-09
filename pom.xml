@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.pi4j</groupId>
+    <groupId>com.pi4j.example</groupId>
     <artifactId>pi4j-example-components</artifactId>
     <name>Pi4J :: EXAMPLE COMPONENTS :: Various example applications</name>
     <description>Pi4J Sample Code</description>
@@ -12,127 +12,134 @@
 
     <!-- BUILD PROPERTIES -->
     <properties>
-        <!-- PROJECT ENCODING PROPERTIES -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- JAVA COMPILER VERSIONS -->
-        <java.version>11</java.version>
+        <!-- Project Properties -->
+        <example.launcher.class>com.pi4j.example/com.pi4j.example.Launcher</example.launcher.class>
+        <example.launcher.args/>
+
+        <!-- Raspberry Remote Deployment -->
+        <example.remote.host/>
+        <example.remote.port>22</example.remote.port>
+        <example.remote.username>pi</example.remote.username>
+        <example.remote.password>crowpi</example.remote.password>
+        <example.remote.target>/home/pi/deployment</example.remote.target>
+        <example.remote.jvmOptions/>
+
+        <!-- Project Dependencies -->
+        <java.version>17</java.version>
+        <pi4j.version>2.1.1</pi4j.version>
+        <slf4j.version>1.7.32</slf4j.version>
+        <picocli.version>4.6.3</picocli.version>
+        <junit.version>5.7.1</junit.version>
+        <ant-jsch.version>1.10.9</ant-jsch.version>
+
+        <!-- Maven Dependencies -->
+        <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+
+        <!-- Maven Properties -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <!-- DEPENDENCIES VERSIONS -->
-        <slf4j.version>1.7.32</slf4j.version>
-        <pi4j.version>2.1.1</pi4j.version>
-
-        <!-- BUILD PLUGIN VERSIONS -->
-        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <!-- include Pi4J Core -->
+        <!-- Pi4J Core -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-core</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
 
-        <!-- include Pi4J Plugins (Platforms and I/O Providers) -->
+        <!-- Pi4J Raspberry Pi Platform -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-raspberrypi</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
+
+        <!-- Pi4J Raspberry Pi GPIO -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-pigpio</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
+
+        <!-- Pi4J Mock Platform -->
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-mock</artifactId>
+            <version>${pi4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- SLF4J API -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- SLF4J Simple -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- PicoCLI -->
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>${picocli.version}</version>
+        </dependency>
+
+        <!-- JUnit -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- JAVA COMPILER -->
+            <!-- Specify compiler options -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <release>${java.version}</release>
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
                     <verbose>false</verbose>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>info.picocli</groupId>
+                            <artifactId>picocli-codegen</artifactId>
+                            <version>${picocli.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <!-- Used by PicoCLI annotation processor -->
+                        <arg>-Aproject=${example.launcher.class}</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
-            <!-- DEFAULT JAR EXECUTABLE CLASS -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <argument>--module-path</argument>
-                        <argument>${project.build.directory}/distribution</argument>
-                        <argument>--module</argument>
-                        <argument>com.pi4j.example/com.pi4j.example.serial.gps.SerialGpsApp</argument>
-                    </arguments>
-                </configuration>
-            </plugin>
-
-            <!-- BUILD THE FINAL JAR FILE IN THE /target/distribution PATH -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <outputDirectory>${project.build.directory}/distribution</outputDirectory>
-                </configuration>
-            </plugin>
-
-            <!-- COPY ANY RUNTIME SCRIPTS TO THE /target/distribution PATH  -->
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <copy todir="${project.build.directory}/distribution" overwrite="true" flatten="true">
-                                    <fileset dir="assets" includes="*.sh"></fileset>
-                                </copy>
-                                <chmod dir="${project.build.directory}/distribution" perm="ugo+rx" includes="**/*.sh"/>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- DOWNLOAD RUNTIME DEPENDENCIES -->
+            <!-- Copy runtime dependencies into distribution folder -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -154,6 +161,151 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Build final JAR file -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/distribution</outputDirectory>
+                </configuration>
+            </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven-antrun-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven-dependency-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${exec-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
+
+    <profiles>
+        <!-- Run the JAR file locally -->
+        <profile>
+            <id>local-run</id>
+            <activation>
+                <property>
+                    <name>!example.remote.host</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>sudo</executable>
+                            <commandlineArgs>java --module-path ${project.build.directory}/distribution --module ${example.launcher.class} ${example.launcher.args}</commandlineArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Transfer and run JAR with dependencies on remote Raspberry -->
+        <profile>
+            <id>remote-run</id>
+            <activation>
+                <property>
+                    <name>example.remote.host</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>transfer</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Ensure target directory exists on Raspberry -->
+                                        <sshexec host="${example.remote.host}" port="${example.remote.port}"
+                                                 username="${example.remote.username}" password="${example.remote.password}"
+                                                 trust="true" command="mkdir --parents ${example.remote.target}"/>
+
+                                        <!-- Transfer distribution folder to Raspberry via SCP -->
+                                        <scp trust="true"
+                                             todir="${example.remote.username}:${example.remote.password}@${example.remote.host}:${example.remote.target}"
+                                             port="${example.remote.port}">
+                                            <fileset dir="${project.build.directory}/distribution"/>
+                                        </scp>
+
+                                        <!-- Run application on Raspberry Pi -->
+                                        <sshexec host="${example.remote.host}" port="${example.remote.port}"
+                                                 username="${example.remote.username}" password="${example.remote.password}" trust="true"
+                                                 failonerror="false" usepty="true" useSystemIn="true"
+                                                 command="sudo java ${example.remote.jvmOptions} --module-path ${example.remote.target} --module ${example.launcher.class} ${example.launcher.args}"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.ant</groupId>
+                                <artifactId>ant-jsch</artifactId>
+                                <version>${ant-jsch.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Activate JDWP server on Raspberry, can be used for local and remote runs -->
+        <profile>
+            <id>debug</id>
+            <properties>
+                <example.remote.jvmOptions>
+                    -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
+                </example.remote.jvmOptions>
+            </properties>
+        </profile>
+    </profiles>
 </project>

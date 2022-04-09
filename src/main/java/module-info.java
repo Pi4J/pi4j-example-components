@@ -32,6 +32,9 @@ module com.pi4j.example {
     // SLF4J MODULES
     requires org.slf4j;
     requires org.slf4j.simple;
+    requires info.picocli;
+    requires com.pi4j.plugin.raspberrypi;
+    requires com.pi4j.library.pigpio;
 
     uses com.pi4j.extension.Extension;
     uses com.pi4j.provider.Provider;
@@ -39,4 +42,5 @@ module com.pi4j.example {
     // allow access to classes in the following namespaces for Pi4J annotation processing
     opens com.pi4j.example.util to com.pi4j;
     opens com.pi4j.example.serial.gps to com.pi4j;
+    opens com.pi4j.example to info.picocli;
 }
