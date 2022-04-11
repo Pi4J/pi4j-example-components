@@ -27,21 +27,21 @@ public class SimpleLED extends Component {
      * @param on Sets the LED to on (true) or off (false)
      */
     public void setState(boolean on) {
-        digitalOutput.setState(!on);
+        digitalOutput.setState(on);
     }
 
     /**
      * Sets the LED to on.
      */
     public void setStateOn() {
-        digitalOutput.off();
+        digitalOutput.on();
     }
 
     /**
      * Sets the LED to off
      */
     public void setStateOff() {
-        digitalOutput.on();
+        digitalOutput.off();
     }
 
     /**
