@@ -3,6 +3,7 @@ package com.pi4j.example;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.example.applications.Joystick_App;
+import com.pi4j.example.applications.LCDDisplay_App;
 import com.pi4j.example.applications.SimpleButton_App;
 import com.pi4j.example.applications.SimpleLED_App;
 import com.pi4j.example.helpers.SingletonAppHelper;
@@ -26,10 +27,11 @@ public final class Launcher implements Runnable {
      * This list must contain all applications which should be executable through the launcher.
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
-    public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
+    public static final List<Application> APPLICATIONS = new ArrayList<Application>(Arrays.asList(
         new SimpleButton_App(),
         new Joystick_App(),
-        new SimpleLED_App()
+        new SimpleLED_App(),
+        new LCDDisplay_App()
     ));
 
     /**
@@ -117,7 +119,7 @@ public final class Launcher implements Runnable {
                             PiGpioSerialProvider.newInstance(piGpio),
                             PiGpioSpiProvider.newInstance(piGpio)
                     )
-                    .build();;
+                    .build();
             // Run the application
             getTargetInteractively(targets).run();
             // Clean up
