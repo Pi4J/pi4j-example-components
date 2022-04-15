@@ -5,15 +5,17 @@ import com.pi4j.example.components.events.DigitalEventProvider;
 import com.pi4j.example.components.events.EventHandler;
 import com.pi4j.example.components.events.SimpleEventHandler;
 import com.pi4j.example.helpers.SimpleInput;
-import com.pi4j.example.helpers.SimpleOutput;
-import com.pi4j.io.gpio.digital.*;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalInputConfig;
+import com.pi4j.io.gpio.digital.DigitalState;
+import com.pi4j.io.gpio.digital.PullResistance;
 
 import java.util.function.ToDoubleBiFunction;
 
 /**
  * Implementation of a button using GPIO with Pi4J
  */
-public class LEDButton extends Component implements DigitalEventProvider<LEDButton.ButtonState>, SimpleInput, SimpleOutput {
+public class SimpleButton extends Component implements DigitalEventProvider<SimpleButton.ButtonState>, SimpleInput {
     /**
      * Default debounce time in microseconds
      */
@@ -23,11 +25,6 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      * Pi4J digital input instance used by this component
      */
     protected final DigitalInput digitalInput;
-
-    /**
-     * Pi4J digital output instance used by this component
-     */
-    protected final DigitalOutput digitalOutput;
     /**
      * Specifies if button state is inverted, e.g. HIGH = depressed, LOW = pressed
      * This will also automatically switch the pull resistance to PULL_UP
@@ -48,23 +45,21 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      *
      * @param pi4j   Pi4J context
      */
-    public LEDButton(Context pi4j, int buttonaddress, Boolean inverted, int ledaddress) {
-        this(pi4j, buttonaddress, inverted, ledaddress, DEFAULT_DEBOUNCE);
+    public SimpleButton(Context pi4j, int address, Boolean inverted) {
+        this(pi4j, address, inverted, DEFAULT_DEBOUNCE);
     }
 
     /**
      * Creates a new button component with custom GPIO address and debounce time.
      *
      * @param pi4j     Pi4J context
-     * @param buttonaddress  GPIO address of button
+     * @param address  GPIO address of button
      * @param inverted Specify if button state is inverted
-     * @param ledaddress  GPIO address of LED
      * @param debounce Debounce time in microseconds
      */
-    public LEDButton(Context pi4j, int buttonaddress, boolean inverted, int ledaddress, long debounce) {
+    public SimpleButton(Context pi4j, int address, boolean inverted, long debounce) {
         this.inverted = inverted;
-        this.digitalInput = pi4j.create(buildDigitalInputConfig(pi4j, buttonaddress, inverted, debounce));
-        this.digitalOutput = pi4j.create(buildDigitalOutputConfig(pi4j, ledaddress));
+        this.digitalInput = pi4j.create(buildDigitalInputConfig(pi4j, address, inverted, debounce));
         this.addListener(this::dispatchSimpleEvents);
     }
 
@@ -164,81 +159,19 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      * Builds a new DigitalInput configuration for the button component.
      *
      * @param pi4j     Pi4J context
-     * @param buttonaddress  GPIO address of button component
+     * @param address  GPIO address of button component
      * @param inverted Specify if button state is inverted
      * @param debounce Debounce time in microseconds
      * @return DigitalInput configuration
      */
-    private DigitalInputConfig buildDigitalInputConfig(Context pi4j, int buttonaddress, boolean inverted, long debounce) {
+    private DigitalInputConfig buildDigitalInputConfig(Context pi4j, int address, boolean inverted, long debounce) {
         return DigitalInput.newConfigBuilder(pi4j)
-                .id("BCM" + buttonaddress)
-                .name("Button #" + buttonaddress)
-                .address(buttonaddress)
+                .id("BCM" + address)
+                .name("Button #" + address)
+                .address(address)
                 .debounce(debounce)
                 .pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN)
                 .build();
-    }
-
-    /**
-     * Configure Digital Input
-     *
-     * @param pi4j    PI4J Context
-     * @param ledaddress GPIO Address of the relay
-     * @return Return Digital Input configuration
-     */
-    protected DigitalOutputConfig buildDigitalOutputConfig(Context pi4j, int ledaddress) {
-        return DigitalOutput.newConfigBuilder(pi4j)
-                .id("BCM" + ledaddress)
-                .name("LED")
-                .address(ledaddress)
-                .build();
-    }
-
-    /**
-     * Set the LED on or off depending on the boolean argument.
-     *
-     * @param on Sets the LED to on (true) or off (false)
-     */
-    @Override
-    public void setState(boolean on) {
-        digitalOutput.setState(!on);
-    }
-
-    /**
-     * Sets the LED to on.
-     */
-    @Override
-    public void setStateOn() {
-        digitalOutput.off();
-    }
-
-    /**
-     * Sets the LED to off
-     */
-    @Override
-    public void setStateOff() {
-        digitalOutput.on();
-    }
-
-    /**
-     * Toggle the LED state depending on its current state.
-     *
-     * @return Return true or false according to the new state of the relay.
-     */
-    @Override
-    public boolean toggleState() {
-        digitalOutput.toggle();
-        return digitalOutput.isOff();
-    }
-
-    /**
-     * Returns the instance of the digital output
-     *
-     * @return DigitalOutput instance of the LED
-     */
-    @Override
-    public DigitalOutput getDigitalOutput() {
-        return digitalOutput;
     }
 
     /**
