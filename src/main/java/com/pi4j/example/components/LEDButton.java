@@ -44,6 +44,11 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
     private SimpleEventHandler onUp;
 
     /**
+     * Handler for simple event when button is depressed
+     */
+    private SimpleEventHandler whilePressed;
+
+    /**
      * Creates a new button component
      *
      * @param pi4j   Pi4J context
@@ -122,6 +127,10 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
         switch (state) {
             case DOWN:
                 triggerSimpleEvent(onDown);
+                while (isDown()) {
+                    triggerSimpleEvent(whilePressed);
+                    sleep(DEFAULT_DEBOUNCE/1000);
+                }
                 break;
             case UP:
                 triggerSimpleEvent(onUp);
@@ -149,6 +158,17 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      */
     public void onUp(SimpleEventHandler handler) {
         this.onUp = handler;
+    }
+
+    /**
+     * Sets or disables the handler for the whilePressed event.
+     * This event gets triggered whenever the button is being pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param handler Event handler to call or null to disable
+     */
+    public void whilePressed(SimpleEventHandler handler) {
+        this.whilePressed = handler;
     }
 
     /**
