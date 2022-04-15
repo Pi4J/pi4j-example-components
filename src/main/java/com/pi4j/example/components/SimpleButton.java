@@ -9,6 +9,8 @@ import com.pi4j.io.gpio.digital.DigitalInputConfig;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.gpio.digital.PullResistance;
 
+import java.util.function.ToDoubleBiFunction;
+
 /**
  * Implementation of a button using GPIO with Pi4J
  */
@@ -65,6 +67,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @return Current button state
      */
+    //Todo comment button instead of touch sensor
     public ButtonState getState() {
         return mapDigitalState(digitalInput.state());
     }
@@ -109,6 +112,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     /**
      * {@inheritDoc}
      */
+    //TODO javadoc
     @Override
     public void dispatchSimpleEvents(ButtonState state) {
         switch (state) {
@@ -148,6 +152,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     /**
      * {@inheritDoc}
      */
+    //todo write java doc
     @Override
     public DigitalInput getDigitalInput() {
         return this.digitalInput;
@@ -175,6 +180,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     /**
      * All available states reported by the button component.
      */
+    //todo why is public enum in this class and not in folder for public enum
     public enum ButtonState {
         DOWN,
         UP,
