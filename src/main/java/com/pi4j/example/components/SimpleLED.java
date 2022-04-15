@@ -2,10 +2,11 @@ package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
 import com.pi4j.example.components.Component;
+import com.pi4j.example.helpers.SimpleOutput;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfig;
 
-public class SimpleLED extends Component {
+public class SimpleLED extends Component implements SimpleOutput {
     /**
      * Pi4J digital output instance used by this component
      */
@@ -59,7 +60,7 @@ public class SimpleLED extends Component {
      *
      * @return DigitalOutput instance of the LED
      */
-    protected DigitalOutput getDigitalOutput() {
+    public DigitalOutput getDigitalOutput() {
         return digitalOutput;
     }
 

@@ -38,13 +38,13 @@ public class Joystick extends Component {
      */
     private final SimpleButton push;
     /**
-     * Spezicies if Joystick with push button
+     * Specifies if Joystick with push button
      */
     private final boolean pushIsPresent;
 
 
     /**
-     * Creates a new joystick component with 5 custom GPIO address.
+     * Creates a new joystick component with 5 custom GPIO address, a joystick with push button.
      *
      * @param pi4j     Pi4J context
      * @param addressUp  GPIO address of button up
@@ -64,7 +64,7 @@ public class Joystick extends Component {
     }
 
     /**
-     * Creates a new joystick component with 4 custom GPIO address.
+     * Creates a new joystick component with 4 custom GPIO address, so no push button.
      *
      * @param pi4j     Pi4J context
      * @param addressUp  GPIO address of button up
@@ -205,7 +205,7 @@ public class Joystick extends Component {
      * @return True if button is pressed, False if button is not pressed or button does not exist
      */
     public boolean buttonPushIsDown() {
-        return pushIsPresent ? push.getState() == SimpleButton.ButtonState.DOWN : false;}
+        return pushIsPresent && push.getState() == SimpleButton.ButtonState.DOWN;}
 
     /**
      * Checks if button push is currently depressed (= NOT pressed)
@@ -213,7 +213,7 @@ public class Joystick extends Component {
      * @return True if button is depressed, False if button is pressed od button does not exits
      */
     public boolean buttonPushIsUp() {
-        return pushIsPresent ? push.getState() == SimpleButton.ButtonState.UP : false;}
+        return pushIsPresent && push.getState() == SimpleButton.ButtonState.UP;}
 
 
 

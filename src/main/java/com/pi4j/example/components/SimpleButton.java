@@ -2,6 +2,7 @@ package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
 import com.pi4j.example.components.events.DigitalEventProvider;
+import com.pi4j.example.components.events.EventHandler;
 import com.pi4j.example.components.events.SimpleEventHandler;
 import com.pi4j.example.helpers.SimpleInput;
 import com.pi4j.io.gpio.digital.DigitalInput;
@@ -63,11 +64,10 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     }
 
     /**
-     * Returns the current state of the touch sensor
+     * Returns the current state of the Digital State
      *
      * @return Current button state
      */
-    //Todo comment button instead of touch sensor
     public ButtonState getState() {
         return mapDigitalState(digitalInput.state());
     }
@@ -77,7 +77,6 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @return True if button is pressed
      */
-    @Override
     public boolean isDown() {
         return getState() == ButtonState.DOWN;
     }
@@ -87,7 +86,6 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @return True if button is depressed
      */
-    @Override
     public boolean isUp() {
         return getState() == ButtonState.UP;
     }
@@ -110,10 +108,11 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     }
 
     /**
-     * {@inheritDoc}
+     * Analyzes the given value passed by an event and triggers 0-n simple events based on it.
+     * This method allows mapping various value/state changes to simple events.
+     *
+     * @param state    Button state
      */
-    //TODO javadoc
-    @Override
     public void dispatchSimpleEvents(ButtonState state) {
         switch (state) {
             case DOWN:
@@ -132,7 +131,6 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @param handler Event handler to call or null to disable
      */
-    @Override
     public void onDown(SimpleEventHandler handler) {
         this.onDown = handler;
     }
@@ -144,16 +142,15 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @param handler Event handler to call or null to disable
      */
-    @Override
     public void onUp(SimpleEventHandler handler) {
         this.onUp = handler;
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the Pi4J DigitalInput associated with this component.
+     *
+     * @return Returns the Pi4J DigitalInput associated with this component.
      */
-    //todo write java doc
-    @Override
     public DigitalInput getDigitalInput() {
         return this.digitalInput;
     }
@@ -179,8 +176,8 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
 
     /**
      * All available states reported by the button component.
+     * This enum is in the Component itself, as it only Represents this class itself
      */
-    //todo why is public enum in this class and not in folder for public enum
     public enum ButtonState {
         DOWN,
         UP,
