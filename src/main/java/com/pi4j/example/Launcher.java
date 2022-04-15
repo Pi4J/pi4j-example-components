@@ -3,6 +3,7 @@ package com.pi4j.example;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.example.applications.SimpleButton_App;
+import com.pi4j.example.applications.SimpleLED_App;
 import com.pi4j.example.helpers.SingletonAppHelper;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
@@ -26,7 +27,8 @@ public final class Launcher implements Runnable {
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
     public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
-        new SimpleButton_App()
+            new SimpleButton_App(),
+            new SimpleLED_App()
     ));
 
     /**
