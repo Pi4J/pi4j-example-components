@@ -3,14 +3,11 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.example.components.events.DigitalEventProvider;
 import com.pi4j.example.components.events.EventHandler;
-import com.pi4j.example.components.events.SimpleEventHandler;
 import com.pi4j.example.helpers.SimpleInput;
 import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalInputConfig;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.gpio.digital.PullResistance;
-
-import java.util.function.ToDoubleBiFunction;
 
 /**
  * Implementation of a button using GPIO with Pi4J
@@ -34,11 +31,15 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     /**
      * Handler for simple event when button is pressed
      */
-    private SimpleEventHandler onDown;
+    private EventHandler onDown;
     /**
      * Handler for simple event when button is depressed
      */
-    private SimpleEventHandler onUp;
+    private EventHandler onUp;
+    /**
+     * Handler for simple event when button is pressed
+     */
+    private EventHandler whilePressed;
 
     /**
      * Creates a new button component
@@ -116,10 +117,14 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     public void dispatchSimpleEvents(ButtonState state) {
         switch (state) {
             case DOWN:
-                triggerSimpleEvent(onDown);
+                triggerEvent(onDown);
+                while (isDown()) {
+                    triggerEvent(whilePressed);
+                    sleep(DEFAULT_DEBOUNCE/1000);
+                }
                 break;
             case UP:
-                triggerSimpleEvent(onUp);
+                triggerEvent(onUp);
                 break;
         }
     }
@@ -131,7 +136,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @param handler Event handler to call or null to disable
      */
-    public void onDown(SimpleEventHandler handler) {
+    public void onDown(EventHandler handler) {
         this.onDown = handler;
     }
 
@@ -142,8 +147,19 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      *
      * @param handler Event handler to call or null to disable
      */
-    public void onUp(SimpleEventHandler handler) {
+    public void onUp(EventHandler handler) {
         this.onUp = handler;
+    }
+
+    /**
+     * Sets or disables the handler for the whilePressed event.
+     * This event gets triggered whenever the button is being pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param handler Event handler to call or null to disable
+     */
+    public void whilePressed(EventHandler handler) {
+        this.whilePressed = handler;
     }
 
     /**

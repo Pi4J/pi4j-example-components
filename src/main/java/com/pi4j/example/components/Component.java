@@ -1,6 +1,6 @@
 package com.pi4j.example.components;
 
-import com.pi4j.example.components.events.SimpleEventHandler;
+import com.pi4j.example.components.events.EventHandler;
 import com.pi4j.example.components.helpers.Logger;
 
 public abstract class Component {
@@ -29,7 +29,7 @@ public abstract class Component {
      *
      * @param handler Event handler to call or null
      */
-    protected void triggerSimpleEvent(SimpleEventHandler handler) {
+    protected void triggerEvent(EventHandler handler) {
         if (handler != null) {
             handler.handle();
         }

@@ -21,7 +21,7 @@
         <example.remote.host/>
         <example.remote.port>22</example.remote.port>
         <example.remote.username>pi</example.remote.username>
-        <example.remote.password>reto</example.remote.password>
+        <example.remote.password>Ms070997</example.remote.password>
         <example.remote.target>/home/pi/deployment</example.remote.target>
         <example.remote.jvmOptions/>
 

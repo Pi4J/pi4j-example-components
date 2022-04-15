@@ -1,24 +1,20 @@
 package com.pi4j.example.components.events;
 
 /**
- * Generic event provider interface for components which expose the ability to add or remove event listeners.
+ * Generic simple event provider with empty default implementation.
+ * Implementing this interface in a class allows mapping raw event values to simple events.
+ * Each implementation is responsible for actually triggering the simple events within {@link #dispatchSimpleEvents(Object)}.
  *
- * @param <L> Type of event listener used for implementation.
- * @param <V> Type of value which gets passed to event handlers.
+ * @param <E> Type of value which gets passed to event handlers.
  */
-public interface EventProvider<L extends EventListener, V> {
+public interface EventProvider<E> {
     /**
-     * Adds a new event listener which uses the given handler.
+     * Analyzes the given value passed by an event and triggers 0-n simple events based on it.
+     * This method allows mapping various value/state changes to simple events.
+     * Must be attached using {@link DigitalEventProvider#addListener(ValueChangeHandler)}.
      *
-     * @param handler Event handler to call
-     * @return Event listener instance
+     * @param value    Event value
      */
-    L addListener(EventHandler<V> handler);
-
-    /**
-     * Removes the given event listener.
-     *
-     * @param listener Event listener to remove
-     */
-    void removeListener(L listener);
+    default void dispatchSimpleEvents(E value) {
+    }
 }

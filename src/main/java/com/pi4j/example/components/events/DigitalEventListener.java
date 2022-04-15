@@ -12,7 +12,7 @@ import java.util.function.Function;
  * Can be registered as a {@link DigitalStateChangeListener} within Pi4J.
  * <p>
  * Whenever a Pi4J {@link DigitalStateChangeEvent} occurs, the provided {@link DigitalState} gets converted into the target type {@link V}
- * by calling the provided {@link #mapper} function. This mapped value then gets passed to the provided {@link EventHandler} to actually
+ * by calling the provided {@link #mapper} function. This mapped value then gets passed to the provided {@link ValueChangeHandler} to actually
  * handle the event with the function provided by the user.
  *
  * @param <V> Target type of event value which gets passed to event handler.
@@ -31,7 +31,7 @@ public class DigitalEventListener<V> implements EventListener, DigitalStateChang
     /**
      * Handler function which gets called
      */
-    protected final EventHandler<V> handler;
+    protected final ValueChangeHandler<V> handler;
 
     /**
      * Creates a new digital event listener for the given digital input which uses the provided mapper and event handler.
@@ -41,7 +41,7 @@ public class DigitalEventListener<V> implements EventListener, DigitalStateChang
      * @param mapper       Mapping function from {@link DigitalState} to target type {@link V}
      * @param handler      Handler function which gets called
      */
-    public DigitalEventListener(DigitalInput digitalInput, Function<DigitalState, V> mapper, EventHandler<V> handler) {
+    public DigitalEventListener(DigitalInput digitalInput, Function<DigitalState, V> mapper, ValueChangeHandler<V> handler) {
         this.digitalInput = digitalInput.addListener(this);
         this.mapper = mapper;
         this.handler = handler;

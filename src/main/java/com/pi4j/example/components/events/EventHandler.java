@@ -1,16 +1,15 @@
 package com.pi4j.example.components.events;
 
 /**
- * Generic functional interface used for event handlers.
- *
- * @param <V> Type of event value
+ * Generic functional interface for simple event handlers, which are event handlers without a parameter.
+ * Usually supposed to be called / triggered within {@link EventProvider#dispatchSimpleEvents(Object)}
  */
 @FunctionalInterface
-public interface EventHandler<V> {
+public interface EventHandler {
     /**
-     * Handles an event based on implementation needs.
-     *
-     * @param value Event value
+     * Handles a specific simple event based on implementation needs.
+     * This method does not take any parameters and returns no value either.
+     * For more advanced event handling, use {@link ValueChangeHandler}.
      */
-    void handle(V value);
+    void handle();
 }

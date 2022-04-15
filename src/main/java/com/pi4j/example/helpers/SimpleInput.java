@@ -1,10 +1,10 @@
 package com.pi4j.example.helpers;
 
-import com.pi4j.example.components.events.SimpleEventHandler;
+import com.pi4j.example.components.events.EventHandler;
 
 public interface SimpleInput {
     boolean isDown();
     boolean isUp();
-    void onDown(SimpleEventHandler handler);
-    void onUp(SimpleEventHandler handler);
+    void onDown(EventHandler handler);
+    void onUp(EventHandler handler);
 }

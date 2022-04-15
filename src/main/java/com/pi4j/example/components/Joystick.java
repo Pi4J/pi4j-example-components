@@ -1,7 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.components.events.SimpleEventHandler;
+import com.pi4j.example.components.events.EventHandler;
 import com.pi4j.io.gpio.digital.DigitalInput;
 
 import java.util.ArrayList;
@@ -225,7 +225,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonUpOnDown(SimpleEventHandler handler) {
+    public void buttonUpOnDown(EventHandler handler) {
         up.onDown(handler);
     }
 
@@ -236,7 +236,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonUpOnUp(SimpleEventHandler handler) {
+    public void buttonUpOnUp(EventHandler handler) {
         up.onUp(handler);
     }
 
@@ -247,7 +247,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonLeftOnDown(SimpleEventHandler handler) {
+    public void buttonLeftOnDown(EventHandler handler) {
         left.onDown(handler);
     }
 
@@ -258,7 +258,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonLeftOnUp(SimpleEventHandler handler) {
+    public void buttonLeftOnUp(EventHandler handler) {
         left.onUp(handler);
     }
     /**
@@ -268,7 +268,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonDownOnDown(SimpleEventHandler handler) {
+    public void buttonDownOnDown(EventHandler handler) {
         down.onDown(handler);
     }
 
@@ -279,7 +279,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonDownOnUp(SimpleEventHandler handler) {
+    public void buttonDownOnUp(EventHandler handler) {
         down.onUp(handler);
     }
     /**
@@ -289,7 +289,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonRightOnDown(SimpleEventHandler handler) {
+    public void buttonRightOnDown(EventHandler handler) {
         right.onDown(handler);
     }
 
@@ -300,7 +300,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonRightOnUp(SimpleEventHandler handler) {
+    public void buttonRightOnUp(EventHandler handler) {
         right.onUp(handler);
     }
 
@@ -311,7 +311,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonPushOnDown(SimpleEventHandler handler) {
+    public void buttonPushOnDown(EventHandler handler) {
         if (pushIsPresent){push.onDown(handler);}
     }
 
@@ -322,7 +322,7 @@ public class Joystick extends Component {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonPushOnUp(SimpleEventHandler handler) {
+    public void buttonPushOnUp(EventHandler handler) {
         if (pushIsPresent){push.onUp(handler);}
     }
 
