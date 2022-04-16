@@ -52,6 +52,9 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      * Creates a new button component
      *
      * @param pi4j   Pi4J context
+     * @param buttonaddress  GPIO address of button
+     * @param inverted Specify if button state is inverted
+     * @param ledaddress  GPIO address of LED
      */
     public LEDButton(Context pi4j, int buttonaddress, Boolean inverted, int ledaddress) {
         this(pi4j, buttonaddress, inverted, ledaddress, DEFAULT_DEBOUNCE);
