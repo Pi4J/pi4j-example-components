@@ -109,17 +109,7 @@ public final class Launcher implements Runnable {
         do {
             // Initialize Pi4J context
             final var piGpio = PiGpio.newNativeInstance();
-            pi4j = Pi4J.newContextBuilder()
-                    .noAutoDetect()
-                    .add(
-                            PiGpioDigitalInputProvider.newInstance(piGpio),
-                            PiGpioDigitalOutputProvider.newInstance(piGpio),
-                            PiGpioPwmProvider.newInstance(piGpio),
-                            PiGpioI2CProvider.newInstance(piGpio),
-                            PiGpioSerialProvider.newInstance(piGpio),
-                            PiGpioSpiProvider.newInstance(piGpio)
-                    )
-                    .build();
+            pi4j = Pi4J.newAutoContext();
             // Run the application
             getTargetInteractively(targets).run();
             // Clean up

@@ -12,25 +12,15 @@ public class LCDDisplay extends Component {
      * IO Component used to Display
      */
     private final I2CBus i2CBus;
-    /**
-     * Those default address are to use this class with default CrowPi setup
-     */
-    private static final int DEFAULT_BUS = 0x1;
-    private static final int DEFAULT_DEVICE = 0x21;
 
     /**
      * With this Byte cursor visibility is controlled
      */
     private byte displayControl;
 
-    /**
-     * Creates a new LCD Display component using the default setup.
-     *
-     * @param pi4j Pi4J context
-     */
-    public LCDDisplay(Context pi4j) {
-        this(pi4j, DEFAULT_BUS, DEFAULT_DEVICE);
-    }
+    private final int lines;
+
+    private final int chars;
 
     /**
      * Creates a new LCD Display component with custom bus, device address
@@ -39,9 +29,11 @@ public class LCDDisplay extends Component {
      * @param bus    Custom I2C bus address
      * @param device Custom device address on I2C
      */
-    public LCDDisplay(Context pi4j, int bus, int device) {
+    public LCDDisplay(Context pi4j, int bus, int device, int lines, int chars) {
         this.i2CBus = new I2CBus(pi4j, bus, device);
         this.i2CBus.initializeIo(i2CBus_IO_CONFIG);
+        this.lines = lines;
+        this.chars = chars;
     }
 
     /**
@@ -86,6 +78,12 @@ public class LCDDisplay extends Component {
      * @param line  Line number on the display
      */
     public void writeCharacter(char c, int digit, int line) {
+        if (digit >= chars) {
+            throw new IllegalArgumentException("Wrong Position. Only " + chars + " positions possible");
+        }
+        if(line > lines){
+            throw new IllegalArgumentException("Wrong line id. Only " + lines + " lines possible");
+        }
         setCursorToPosition(digit, line);
         write(Symbol.getByChar(c), true);
     }
@@ -97,8 +95,11 @@ public class LCDDisplay extends Component {
      * @param line Select Line of Display
      */
     public void writeLine(String text, int line) {
-        if (text.length() > 16) {
-            throw new IllegalArgumentException("Too long text. Only 16 characters possible");
+        if (text.length() > chars) {
+            throw new IllegalArgumentException("Too long text. Only " + chars + " characters possible");
+        }
+        if(line > lines){
+            throw new IllegalArgumentException("Wrong line id. Only " + lines + " lines possible");
         }
 
         clearLine(line);
@@ -111,39 +112,39 @@ public class LCDDisplay extends Component {
     }
 
     /**
-     * Write a text upto 32 characters to the display
+     * Write a text upto lines*chars characters to the display
      *
      * @param text Text to write to the display
      */
     public void writeText(String text) {
-        if ((text.length() > 32 && !text.contains("\n")) || (text.length() > 33 && text.contains("\n"))) {
-            throw new IllegalArgumentException("Too long text. Only 32 characters plus one linebreak allowed");
+        if ((text.length() > (lines*chars) && !text.contains("\n")) || (text.length() > (lines*chars)+1 && text.contains("\n"))) {
+            throw new IllegalArgumentException("Too long text. Only " + lines*chars +" characters plus linebreaks allowed");
         }
 
         // Clean and prepare to write some text
         var currentLine = 1;
         clearDisplay();
-        setCursorToLine(1);
+        setCursorToLine(currentLine);
 
-        // Iterate through characters and write them to the display
+        // Iterate through lines and characters and write them to the display
         for (int i = 0; i < text.length(); i++) {
             // line break in text found
             if (text.charAt(i) == '\n') {
-                currentLine = 2;
-                setCursorToLine(2);
+                currentLine++;
+                setCursorToLine(currentLine);
                 continue;
             }
 
             // Write character to display
             write(Symbol.getByChar(text.charAt(i)), true);
 
-            // Was last character on first line? switch to second
-            if (i == 15 && currentLine == 1) {
-                setCursorToLine(2);
+            // Was last character on line? switch to next
+            if ((i + 1) % chars == 0) {
+                currentLine++;
+                setCursorToLine(currentLine);
                 if (text.charAt(i + 1) == ' ') {
                     i++;
                 }
-                currentLine = 2;
             }
         }
     }
@@ -179,12 +180,12 @@ public class LCDDisplay extends Component {
      * @param line  Selects the line of the display
      */
     public void setCursorToPosition(int digit, int line) {
-        if (line > 2 || line < 1) {
-            throw new IllegalArgumentException("Line out of range. Display has only 2x16 Characters!");
+        if (line > lines || line < 1) {
+            throw new IllegalArgumentException("Line out of range. Display has only " + lines + "x" + chars + " Characters!");
         }
 
-        if (digit < 0 || digit > 15) {
-            throw new IllegalArgumentException("Digit out of range. Display has only 2x16 Characters!");
+        if (digit < 0 || digit > chars) {
+            throw new IllegalArgumentException("Line out of range. Display has only " + lines + "x" + chars + " Characters!");
         }
 
         digit &= 0xFF;
@@ -194,13 +195,13 @@ public class LCDDisplay extends Component {
     }
 
     /**
-     * Set the cursor to line 1 or 2
+     * Set the cursor to desired line
      *
-     * @param line Sets the cursor to this line. Only Range 1-2 allowed.
+     * @param line Sets the cursor to this line. Only Range 1 - lines allowed.
      */
     public void setCursorToLine(int line) {
-        if (line > 2 || line < 1) {
-            throw new IllegalArgumentException("CrowPi Display has only 2 Rows!");
+        if (line > lines || line < 1) {
+            throw new IllegalArgumentException("CrowPi Display has only " + lines + " Rows!");
         }
 
         executeCommand(LCD_SET_DDRAM_ADDR, LCD_ROW_OFFSETS[line - 1]);
@@ -301,7 +302,7 @@ public class LCDDisplay extends Component {
     public void clearLine(int line) {
         setCursorToLine(line);
 
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < chars; i++) {
             write(' ', true);
         }
     }

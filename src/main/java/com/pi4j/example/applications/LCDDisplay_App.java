@@ -5,16 +5,19 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.LCDDisplay;
 
 /**
- * Example Application of using the Crow Pi LCD Display
+ * Example Application of using the a LCD Display
  */
 public class LCDDisplay_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        LCDDisplay lcd = new LCDDisplay(pi4j, 1, 33);
+        LCDDisplay lcd = new LCDDisplay(pi4j, 1, 0x27, 2, 16);
         System.out.println("Here we go.. let's have some fun with that LCD Display!");
 
         // First we need to setup the LCD Display. That for just call initialize
         lcd.initialize();
+
+        // Turn on the backlight makes the display appear turned on
+        lcd.setDisplayBacklight(true);
 
         // Write text to the lines separate
         lcd.writeLine("Hello", 1);
