@@ -2,10 +2,7 @@ package com.pi4j.example;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.example.applications.Joystick_App;
-import com.pi4j.example.applications.SimpleButton_App;
-import com.pi4j.example.applications.SimpleLED_App;
-import com.pi4j.example.applications.LEDButton_App;
+import com.pi4j.example.applications.*;
 import com.pi4j.example.helpers.SingletonAppHelper;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
@@ -31,7 +28,8 @@ public final class Launcher implements Runnable {
         new SimpleButton_App(),
         new Joystick_App(),
         new SimpleLED_App(),
-        new LEDButton_App()
+        new LEDButton_App(),
+        new SimplerButton_App()
     ));
 
     /**
@@ -109,17 +107,7 @@ public final class Launcher implements Runnable {
         do {
             // Initialize Pi4J context
             final var piGpio = PiGpio.newNativeInstance();
-            pi4j = Pi4J.newContextBuilder()
-                    .noAutoDetect()
-                    .add(
-                            PiGpioDigitalInputProvider.newInstance(piGpio),
-                            PiGpioDigitalOutputProvider.newInstance(piGpio),
-                            PiGpioPwmProvider.newInstance(piGpio),
-                            PiGpioI2CProvider.newInstance(piGpio),
-                            PiGpioSerialProvider.newInstance(piGpio),
-                            PiGpioSpiProvider.newInstance(piGpio)
-                    )
-                    .build();;
+            pi4j = Pi4J.newAutoContext();
             // Run the application
             getTargetInteractively(targets).run();
             // Clean up
