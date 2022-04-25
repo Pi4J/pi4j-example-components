@@ -18,6 +18,7 @@ public class SimpleButton_App implements Application {
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
         button.onDown(() -> System.out.println("Pressing the button"));
+        button.whilePressed(1000, () -> System.out.println("Pressing"));
         button.onUp(() -> System.out.println("Stopped pressing."));
 
         // Wait for 15 seconds while handling events before exiting
@@ -25,7 +26,11 @@ public class SimpleButton_App implements Application {
         sleep(15000);
 
         // Unregister all event handlers to exit this application in a clean way
-        button.onDown(null);
+        button.deRegisterAll();
+
+        /*
+        if you want to deRegister only a single function, you can do so like this:
         button.onUp(null);
+        */
     }
 }

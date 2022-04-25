@@ -28,8 +28,7 @@ public final class Launcher implements Runnable {
         new SimpleButton_App(),
         new Joystick_App(),
         new SimpleLED_App(),
-        new LEDButton_App(),
-        new SimplerButton_App()
+        new LEDButton_App()
     ));
 
     /**

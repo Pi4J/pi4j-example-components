@@ -1,21 +1,14 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.components.events.DigitalEventProvider;
-import com.pi4j.example.components.events.EventHandler;
-import com.pi4j.example.components.events.SimpleEventHandler;
-import com.pi4j.example.helpers.SimpleInput;
-import com.pi4j.io.gpio.digital.DigitalInput;
-import com.pi4j.io.gpio.digital.DigitalInputConfig;
-import com.pi4j.io.gpio.digital.DigitalState;
-import com.pi4j.io.gpio.digital.PullResistance;
+import com.pi4j.example.components.helpers.Logger;
+import com.pi4j.io.gpio.digital.*;
 
-import java.util.function.ToDoubleBiFunction;
-
-/**
- * Implementation of a button using GPIO with Pi4J
- */
-public class SimpleButton extends Component implements DigitalEventProvider<SimpleButton.ButtonState>, SimpleInput {
+public class SimpleButton extends Component implements DigitalStateChangeListener {
+    /**
+     * Logger instance
+     */
+    protected final Logger logger = new Logger(this.getClass());
     /**
      * Default debounce time in microseconds
      */
@@ -30,16 +23,22 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      * This will also automatically switch the pull resistance to PULL_UP
      */
     private final boolean inverted;
-
     /**
-     * Handler for simple event when button is pressed
+     * Runnable Code when button is pressed
      */
-    private SimpleEventHandler onDown;
+    private Runnable onDown;
     /**
-     * Handler for simple event when button is depressed
+     * Handler while button is pressed
      */
-    private SimpleEventHandler onUp;
-
+    private Runnable whilePressed;
+    /**
+     * Timer while button is pressed
+     */
+    private long whilePressedDEBOUNCE;
+    /**
+     * Runnable Code when button is depressed
+     */
+    private Runnable onUp;
     /**
      * Creates a new button component
      *
@@ -60,16 +59,20 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     public SimpleButton(Context pi4j, int address, boolean inverted, long debounce) {
         this.inverted = inverted;
         this.digitalInput = pi4j.create(buildDigitalInputConfig(pi4j, address, inverted, debounce));
-        this.addListener(this::dispatchSimpleEvents);
+        this.digitalInput.addListener(this);
     }
 
     /**
      * Returns the current state of the Digital State
      *
-     * @return Current button state
+     * @return Current DigitalInput state (Can be HIGH, LOW or UNKNOWN)
      */
-    public ButtonState getState() {
-        return mapDigitalState(digitalInput.state());
+    public DigitalState getState() {
+        return switch (digitalInput.state()) {
+            case HIGH -> inverted ? DigitalState.LOW : DigitalState.HIGH;
+            case LOW -> inverted ? DigitalState.HIGH : DigitalState.LOW;
+            default -> DigitalState.UNKNOWN;
+        };
     }
 
     /**
@@ -78,7 +81,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      * @return True if button is pressed
      */
     public boolean isDown() {
-        return getState() == ButtonState.DOWN;
+        return getState() == DigitalState.HIGH;
     }
 
     /**
@@ -87,63 +90,7 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
      * @return True if button is depressed
      */
     public boolean isUp() {
-        return getState() == ButtonState.UP;
-    }
-
-    /**
-     * Maps a {@link DigitalState} to a well-known {@link ButtonState}
-     *
-     * @param digitalState Pi4J digital state to map
-     * @return Mapped touch state
-     */
-    public ButtonState mapDigitalState(DigitalState digitalState) {
-        switch (digitalState) {
-            case HIGH:
-                return inverted ? ButtonState.UP : ButtonState.DOWN;
-            case LOW:
-                return inverted ? ButtonState.DOWN : ButtonState.UP;
-            default:
-                return ButtonState.UNKNOWN;
-        }
-    }
-
-    /**
-     * Analyzes the given value passed by an event and triggers 0-n simple events based on it.
-     * This method allows mapping various value/state changes to simple events.
-     *
-     * @param state    Button state
-     */
-    public void dispatchSimpleEvents(ButtonState state) {
-        switch (state) {
-            case DOWN:
-                triggerSimpleEvent(onDown);
-                break;
-            case UP:
-                triggerSimpleEvent(onUp);
-                break;
-        }
-    }
-
-    /**
-     * Sets or disables the handler for the onDown event.
-     * This event gets triggered whenever the button is pressed.
-     * Only a single event handler can be registered at once.
-     *
-     * @param handler Event handler to call or null to disable
-     */
-    public void onDown(SimpleEventHandler handler) {
-        this.onDown = handler;
-    }
-
-    /**
-     * Sets or disables the handler for the onUp event.
-     * This event gets triggered whenever the button is no longer pressed.
-     * Only a single event handler can be registered at once.
-     *
-     * @param handler Event handler to call or null to disable
-     */
-    public void onUp(SimpleEventHandler handler) {
-        this.onUp = handler;
+        return getState() == DigitalState.LOW;
     }
 
     /**
@@ -175,12 +122,78 @@ public class SimpleButton extends Component implements DigitalEventProvider<Simp
     }
 
     /**
-     * All available states reported by the button component.
-     * This enum is in the Component itself, as it only Represents this class itself
+     * Gets a DigitalStateChangeEvent directly from the Provider, as this
+     * Class is a listener. This runs in a different Thread than main.
+     * Calls the mehtods onUp, onDown and whilePressed. WhilePressed gets
+     * executed in an own Thread, as to not block other resources.
+     *
+     * @param digitalStateChangeEvent event of digitalstatechange, contains new state
      */
-    public enum ButtonState {
-        DOWN,
-        UP,
-        UNKNOWN
+    @Override
+    public void onDigitalStateChange(DigitalStateChangeEvent digitalStateChangeEvent) {
+        DigitalState state = inverted ? getState() : digitalStateChangeEvent.state();
+        switch (state){
+            case HIGH:
+                this.onDown.run();
+                new Thread(() -> {
+                    while(whilePressed != null && isDown()){
+                        whilePressed.run();
+                        try {
+                            Thread.sleep(whilePressedDEBOUNCE);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    return;
+                }).start();
+                return;
+            case LOW:
+                this.onUp.run();
+                return;
+            default:
+                return;
+        }
+    }
+
+    /**
+     * Sets or disables the handler for the onDown event.
+     * This event gets triggered whenever the button is pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param method Event handler to call or null to disable
+     */
+    public void onDown(Runnable method) {
+        this.onDown = method;
+    }
+
+    /**
+     * Sets or disables the handler for the onUp event.
+     * This event gets triggered whenever the button is no longer pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param method Event handler to call or null to disable
+     */
+    public void onUp(Runnable method) {
+        this.onUp = method;
+    }
+    /**
+     * Sets or disables the handler for the whilePressed event.
+     * This event gets triggered whenever the button is pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param method Event handler to call or null to disable
+     */
+    public void whilePressed(long whilePressedDEBOUNCE, Runnable method) {
+        this.whilePressed = method;
+        this.whilePressedDEBOUNCE = whilePressedDEBOUNCE;
+    }
+
+    /**
+     * disables all the handlers for the onUp, onDown and WhilePressed Events
+     */
+    public void deRegisterAll(){
+        this.onDown = null;
+        this.onUp = null;
+        this.whilePressed = null;
     }
 }

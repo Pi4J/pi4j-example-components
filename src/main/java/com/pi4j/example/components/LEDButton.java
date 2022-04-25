@@ -1,52 +1,25 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.components.events.DigitalEventProvider;
-import com.pi4j.example.components.events.EventHandler;
-import com.pi4j.example.components.events.SimpleEventHandler;
-import com.pi4j.example.helpers.SimpleInput;
-import com.pi4j.example.helpers.SimpleOutput;
 import com.pi4j.io.gpio.digital.*;
-
-import java.util.function.ToDoubleBiFunction;
 
 /**
  * Implementation of a button using GPIO with Pi4J
  */
-public class LEDButton extends Component implements DigitalEventProvider<LEDButton.ButtonState>, SimpleInput, SimpleOutput {
+public class LEDButton extends Component {
     /**
      * Default debounce time in microseconds
      */
     protected static final long DEFAULT_DEBOUNCE = 10000;
 
     /**
-     * Pi4J digital input instance used by this component
+     * Button component
      */
-    protected final DigitalInput digitalInput;
-
+    private final SimpleButton button;
     /**
-     * Pi4J digital output instance used by this component
+     * LED component
      */
-    protected final DigitalOutput digitalOutput;
-    /**
-     * Specifies if button state is inverted, e.g. HIGH = depressed, LOW = pressed
-     * This will also automatically switch the pull resistance to PULL_UP
-     */
-    private final boolean inverted;
-
-    /**
-     * Handler for simple event when button is pressed
-     */
-    private SimpleEventHandler onDown;
-    /**
-     * Handler for simple event when button is depressed
-     */
-    private SimpleEventHandler onUp;
-
-    /**
-     * Handler for simple event when button is depressed
-     */
-    private SimpleEventHandler whilePressed;
+    private final SimpleLED led;
 
     /**
      * Creates a new button component
@@ -70,151 +43,8 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      * @param debounce Debounce time in microseconds
      */
     public LEDButton(Context pi4j, int buttonaddress, boolean inverted, int ledaddress, long debounce) {
-        this.inverted = inverted;
-        this.digitalInput = pi4j.create(buildDigitalInputConfig(pi4j, buttonaddress, inverted, debounce));
-        this.digitalOutput = pi4j.create(buildDigitalOutputConfig(pi4j, ledaddress));
-        this.addListener(this::dispatchSimpleEvents);
-    }
-
-    /**
-     * Returns the current state of the Digital State
-     *
-     * @return Current button state
-     */
-    public ButtonState getState() {
-        return mapDigitalState(digitalInput.state());
-    }
-
-    /**
-     * Checks if button is currently pressed
-     *
-     * @return True if button is pressed
-     */
-    public boolean isDown() {
-        return getState() == ButtonState.DOWN;
-    }
-
-    /**
-     * Checks if button is currently depressed (= NOT pressed)
-     *
-     * @return True if button is depressed
-     */
-    public boolean isUp() {
-        return getState() == ButtonState.UP;
-    }
-
-    /**
-     * Maps a {@link DigitalState} to a well-known {@link ButtonState}
-     *
-     * @param digitalState Pi4J digital state to map
-     * @return Mapped touch state
-     */
-    public ButtonState mapDigitalState(DigitalState digitalState) {
-        switch (digitalState) {
-            case HIGH:
-                return inverted ? ButtonState.UP : ButtonState.DOWN;
-            case LOW:
-                return inverted ? ButtonState.DOWN : ButtonState.UP;
-            default:
-                return ButtonState.UNKNOWN;
-        }
-    }
-
-    /**
-     * Analyzes the given value passed by an event and triggers 0-n simple events based on it.
-     * This method allows mapping various value/state changes to simple events.
-     *
-     * @param state    Button state
-     */
-    public void dispatchSimpleEvents(ButtonState state) {
-        switch (state) {
-            case DOWN:
-                triggerSimpleEvent(onDown);
-                while (isDown()) {
-                    triggerSimpleEvent(whilePressed);
-                    sleep(DEFAULT_DEBOUNCE/1000);
-                }
-                break;
-            case UP:
-                triggerSimpleEvent(onUp);
-                break;
-        }
-    }
-
-    /**
-     * Sets or disables the handler for the onDown event.
-     * This event gets triggered whenever the button is pressed.
-     * Only a single event handler can be registered at once.
-     *
-     * @param handler Event handler to call or null to disable
-     */
-    public void onDown(SimpleEventHandler handler) {
-        this.onDown = handler;
-    }
-
-    /**
-     * Sets or disables the handler for the onUp event.
-     * This event gets triggered whenever the button is no longer pressed.
-     * Only a single event handler can be registered at once.
-     *
-     * @param handler Event handler to call or null to disable
-     */
-    public void onUp(SimpleEventHandler handler) {
-        this.onUp = handler;
-    }
-
-    /**
-     * Sets or disables the handler for the whilePressed event.
-     * This event gets triggered whenever the button is being pressed.
-     * Only a single event handler can be registered at once.
-     *
-     * @param handler Event handler to call or null to disable
-     */
-    public void whilePressed(SimpleEventHandler handler) {
-        this.whilePressed = handler;
-    }
-
-    /**
-     * Returns the Pi4J DigitalInput associated with this component.
-     *
-     * @return Returns the Pi4J DigitalInput associated with this component.
-     */
-    public DigitalInput getDigitalInput() {
-        return this.digitalInput;
-    }
-
-    /**
-     * Builds a new DigitalInput configuration for the button component.
-     *
-     * @param pi4j     Pi4J context
-     * @param buttonaddress  GPIO address of button component
-     * @param inverted Specify if button state is inverted
-     * @param debounce Debounce time in microseconds
-     * @return DigitalInput configuration
-     */
-    private DigitalInputConfig buildDigitalInputConfig(Context pi4j, int buttonaddress, boolean inverted, long debounce) {
-        return DigitalInput.newConfigBuilder(pi4j)
-                .id("BCM" + buttonaddress)
-                .name("Button #" + buttonaddress)
-                .address(buttonaddress)
-                .debounce(debounce)
-                .pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN)
-                .build();
-    }
-
-    /**
-     * Configure Digital Input
-     *
-     * @param pi4j    PI4J Context
-     * @param ledaddress GPIO Address of the relay
-     * @return Return Digital Input configuration
-     */
-    protected DigitalOutputConfig buildDigitalOutputConfig(Context pi4j, int ledaddress) {
-        return DigitalOutput.newConfigBuilder(pi4j)
-                .id("BCM" + ledaddress)
-                .name("LED")
-                .address(ledaddress)
-                .build();
+        this.button = new SimpleButton(pi4j, buttonaddress, inverted, debounce);
+        this.led = new SimpleLED(pi4j, ledaddress);
     }
 
     /**
@@ -222,25 +52,22 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      *
      * @param on Sets the LED to on (true) or off (false)
      */
-    @Override
-    public void setState(boolean on) {
-        digitalOutput.setState(!on);
+    public void LEDsetState(boolean on) {
+        led.setState(on);
     }
 
     /**
      * Sets the LED to on.
      */
-    @Override
-    public void setStateOn() {
-        digitalOutput.off();
+    public void LEDsetStateOn() {
+        led.setStateOn();
     }
 
     /**
      * Sets the LED to off
      */
-    @Override
-    public void setStateOff() {
-        digitalOutput.on();
+    public void LEDsetStateOff() {
+        led.setStateOff();
     }
 
     /**
@@ -248,10 +75,8 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      *
      * @return Return true or false according to the new state of the relay.
      */
-    @Override
-    public boolean toggleState() {
-        digitalOutput.toggle();
-        return digitalOutput.isOff();
+    public boolean LEDtoggleState() {
+        return led.toggleState();
     }
 
     /**
@@ -259,18 +84,74 @@ public class LEDButton extends Component implements DigitalEventProvider<LEDButt
      *
      * @return DigitalOutput instance of the LED
      */
-    @Override
-    public DigitalOutput getDigitalOutput() {
-        return digitalOutput;
+    public DigitalOutput LEDgetDigitalOutput() {
+        return led.getDigitalOutput();
     }
 
     /**
-     * All available states reported by the button component.
-     * This enum is in the Component itself, as it only Represents this class itself
+     * Returns the current state of the Digital State
+     *
+     * @return Current DigitalInput state (Can be HIGH, LOW or UNKNOWN)
      */
-    public enum ButtonState {
-        DOWN,
-        UP,
-        UNKNOWN
+    public DigitalState btngetState() { return button.getState(); }
+
+    /**
+     * Checks if button is currently pressed
+     *
+     * @return True if button is pressed
+     */
+    public boolean btnisDown() {
+        return button.isDown();
     }
+
+    /**
+     * Checks if button is currently depressed (= NOT pressed)
+     *
+     * @return True if button is depressed
+     */
+    public boolean btnisUp() {
+        return button.isUp();
+    }
+
+    /**
+     * Returns the Pi4J DigitalInput associated with this component.
+     *
+     * @return Returns the Pi4J DigitalInput associated with this component.
+     */
+    public DigitalInput btngetDigitalInput() {
+        return button.getDigitalInput();
+    }
+
+    /**
+     * Sets or disables the handler for the onDown event.
+     * This event gets triggered whenever the button is pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param method Event handler to call or null to disable
+     */
+    public void btnonDown(Runnable method) { button.onDown(method); }
+
+    /**
+     * Sets or disables the handler for the onUp event.
+     * This event gets triggered whenever the button is no longer pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param method Event handler to call or null to disable
+     */
+    public void btnonUp(Runnable method) {
+        button.onUp(method);
+    }
+    /**
+     * Sets or disables the handler for the whilePressed event.
+     * This event gets triggered whenever the button is pressed.
+     * Only a single event handler can be registered at once.
+     *
+     * @param method Event handler to call or null to disable
+     */
+    public void btnwhilePressed(long millis, Runnable method) {button.whilePressed(millis, method); }
+
+    /**
+     * disables all the handlers for the onUp, onDown and WhilePressed Events
+     */
+    public void btndeRegisterAll(){ button.deRegisterAll(); }
 }
