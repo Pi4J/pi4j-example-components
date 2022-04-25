@@ -6,10 +6,6 @@ import com.pi4j.io.gpio.digital.*;
 
 public class SimpleButton extends Component implements DigitalStateChangeListener {
     /**
-     * Logger instance
-     */
-    protected final Logger logger = new Logger(this.getClass());
-    /**
      * Default debounce time in microseconds
      */
     protected static final long DEFAULT_DEBOUNCE = 10000;

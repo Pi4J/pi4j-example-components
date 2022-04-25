@@ -7,10 +7,6 @@ import com.pi4j.io.gpio.digital.DigitalOutputConfig;
 
 public class SimpleLED extends Component {
     /**
-     * Logger instance
-     */
-    protected final Logger logger = new Logger(this.getClass());
-    /**
      * Pi4J digital output instance used by this component
      */
     protected final DigitalOutput digitalOutput;
