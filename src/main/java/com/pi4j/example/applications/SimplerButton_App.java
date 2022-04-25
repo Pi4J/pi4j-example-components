@@ -18,7 +18,7 @@ public class SimplerButton_App implements Application {
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
         button.onDown(() -> System.out.println("Pressing the button"));
-        button.whilePressed(10000, () -> System.out.println("Pressing"));
+        button.whilePressed(1000, () -> System.out.println("Pressing"));
         button.onUp(() -> System.out.println("Stopped pressing."));
 
         // Wait for 15 seconds while handling events before exiting

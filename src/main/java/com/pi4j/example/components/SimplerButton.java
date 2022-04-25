@@ -63,14 +63,11 @@ public class SimplerButton implements DigitalStateChangeListener {
      * @return Current DigitalInput state (Can be HIGH, LOW or UNKNOWN)
      */
     public DigitalState getState() {
-        switch (digitalInput.state()) {
-            case HIGH:
-                return inverted ? DigitalState.HIGH : DigitalState.LOW;
-            case LOW:
-                return inverted ? DigitalState.LOW : DigitalState.HIGH;
-            default:
-                return DigitalState.UNKNOWN;
-        }
+        return switch (digitalInput.state()) {
+            case HIGH -> inverted ? DigitalState.LOW : DigitalState.HIGH;
+            case LOW -> inverted ? DigitalState.HIGH : DigitalState.LOW;
+            default -> DigitalState.UNKNOWN;
+        };
     }
 
     /**
@@ -125,14 +122,17 @@ public class SimplerButton implements DigitalStateChangeListener {
         switch (state){
             case HIGH:
                 this.onDown.run();
-                while (isDown()){
-                    try {
-                        Thread.sleep(whilePressedDEBOUNCE);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                new Thread(() -> {
+                    while(whilePressed != null && isDown()){
+                        whilePressed.run();
+                        try {
+                            Thread.sleep(whilePressedDEBOUNCE);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
-                    this.whilePressed.run();
-                }
+                    return;
+                }).start();
                 return;
             case LOW:
                 this.onUp.run();
