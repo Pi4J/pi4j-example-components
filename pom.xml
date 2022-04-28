@@ -28,7 +28,6 @@
         <!-- Project Dependencies -->
         <java.version>17</java.version>
         <pi4j.version>2.1.1</pi4j.version>
-        <slf4j.version>1.7.32</slf4j.version>
         <picocli.version>4.6.3</picocli.version>
         <junit.version>5.7.1</junit.version>
         <ant-jsch.version>1.10.9</ant-jsch.version>
@@ -78,19 +77,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- SLF4J API -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <!-- SLF4J Simple -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
 
         <!-- PicoCLI -->
         <dependency>
