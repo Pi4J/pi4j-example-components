@@ -168,12 +168,11 @@ public final class Launcher implements Runnable {
 
         // Append list of application targets
         targets.addAll(this.runners.stream()
-            .map(runner -> {
-                final var runnerApp = runner.getApp();
-                final var runnerLabel = runnerApp.getName() + " (" + runnerApp.getDescription() + ")";
-                return new Target(runnerLabel, runner);
-            })
-            .collect(Collectors.toList()));
+                .map(runner -> {
+                    final var runnerApp = runner.getApp();
+                    final var runnerLabel = runnerApp.getName() + " (" + runnerApp.getDescription() + ")";
+                    return new Target(runnerLabel, runner);
+                }).toList());
 
         return targets;
     }
