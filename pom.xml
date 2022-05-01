@@ -21,7 +21,7 @@
         <example.remote.host/>
         <example.remote.port>22</example.remote.port>
         <example.remote.username>pi</example.remote.username>
-        <example.remote.password>Ms070997</example.remote.password>
+        <example.remote.password>reto</example.remote.password>
         <example.remote.target>/home/pi/deployment</example.remote.target>
         <example.remote.jvmOptions/>
 
@@ -112,6 +112,13 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-linuxfs</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
