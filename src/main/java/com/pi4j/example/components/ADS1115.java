@@ -85,6 +85,8 @@ public class ADS1115 extends Component {
                     | COMP_LAT.NON_LATCH.latching
                     | COMP_QUE.DISABLE_COMP.compQue;
 
+
+
     /**
      * I2C Address Selection
      * The ADS1115 has one address pin, ADDR, that configures the I2C address of the device. This pin can be
