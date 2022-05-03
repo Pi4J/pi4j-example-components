@@ -6,7 +6,8 @@ import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
 
 /**
- * Class to provide IO interfacing with I2C Bus
+ * Implementation of a LCDDisplay using GPIO with Pi4J
+ * For now, only works with the PCF8574T Backpack
  */
 public class LCDDisplay extends Component{
     private int ROWS    = 2;
@@ -57,6 +58,18 @@ public class LCDDisplay extends Component{
     private static final byte Rw = (byte) 0b000_00010; // Read/Write bit
     private static final byte Rs = (byte) 0b000_00001; // Register select bit
 
+    /** Display row offsets. Offset for up to 4 rows.*/
+    private static final byte[] LCD_ROW_OFFSETS = {0x00, 0x40, 0x14, 0x54};
+
+    /**
+     * With this Byte cursor visibility is controlled
+     */
+    private byte displayControl;
+
+    /**
+     * The Default BUS and Device Address.
+     * On the PI, you can look it up with the Command 'sudo i2cdetect -y 1'
+     */
     private static final int DEFAULT_BUS    = 0x1;
     private static final int DEFAULT_DEVICE = 0x27;
 
@@ -98,61 +111,47 @@ public class LCDDisplay extends Component{
         sleep(3, 0);
     }
 
+    /**
+     * Shuts the display off
+     */
     public void off(){
         executeCommand(LCD_DISPLAY_OFF);
     }
 
+
     /**
-     * writes string to the lcd display on a specific line. Excess characters (greater than Columns) are not shown on the line
+     * Write a Line of Text on the LCD Display
      *
-     * @param text to be displayed
-     * @param line on the display for the text to appear
+     * @param text Text to display
+     * @param line Select Line of Display
      */
     public void displayText(String text, int line) {
-        displayText(text, line, 0, false);
+        if (text.length() > COLUMNS) {
+            throw new IllegalArgumentException("Too long text. Only " + COLUMNS + " characters possible");
+        }
+        if(line > ROWS){
+            throw new IllegalArgumentException("Wrong line id. Only " + ROWS + " lines possible");
+        }
+
+        clearLine(line);
+        moveCursorHome();
+        displayLine(text, LCD_ROW_OFFSETS[line - 1]);
     }
 
     /**
-     * writes string to the lcd display. Excess characters (greater than Columns) are not shown on the line
+     * Write Text on the LCD Display
      *
-     * @param text to be displayed
-     * @param line on the display for the text to appear
-     * @param pos on the display for the Column
-     * @param jumpToNextLine if it can make a newLine
+     * @param text Text to display
      */
-    public void displayText(String text, int line, int pos, boolean jumpToNextLine) {
-        if (text.length() > 32 - pos) {
-            text = text.substring(0, 31 - pos);
-            logger.info("Text length cut to 31 characters");
-        }
-
-        String firstLine  = text;
-        String secondLine = text;
-
-        //lcd only has 2 lines, so I assume the first one if the second one wasn't selected explicitly
-        if (line != 2) {
-            boolean textLargerThanLine = text.length() > COLUMNS - pos;
-            if (textLargerThanLine) {
-                firstLine = text.substring(0, COLUMNS - pos);
-                secondLine = text.substring(COLUMNS - pos);
-            }
-            displayLine(firstLine, pos);
-            if (jumpToNextLine && textLargerThanLine) {
-                displayLine(secondLine, pos + 0x40);
-            }
-        } else {
-            displayLine(secondLine, pos + 0x40);
-        }
-    }
-
     public void displayText(String text){
-        if ((text.length() > (ROWS*COLUMNS) && !text.contains("\n")) || (text.length() > (ROWS*COLUMNS)+1 && text.contains("\n"))) {
-            throw new IllegalArgumentException("Too long text. Only " + ROWS*COLUMNS +" characters plus linebreaks allowed");
+        if (text.length() > (ROWS*COLUMNS)) {
+            throw new IllegalArgumentException("Too long text. Only " + ROWS*COLUMNS +" characters allowed");
         }
 
         // Clean and prepare to write some text
         var currentLine = 0;
-        String[] lines = new String[ROWS+1];
+        String[] lines = new String[ROWS];
+        for (int j = 0; j < ROWS; j++) {lines[j] = "";}
         clearDisplay();
 
         // Iterate through lines and characters and write them to the display
@@ -160,6 +159,8 @@ public class LCDDisplay extends Component{
             // line break in text found
             if (text.charAt(i) == '\n' && currentLine < ROWS) {
                 currentLine++;
+                //When after newLine a space, it is omitted
+                if(text.charAt(i+1)==' ')i++;
                 continue;
             }
 
@@ -168,23 +169,37 @@ public class LCDDisplay extends Component{
 
             if(lines[currentLine].length() == COLUMNS && currentLine < ROWS){
                 currentLine++;
+                //if a space comes after newLine, it is omitted
+                if(text.charAt(i+1)==' ')i++;
             }
+        }
 
-            for(int j = 0; j < ROWS; j++){
-                if(lines[j] != null && lines[j].length() > 0) {
-                    displayLine(lines[j], j * 0x40);
-                }
-            }
+        //display the created Rows
+        for(int j = 0; j < ROWS; j++){
+            displayLine(lines[j], LCD_ROW_OFFSETS[j]);
         }
     }
 
     /**
      * write a character to lcd
+     *
+     * @param charvalue of the char that is written
      */
     public void writeCharacter(char charvalue) {
         writeSplitCommand((byte) charvalue, Rs);
     }
 
+    /**
+     * write a character to lcd
+     *
+     * @param charvalue of the char that is written
+     * @param line      ROW-position, Range 1 - ROWS
+     * @param column    Column-position, Range 0 - COLUMNS-1
+     */
+    public void writeCharacter(char charvalue, int column, int line) {
+        setCursorToPosition(column, line);
+        writeSplitCommand((byte) charvalue, Rs);
+    }
     /**
      * displays a line on a specific position
      *
@@ -194,8 +209,22 @@ public class LCDDisplay extends Component{
     private void displayLine(String text, int pos) {
         writeCommand((byte) (0x80 + pos));
 
+        if(text == null || text.isEmpty()) return;
         for (int i = 0; i < text.length(); i++) {
             writeCharacter(text.charAt(i));
+        }
+    }
+
+    /**
+     * Clears a line of the display
+     *
+     * @param line Select line to clear
+     */
+    public void clearLine(int line) {
+        setCursorToLine(line);
+
+        for (int i = 0; i < COLUMNS; i++) {
+            writeCharacter(' ');
         }
     }
 
@@ -206,6 +235,9 @@ public class LCDDisplay extends Component{
         writeSplitCommand(cmd, (byte) 0);
     }
 
+    /**
+     * Write a command in 2 parts to the LCD
+     */
     private void writeSplitCommand(byte cmd, byte mode) {
         //bitwise AND with 11110000 to remove last 4 bits
         writeFourBits((byte) (mode | (cmd & 0xF0)));
@@ -213,6 +245,11 @@ public class LCDDisplay extends Component{
         writeFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
     }
 
+    /**
+     * Write the four bits of a byte to the LCD
+     *
+     * @param data      the byte that is sent
+     */
     private void writeFourBits(byte data) {
         i2c.write((byte) (data | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
         lcd_strobe(data);
@@ -228,6 +265,113 @@ public class LCDDisplay extends Component{
         sleep(0, 100_000);
     }
 
+    /**
+     * Moves the cursor 1 character right
+     */
+    public void moveCursorRight() {
+        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_RIGHT));
+        sleep(1);
+    }
+
+    /**
+     * Moves the cursor 1 character left
+     */
+    public void moveCursorLeft() {
+        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_LEFT));
+        sleep(1);
+    }
+
+    /**
+     * Sets the cursor to a target destination
+     *
+     * @param digit Selects the character of the line. Range: 0 - Columns-1
+     * @param line  Selects the line of the display. Range: 1 - ROWS
+     */
+    public void setCursorToPosition(int digit, int line) {
+        if (line > ROWS || line < 1) {
+            throw new IllegalArgumentException("Line out of range. Display has only " + ROWS + "x" + COLUMNS + " Characters!");
+        }
+
+        if (digit < 0 || digit > COLUMNS) {
+            throw new IllegalArgumentException("Line out of range. Display has only " + ROWS + "x" + COLUMNS + " Characters!");
+        }
+        executeCommand(LCD_SET_DDRAM_ADDR, (byte) (digit + LCD_ROW_OFFSETS[line - 1]));
+    }
+
+    /**
+     * Set the cursor to desired line
+     *
+     * @param line Sets the cursor to this line. Only Range 1 - lines allowed.
+     */
+    public void setCursorToLine(int line) {
+        setCursorToPosition(0, line);
+    }
+
+    /**
+     * Sets the display cursor to hidden or showing
+     *
+     * @param show Set the state of the cursor
+     */
+    public void setCursorVisibility(boolean show) {
+        if (show) {
+            this.displayControl |= LCD_CURSOR_ON;
+        } else {
+            this.displayControl &= ~LCD_CURSOR_ON;
+        }
+        executeCommand(LCD_DISPLAY_CONTROL, this.displayControl);
+    }
+
+    /**
+     * Set the cursor to blinking or static
+     *
+     * @param blink Blink = true means the cursor will change to blinking mode. False lets the cursor stay static
+     */
+    public void setCursorBlinking(boolean blink) {
+        if (blink) {
+            this.displayControl |= LCD_BLINK_ON;
+        } else {
+            this.displayControl &= ~LCD_BLINK_ON;
+        }
+
+        executeCommand(LCD_DISPLAY_CONTROL, this.displayControl);
+    }
+
+    /**
+     * Moves the whole displayed text one character right
+     */
+    public void moveDisplayRight() {
+        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_DISPLAY_MOVE | LCD_MOVE_RIGHT));
+    }
+
+    /**
+     * Moves the whole displayed text one character right
+     */
+    public void moveDisplayLeft() {
+        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_DISPLAY_MOVE | LCD_MOVE_LEFT));
+    }
+
+    /**
+     * Create a custom character by providing the single digit states of each pixel. Simply pass an Array of bytes
+     * which will be translated to a character.
+     *
+     * @param location  Set the memory location of the character. 1 - 7 is possible.
+     * @param character Byte array representing the pixels of a character
+     */
+    public void createCharacter(int location, byte[] character) {
+        if (character.length != 8) {
+            throw new IllegalArgumentException("Array has invalid length. Character is only 5x8 Digits. Only a array with length" +
+                    " 8 is allowed");
+        }
+
+        if (location > 7 || location < 1) {
+            throw new IllegalArgumentException("Invalid memory location. Range 1-7 allowed. Value: " + location);
+        }
+        executeCommand(LCD_SET_CGRAM_ADDR, (byte) (location << 3));
+
+        for (int i = 0; i < 8; i++) {
+            executeCommand(character[i]);
+        }
+    }
 
     /**
      * Execute Display commands
@@ -268,7 +412,14 @@ public class LCDDisplay extends Component{
         logger.info("LCD Display initialized");
     }
 
-
+    /**
+     * Registers the I2C Component on the PI4J
+     *
+     * @param pi4j      The Context
+     * @param bus       The I2C Bus
+     * @param device    The I2C Device
+     * @return          A Provider of an I2C Bus
+     */
     private static I2C createI2C(Context pi4j, int bus, int device) {
         I2CProvider i2CProvider = pi4j.getI2CProvider();
         I2CConfig i2cConfig = I2C.newConfigBuilder(pi4j)
