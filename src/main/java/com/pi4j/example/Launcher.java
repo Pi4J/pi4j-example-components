@@ -2,9 +2,7 @@ package com.pi4j.example;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.example.applications.Joystick_App;
-import com.pi4j.example.applications.SimpleButton_App;
-import com.pi4j.example.applications.SimpleLED_App;
+import com.pi4j.example.applications.*;
 import com.pi4j.example.helpers.SingletonAppHelper;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
@@ -29,7 +27,8 @@ public final class Launcher implements Runnable {
     public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
         new SimpleButton_App(),
         new Joystick_App(),
-        new SimpleLED_App()
+        new SimpleLED_App(),
+        new LEDButton_App()
     ));
 
     /**
@@ -117,7 +116,7 @@ public final class Launcher implements Runnable {
                             PiGpioSerialProvider.newInstance(piGpio),
                             PiGpioSpiProvider.newInstance(piGpio)
                     )
-                    .build();;
+                    .build();
             // Run the application
             getTargetInteractively(targets).run();
             // Clean up
@@ -169,12 +168,11 @@ public final class Launcher implements Runnable {
 
         // Append list of application targets
         targets.addAll(this.runners.stream()
-            .map(runner -> {
-                final var runnerApp = runner.getApp();
-                final var runnerLabel = runnerApp.getName() + " (" + runnerApp.getDescription() + ")";
-                return new Target(runnerLabel, runner);
-            })
-            .collect(Collectors.toList()));
+                .map(runner -> {
+                    final var runnerApp = runner.getApp();
+                    final var runnerLabel = runnerApp.getName() + " (" + runnerApp.getDescription() + ")";
+                    return new Target(runnerLabel, runner);
+                }).toList());
 
         return targets;
     }

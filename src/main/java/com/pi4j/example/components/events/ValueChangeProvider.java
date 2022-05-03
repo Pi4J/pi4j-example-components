@@ -1,5 +1,7 @@
 package com.pi4j.example.components.events;
 
+import java.util.EventListener;
+
 /**
  * Generic event provider interface for components which expose the ability to add or remove event listeners.
  *
