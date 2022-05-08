@@ -2,6 +2,7 @@ package com.pi4j.example.applications;
 
 import com.pi4j.context.Context;
 import com.pi4j.example.Application;
+import com.pi4j.example.components.PIN;
 import com.pi4j.example.components.SimpleLED;
 
 
@@ -12,7 +13,7 @@ public class SimpleLED_App implements Application {
     @Override
     public void execute(Context pi4j) {
         // Create a new SimpleLED component
-        SimpleLED led = new SimpleLED(pi4j, 26);
+        SimpleLED led = new SimpleLED(pi4j, PIN.D26);
 
         // Turn on the LED to have a defined state
         led.setStateOn();
