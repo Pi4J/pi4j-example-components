@@ -29,7 +29,7 @@ public class LEDButton extends Component {
      * @param inverted Specify if button state is inverted
      * @param ledaddress  GPIO address of LED
      */
-    public LEDButton(Context pi4j, PIN buttonaddress, Boolean inverted, int ledaddress) {
+    public LEDButton(Context pi4j, PIN buttonaddress, Boolean inverted, PIN ledaddress) {
         this(pi4j, buttonaddress, inverted, ledaddress, DEFAULT_DEBOUNCE);
     }
 
@@ -42,7 +42,7 @@ public class LEDButton extends Component {
      * @param ledaddress  GPIO address of LED
      * @param debounce Debounce time in microseconds
      */
-    public LEDButton(Context pi4j, PIN buttonaddress, boolean inverted, int ledaddress, long debounce) {
+    public LEDButton(Context pi4j, PIN buttonaddress, boolean inverted, PIN ledaddress, long debounce) {
         this.button = new SimpleButton(pi4j, buttonaddress, inverted, debounce);
         this.led = new SimpleLED(pi4j, ledaddress);
     }
