@@ -221,11 +221,11 @@ public class LCDDisplay extends Component{
      * @param line Select line to clear
      */
     public void clearLine(int line) {
-        setCursorToLine(line);
-
+        String remover = "";
         for (int i = 0; i < COLUMNS; i++) {
-            writeCharacter(' ');
+            remover += ' ';
         }
+        displayLine(remover, LCD_ROW_OFFSETS[line-1]);
     }
 
     /**
