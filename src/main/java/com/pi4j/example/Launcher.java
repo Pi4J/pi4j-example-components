@@ -16,7 +16,6 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Command(name = "Raspberry Pi Example Launcher", version = "1.0.0", mixinStandardHelpOptions = true)
 public final class Launcher implements Runnable {
@@ -28,7 +27,8 @@ public final class Launcher implements Runnable {
         new SimpleButton_App(),
         new Joystick_App(),
         new SimpleLED_App(),
-        new LEDButton_App()
+        new LEDButton_App(),
+        new RGBLed_App()
     ));
 
     /**

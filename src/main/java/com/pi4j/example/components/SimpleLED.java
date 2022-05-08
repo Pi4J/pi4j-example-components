@@ -63,11 +63,11 @@ public class SimpleLED extends Component {
     }
 
     /**
-     * Configure Digital Input
+     * Configure Digital Output
      *
      * @param pi4j    PI4J Context
      * @param address GPIO Address of the relay
-     * @return Return Digital Input configuration
+     * @return Return Digital Output configuration
      */
     protected DigitalOutputConfig buildDigitalOutputConfig(Context pi4j, PIN address) {
         return DigitalOutput.newConfigBuilder(pi4j)
