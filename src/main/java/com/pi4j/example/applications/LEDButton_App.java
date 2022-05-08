@@ -14,7 +14,7 @@ public class LEDButton_App implements Application {
     @Override
     public void execute(Context pi4j) {
         // Initialize the button component
-        final var ledbutton = new LEDButton(pi4j, PIN.D26, Boolean.FALSE, 19);
+        final var ledbutton = new LEDButton(pi4j, PIN.D26, Boolean.FALSE, PIN.PWM19);
 
         // Turn on the LED to have a defined state
         ledbutton.LEDsetStateOn();
