@@ -278,8 +278,8 @@ public class Joystick extends Component{
      *
      * @param method Event handler to call or null to disable
      */
-    public void buttonSouthwhilePressed(long millis, Runnable method) {
-        bSouth.whilePressed(millis, method);
+    public void whileSouth(long millis, Runnable method) {
+        bSouth.whilePressed(method, millis);
     }
     /**
      * Sets or disables the handler for the onDown event.
@@ -310,7 +310,7 @@ public class Joystick extends Component{
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonPushOnDown(Runnable handler) {
+    public void onPushDown(Runnable handler) {
         if (pushIsPresent){
             bPush.onDown(handler);}
         else{
