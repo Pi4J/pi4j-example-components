@@ -9,7 +9,7 @@ public class Joystick_App implements Application {
     @Override
     public void execute(Context pi4j) {
 
-        //Initzalize the joystick component
+        logInfo("Joystick app started ...");
         final var joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.PWM13, PIN.PWM19, PIN.D26);
 
         //Register event handlers to print a message when pressed (onDown) and (onUp)
@@ -29,11 +29,13 @@ public class Joystick_App implements Application {
         joystick.onPushUp(() -> System.out.println("Stop pressing joystick button PUSH"));
 
         // Wait for 15 seconds while handling events before exiting
-        System.out.println("Press the button to see it in action!");
+        logInfo("Press the button to see it in action!");
         delay(15000);
 
         // Unregister all event handlers to exit this application in a clean way
         joystick.deRegisterAll();
+
+        logInfo("Joystick app done.");
 
     }
 }
