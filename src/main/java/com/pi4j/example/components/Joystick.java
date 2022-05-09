@@ -215,6 +215,9 @@ public class Joystick extends Component{
     public boolean buttonPushIsUp() {
         return pushIsPresent && bPush.isUp();}
 
+
+
+
     /**
      * Sets or disables the handler for the onDown event.
      * This event gets triggered whenever the button is pressed.
@@ -275,8 +278,8 @@ public class Joystick extends Component{
      *
      * @param method Event handler to call or null to disable
      */
-    public void whileSouth(long millis, Runnable method) {
-        bSouth.whilePressed(method, millis);
+    public void buttonSouthwhilePressed(long millis, Runnable method) {
+        bSouth.whilePressed(millis, method);
     }
     /**
      * Sets or disables the handler for the onDown event.
@@ -307,7 +310,7 @@ public class Joystick extends Component{
      *
      * @param handler Event handler to call or null to disable
      */
-    public void onPushDown(Runnable handler) {
+    public void buttonPushOnDown(Runnable handler) {
         if (pushIsPresent){
             bPush.onDown(handler);}
         else{
