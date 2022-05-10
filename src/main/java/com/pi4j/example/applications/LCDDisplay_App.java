@@ -5,7 +5,7 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.LCDDisplay;
 
 /**
- * Example Application of using the a LCD Display
+ * Example Application of using the LCD Display
  */
 public class LCDDisplay_App implements Application {
     @Override
@@ -24,7 +24,7 @@ public class LCDDisplay_App implements Application {
         lcd.displayText("   Line 4", 4);
 
         // Wait a little to have some time to read it
-        sleep(3000);
+        delay(3000);
 
         // Clear the display to start next parts
         lcd.clearDisplay();
@@ -34,18 +34,18 @@ public class LCDDisplay_App implements Application {
         lcd.displayText("Boohoo that's so simple to use!");
 
         // Delay again
-        sleep(3000);
+        delay(3000);
 
         // Of course it is also possible to write with newLine Chars
-        lcd.displayText("Some Big Text \n with some new Lines \n just testing");
-        sleep(3000);
+        lcd.displayText("Some big text \nwith some new Lines \n just for testing");
+        delay(3000);
 
         // Of course it is also possible to write long text
-        lcd.displayText("Some Big Text with no new Lines, just to test how many lines will get filled");
-        sleep(3000);
+        lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
+        delay(3000);
 
-        lcd.displayText("Small Text with \nnew");
-        sleep(3000);
+        lcd.displayText("Small text with \nnew line char");
+        delay(3000);
 
         // Clear the display to start next parts
         lcd.clearDisplay();
