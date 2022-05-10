@@ -48,4 +48,5 @@ module com.pi4j.example {
     opens com.pi4j.example.util to com.pi4j;
     opens com.pi4j.example.serial.gps to com.pi4j;
     opens com.pi4j.example to info.picocli, com.pi4j;
+    exports com.pi4j.example.components.helpers;
 }
