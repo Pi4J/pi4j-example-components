@@ -25,11 +25,18 @@
  * #L%
  */
 module com.pi4j.example {
+    // Module Exports
+    exports com.pi4j.example;
+    exports com.pi4j.example.components;
+    exports com.pi4j.example.components.events;
+    exports com.pi4j.example.helpers;
+
     // Pi4J MODULES
     requires com.pi4j;
     requires com.pi4j.plugin.pigpio;
     requires com.pi4j.plugin.raspberrypi;
     requires com.pi4j.library.pigpio;
+    requires com.pi4j.plugin.linuxfs;
 
     uses com.pi4j.extension.Extension;
     uses com.pi4j.provider.Provider;
