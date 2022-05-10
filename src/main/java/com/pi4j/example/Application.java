@@ -2,6 +2,8 @@ package com.pi4j.example;
 
 import com.pi4j.context.Context;
 
+import java.util.logging.Logger;
+
 /**
  * This interface should be implemented by each CrowPi example / application
  */
@@ -40,11 +42,23 @@ public interface Application {
      *
      * @param milliseconds Time in milliseconds to sleep
      */
-    default void sleep(long milliseconds) {
+    default void delay(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    /**
+     * Logger instance
+     */
+    Logger logger = Logger.getLogger("Pi4J-App");
+
+    default void logInfo(String msg){
+        logger.info(() -> msg);
+    }
+    default void logError(String msg){
+        logger.severe(() -> msg);
     }
 }

@@ -1,13 +1,19 @@
 package com.pi4j.example.components;
 
-import com.pi4j.example.components.events.EventHandler;
-import com.pi4j.example.components.helpers.Logger;
+import java.util.logging.Logger;
 
 public abstract class Component {
     /**
      * Logger instance
      */
-    protected final Logger logger = new Logger(this.getClass());
+    protected final Logger logger = Logger.getLogger(getClass().getName());
+
+    protected void logInfo(String msg){
+        logger.info(() -> msg);
+    }
+    protected void logError(String msg){
+        logger.severe(() -> msg);
+    }
 
     /**
      * Utility function to sleep for the specified amount of milliseconds.
@@ -15,23 +21,12 @@ public abstract class Component {
      *
      * @param milliseconds Time in milliseconds to sleep
      */
-    protected void sleep(long milliseconds) {
+
+    void delay(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        }
-    }
-
-    /**
-     * Utility function to trigger a simple event handler.
-     * If the handler is currently null it gets silently ignored.
-     *
-     * @param handler Event handler to call or null
-     */
-    protected void triggerEvent(EventHandler handler) {
-        if (handler != null) {
-            handler.handle();
         }
     }
 }

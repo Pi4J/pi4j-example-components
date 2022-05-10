@@ -1,12 +1,10 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.components.Component;
-import com.pi4j.example.helpers.SimpleOutput;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfig;
 
-public class SimpleLED extends Component implements SimpleOutput {
+public class SimpleLED extends Component {
     /**
      * Pi4J digital output instance used by this component
      */
@@ -18,7 +16,7 @@ public class SimpleLED extends Component implements SimpleOutput {
      * @param pi4j    Pi4J context
      * @param address Custom BCM pin address
      */
-    public SimpleLED(Context pi4j, int address) {
+    public SimpleLED(Context pi4j, PIN address) {
         this.digitalOutput = pi4j.create(buildDigitalOutputConfig(pi4j, address));
     }
 
@@ -71,11 +69,11 @@ public class SimpleLED extends Component implements SimpleOutput {
      * @param address GPIO Address of the relay
      * @return Return Digital Input configuration
      */
-    protected DigitalOutputConfig buildDigitalOutputConfig(Context pi4j, int address) {
+    protected DigitalOutputConfig buildDigitalOutputConfig(Context pi4j, PIN address) {
         return DigitalOutput.newConfigBuilder(pi4j)
                 .id("BCM" + address)
                 .name("LED")
-                .address(address)
+                .address(address.getPin())
                 .build();
     }
 }
