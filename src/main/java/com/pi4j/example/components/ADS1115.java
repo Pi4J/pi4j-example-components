@@ -1,20 +1,10 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.components.events.ValueChangeHandler;
-import com.pi4j.io.gpio.analog.AnalogValueChangeListener;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public class ADS1115 extends Component{
-    /**
-     * logger instance
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(ADS1115.class);
-
     /**
      * i2c component
      */
@@ -923,10 +913,10 @@ public class ADS1115 extends Component{
         try {
             Thread.sleep(15);
         } catch (InterruptedException e) {
-            logger.error("Error: " + e);
+            logInfo("Error: " + e);
         }
         int result = i2c.readRegisterWord(CONVERSION_REGISTER);
-        logger.debug("readIn: " + config + ", raw " + result);
+        logInfo("readIn: " + config + ", raw " + result);
         return result;
     }
 
@@ -942,7 +932,7 @@ public class ADS1115 extends Component{
                 try {
                     Thread.sleep(readFrequency);
                 } catch (InterruptedException e) {
-                    logger.error("Error: " + e);
+                    logError("Error: " + e);
                 }
             }
         });

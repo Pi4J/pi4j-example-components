@@ -1,6 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
+import com.pi4j.example.components.helpers.PIN;
 
 import static java.lang.Thread.sleep;
 
@@ -60,7 +61,7 @@ public class Potentiometer extends Component{
 
     public Potentiometer(Context pi4j){
         ads1115 = new ADS1115(pi4j);
-        btn = new SimpleButton(pi4j,26,false);
+        btn = new SimpleButton(pi4j, PIN.D26,false);
     }
 
 

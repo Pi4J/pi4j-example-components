@@ -4,6 +4,8 @@ import com.pi4j.context.Context;
 import com.pi4j.example.Application;
 import com.pi4j.example.components.ADS1115;
 
+import static java.lang.Thread.sleep;
+
 public class PotentiometerApp implements Application {
 
     /**
@@ -64,7 +66,11 @@ public class PotentiometerApp implements Application {
         for (int i = 0; i < 10; i++){
             System.out.println(ads1115.readConversionRegister());
             System.out.println(ads1115.readConfigRegister());
-            sleep(1000);
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                logError("Error: " + e);
+            }
         }
     }
 }
