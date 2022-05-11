@@ -18,10 +18,10 @@ public class ADS1115_App implements Application {
         ADS1115 adc = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND);
 
         for (int i = 0; i < 100; i++) {
-            double aIn0 = adc.getAIn0();
-            double aIn1 = adc.getAIn1();
-            double aIn2 = adc.getAIn2();
-            double aIn3 = adc.getAIn3();
+            double aIn0 = adc.singleShotAIn0();
+            double aIn1 = adc.singleShotAIn1();
+            double aIn2 = adc.singleShotAIn2();
+            double aIn3 = adc.singleShotAIn3();
             LOG.info("[{}] Voltages: a0={} V, a1={} V, a2={} V, a3={} V",
                     i, String.format("%.3f", aIn0), String.format("%.3f", aIn1), String.format("%.3f", aIn2), String.format("%.3f", aIn3));
             sleep(500);

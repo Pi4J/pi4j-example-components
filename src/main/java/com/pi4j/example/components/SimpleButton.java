@@ -135,6 +135,7 @@ public class SimpleButton extends Component implements DigitalStateChangeListene
                     while(whilePressed != null && isDown()){
                         whilePressed.run();
                         try {
+                            //ToDo format WHILE_PRESSED_DEBOUNCE
                             Thread.sleep(whilePressedDEBOUNCE);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
