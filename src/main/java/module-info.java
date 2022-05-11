@@ -25,22 +25,28 @@
  * #L%
  */
 module com.pi4j.example {
+    // Module Exports
+    exports com.pi4j.example;
+    exports com.pi4j.example.components;
+    exports com.pi4j.example.components.events;
+    exports com.pi4j.example.helpers;
+
     // Pi4J MODULES
     requires com.pi4j;
     requires com.pi4j.plugin.pigpio;
-
-    // SLF4J MODULES
-    requires org.slf4j;
-    requires org.slf4j.simple;
-    requires info.picocli;
     requires com.pi4j.plugin.raspberrypi;
     requires com.pi4j.library.pigpio;
+    requires com.pi4j.plugin.linuxfs;
 
     uses com.pi4j.extension.Extension;
     uses com.pi4j.provider.Provider;
+
+    requires java.logging;
+    requires info.picocli;
 
     // allow access to classes in the following namespaces for Pi4J annotation processing
     opens com.pi4j.example.util to com.pi4j;
     opens com.pi4j.example.serial.gps to com.pi4j;
     opens com.pi4j.example to info.picocli, com.pi4j;
+    exports com.pi4j.example.components.helpers;
 }

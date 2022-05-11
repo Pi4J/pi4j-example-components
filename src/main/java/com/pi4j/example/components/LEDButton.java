@@ -1,6 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
+import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.io.gpio.digital.*;
 
 /**
@@ -29,7 +30,7 @@ public class LEDButton extends Component {
      * @param inverted Specify if button state is inverted
      * @param ledaddress  GPIO address of LED
      */
-    public LEDButton(Context pi4j, int buttonaddress, Boolean inverted, int ledaddress) {
+    public LEDButton(Context pi4j, PIN buttonaddress, Boolean inverted, PIN ledaddress) {
         this(pi4j, buttonaddress, inverted, ledaddress, DEFAULT_DEBOUNCE);
     }
 
@@ -42,7 +43,7 @@ public class LEDButton extends Component {
      * @param ledaddress  GPIO address of LED
      * @param debounce Debounce time in microseconds
      */
-    public LEDButton(Context pi4j, int buttonaddress, boolean inverted, int ledaddress, long debounce) {
+    public LEDButton(Context pi4j, PIN buttonaddress, boolean inverted, PIN ledaddress, long debounce) {
         this.button = new SimpleButton(pi4j, buttonaddress, inverted, debounce);
         this.led = new SimpleLED(pi4j, ledaddress);
     }
@@ -129,7 +130,7 @@ public class LEDButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void btnonDown(Runnable method) { button.onDown(method); }
+    public void onDown(Runnable method) { button.onDown(method); }
 
     /**
      * Sets or disables the handler for the onUp event.
@@ -138,7 +139,7 @@ public class LEDButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void btnonUp(Runnable method) {
+    public void onUp(Runnable method) {
         button.onUp(method);
     }
     /**
@@ -148,7 +149,7 @@ public class LEDButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void btnwhilePressed(long millis, Runnable method) {button.whilePressed(millis, method); }
+    public void btnwhilePressed(long millis, Runnable method) {button.whilePressed(method, millis); }
 
     /**
      * disables all the handlers for the onUp, onDown and WhilePressed Events

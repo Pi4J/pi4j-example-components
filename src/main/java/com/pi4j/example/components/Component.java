@@ -1,10 +1,32 @@
 package com.pi4j.example.components;
 
-import com.pi4j.example.components.helpers.Logger;
+import java.util.logging.Logger;
 
 public abstract class Component {
     /**
      * Logger instance
      */
-    protected final Logger logger = new Logger(this.getClass());
+    protected final Logger logger = Logger.getLogger(getClass().getName());
+
+    protected void logInfo(String msg){
+        logger.info(() -> msg);
+    }
+    protected void logError(String msg){
+        logger.severe(() -> msg);
+    }
+
+    /**
+     * Utility function to sleep for the specified amount of milliseconds.
+     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
+     *
+     * @param milliseconds Time in milliseconds to sleep
+     */
+
+    void delay(long milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
+import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalState;
 
@@ -53,11 +54,11 @@ public class Joystick {
      * @param addrEast  GPIO address of button right
      * @param addrPush  GPIO address of button push
      */
-    public Joystick (Context pi4j, int addrNorth, int addrWest, int addrSouth, int addrEast, int addrPush){
+    public Joystick (Context pi4j, PIN addrNorth, PIN addrWest, PIN addrSouth, PIN addrEast, PIN addrPush){
         bNorth = new SimpleButton(pi4j, addrNorth, false, DEFAULT_DEBOUNCE);
-        bWest = new SimpleButton(pi4j, addrWest, false, DEFAULT_DEBOUNCE);
+        bWest  = new SimpleButton(pi4j, addrWest,  false, DEFAULT_DEBOUNCE);
         bSouth = new SimpleButton(pi4j, addrSouth, false, DEFAULT_DEBOUNCE);
-        bEast = new SimpleButton(pi4j, addrEast, false, DEFAULT_DEBOUNCE);
+        bEast  = new SimpleButton(pi4j, addrEast,  false, DEFAULT_DEBOUNCE);
         //joystick with push button
         bPush = new SimpleButton(pi4j, addrPush, false, DEFAULT_DEBOUNCE);
         pushIsPresent = true;
@@ -72,11 +73,11 @@ public class Joystick {
      * @param addrSouth  GPIO address of button down
      * @param addrEast  GPIO address of button right
      */
-    public Joystick (Context pi4j, int addrNorth, int addrWest, int addrSouth, int addrEast){
+    public Joystick (Context pi4j, PIN addrNorth, PIN addrWest, PIN addrSouth, PIN addrEast){
         bNorth = new SimpleButton(pi4j, addrNorth, false, DEFAULT_DEBOUNCE);
-        bWest = new SimpleButton(pi4j, addrWest, false, DEFAULT_DEBOUNCE);
+        bWest = new SimpleButton(pi4j,  addrWest,  false, DEFAULT_DEBOUNCE);
         bSouth = new SimpleButton(pi4j, addrSouth, false, DEFAULT_DEBOUNCE);
-        bEast = new SimpleButton(pi4j, addrEast, false, DEFAULT_DEBOUNCE);
+        bEast = new SimpleButton(pi4j,  addrEast,  false, DEFAULT_DEBOUNCE);
         bPush = null;
         //joystick without push button
         pushIsPresent = false;
@@ -225,7 +226,7 @@ public class Joystick {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonNorthOnDown(Runnable handler) {
+    public void onNorth(Runnable handler) {
         bNorth.onDown(handler);
     }
 
@@ -236,8 +237,8 @@ public class Joystick {
      *
      * @param method Event handler to call or null to disable
      */
-    public void buttonNorthwhilePressed(long millis, Runnable method) {
-        bNorth.whilePressed(millis, method);
+    public void whileNorth(long millis, Runnable method) {
+        bNorth.whilePressed(method, millis);
     }
     /**
      * Sets or disables the handler for the onDown event.
@@ -246,7 +247,7 @@ public class Joystick {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonWestOnDown(Runnable handler) {
+    public void onWest(Runnable handler) {
         bWest.onDown(handler);
     }
 
@@ -257,8 +258,8 @@ public class Joystick {
      *
      * @param method Event handler to call or null to disable
      */
-    public void buttonWestwhilePressed(long millis, Runnable method) {
-        bWest.whilePressed(millis, method);
+    public void whileWest(long millis, Runnable method) {
+        bWest.whilePressed(method, millis);
     }
     /**
      * Sets or disables the handler for the onDown event.
@@ -267,7 +268,7 @@ public class Joystick {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonSouthOnDown(Runnable handler) {
+    public void onSouth(Runnable handler) {
         bSouth.onDown(handler);
     }
 
@@ -278,8 +279,8 @@ public class Joystick {
      *
      * @param method Event handler to call or null to disable
      */
-    public void buttonSouthwhilePressed(long millis, Runnable method) {
-        bSouth.whilePressed(millis, method);
+    public void whileSouth(long millis, Runnable method) {
+        bSouth.whilePressed(method, millis);
     }
     /**
      * Sets or disables the handler for the onDown event.
@@ -288,7 +289,7 @@ public class Joystick {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonEastOnDown(Runnable handler) {
+    public void onEast(Runnable handler) {
         bEast.onDown(handler);
     }
 
@@ -299,8 +300,8 @@ public class Joystick {
      *
      * @param method Event handler to call or null to disable
      */
-    public void buttonEastwhilePressed(long millis, Runnable method) {
-        bEast.whilePressed(millis, method);
+    public void whileEast(long millis, Runnable method) {
+        bEast.whilePressed(method, millis);
     }
 
     /**
@@ -310,7 +311,7 @@ public class Joystick {
      *
      * @param handler Event handler to call or null to disable
      */
-    public void buttonPushOnDown(Runnable handler) {
+    public void onPushDown(Runnable handler) {
         if (pushIsPresent){
             bPush.onDown(handler);}
     }
@@ -321,7 +322,7 @@ public class Joystick {
      *
      * @param method Event handler to call or null to disable
      */
-    public void buttonPushOnUp(Runnable method) {
+    public void onPushUp(Runnable method) {
         bPush.onUp(method);
     }
     /**
@@ -332,7 +333,7 @@ public class Joystick {
      * @param method Event handler to call or null to disable
      */
     public void buttonPushwhilePressed(long millis, Runnable method) {
-        bPush.whilePressed(millis, method);
+        bPush.whilePressed(method, millis);
     }
 
     /**
