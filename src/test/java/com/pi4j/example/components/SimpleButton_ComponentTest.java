@@ -6,6 +6,7 @@ import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalInput;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -153,37 +154,40 @@ public class SimpleButton_ComponentTest extends ComponentTest {
         //given
         int samplingTime = 100;
 
-        int[] counter = {0};
+        AtomicInteger counter = new AtomicInteger(0);
 
-        button.whilePressed(()->counter[0]++, samplingTime);
+        button.whilePressed(()-> counter.getAndIncrement(), samplingTime);
 
         //when
         digitalInput.mockState(DigitalState.HIGH);
 
         //then
-        assertEquals(0, counter[0]);
+        assertEquals(0, counter.get());
 
         //when
         sleep(150);
 
         //then
-        assertEquals(1, counter[0]);
+        assertEquals(1, counter.get());
 
         //when
         sleep(100);
 
         //then
-        assertEquals(2, counter[0]);
+        assertEquals(2, counter.get());
 
         //when
         button.deRegisterAll();
         sleep(100);
 
         //then
-        assertEquals(2, counter[0]);
+        assertEquals(2, counter.get());
         assertEquals(null, button.getOnDown());
         assertEquals(null, button.getOnUp());
         assertEquals(null, button.getWhilePressed());
+
+        //cleanup
+        digitalInput.mockState(DigitalState.LOW);
 
     }
 }

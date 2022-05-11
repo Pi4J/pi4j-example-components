@@ -59,7 +59,7 @@ public class SimpleButton extends Component  {
         /*
          * Gets a DigitalStateChangeEvent directly from the Provider, as this
          * Class is a listener. This runs in a different Thread than main.
-         * Calls the mehtods onUp, onDown and whilePressed. WhilePressed gets
+         * Calls the methods onUp, onDown and whilePressed. WhilePressed gets
          * executed in an own Thread, as to not block other resources.
          */
         this.digitalInput.addListener(digitalStateChangeEvent -> {
@@ -76,7 +76,7 @@ public class SimpleButton extends Component  {
                         new Thread(() -> {
                             while (isDown()) {
                                 delay(whilePressedDEBOUNCE);
-                                if(isDown()){
+                                if(isDown() && whilePressed != null){
                                     whilePressed.run();
                                 }
                             }
