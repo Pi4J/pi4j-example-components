@@ -6,7 +6,9 @@ import com.pi4j.example.components.ADS1115;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ADS1115_App implements Application {
+import static java.lang.Thread.sleep;
+
+public class ADS1115_App implements Application{
 
     private static final Logger LOG = LoggerFactory.getLogger(ADS1115.class);
 

@@ -1,8 +1,6 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.components.events.ValueChangeHandler;
-import com.pi4j.io.gpio.analog.AnalogValueChangeListener;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import org.slf4j.Logger;
@@ -48,7 +46,6 @@ public class ADS1115 extends Component{
     /**
      * device address
      */
-    // TODO: 01.05.22 is adress stored in enum? 
     private final ADDRESS address;
 
     /**
@@ -545,8 +542,6 @@ public class ADS1115 extends Component{
         public int getSpS() {
             return this.sps;
         }
-
-        ;
     }
 
     /**
@@ -667,7 +662,6 @@ public class ADS1115 extends Component{
         public int getPga() {
             return this.pga;
         }
-
     }
 
     /**
@@ -930,31 +924,39 @@ public class ADS1115 extends Component{
         return result;
     }
 
-    private void readContiniousValue(int config, int readFrequency) {
-        // TODO: 11.05.22 niquist error
-        //set configuration
-        writeConfigRegister(config);
+    private void readContiniousValue(int config, double threshold, int readFrequency) {
+        if(readFrequency * 2 < samplingRate){
+            //set configuration
+            writeConfigRegister(config);
 
-        //start new thread for continuous reading
-        new Thread(() -> {
-            while (continiousReadingActive) {
-                actualValue = readConversionRegister();
-                try {
-                    Thread.sleep(readFrequency);
-                } catch (InterruptedException e) {
-                    logger.error("Error: " + e);
+            //start new thread for continuous reading
+            new Thread(() -> {
+                while (continiousReadingActive) {
+                    int oldValue = actualValue;
+                    actualValue = readConversionRegister();
+                    if(oldValue*(1-threshold) < actualValue || oldValue*(1+threshold) > actualValue){
+                        onValueChange.run();
+                    }
+                    try {
+                        Thread.sleep(readFrequency);
+                    } catch (InterruptedException e) {
+                        logger.error("Error: " + e);
+                    }
                 }
-            }
-        });
+            });
+        }else{
+            logger.error("niquist problem");
+        }
+
 
     }
 
     /**
      * start continuous reading
      */
-    public void startContiniousReading(int config, int readFrequenzy){
+    public void startContiniousReading(int config, double threshold, int readFrequenzy){
         continiousReadingActive = true;
-        readContiniousValue(config, readFrequenzy);
+        readContiniousValue(config, threshold, readFrequenzy);
 
 
     }
