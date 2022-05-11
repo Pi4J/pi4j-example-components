@@ -99,7 +99,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Plugin for I2C -->
+    <!-- Plugin for I2C -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-linuxfs</artifactId>
