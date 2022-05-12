@@ -1,14 +1,25 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
-import com.pi4j.example.components.helpers.PIN;
-import com.pi4j.io.spi.Spi;
-import com.pi4j.io.spi.SpiConfig;
+import com.pi4j.io.spi.*;
 
 import java.util.Arrays;
 
 public class LEDStrip extends Component{
     protected final Spi spi;
+
+    /**
+     * Default SPI channel for the LED matrix on the CrowPi
+     */
+    protected static final int DEFAULT_CHANNEL = 0;
+
+    // MAX7219: Internal Commands
+    private static final byte CMD_SET_FIRST_ROW = 0x01;
+    private static final byte CMD_DECODE_MODE = 0x09;
+    private static final byte CMD_INTENSITY = 0x0A;
+    private static final byte CMD_SCAN_LIMIT = 0x0B;
+    private static final byte CMD_SHUTDOWN = 0x0C;
+    private static final byte CMD_DISPLAY_TEST = 0x0F;
 
     private static final int LED_COLOURS = 4;
     private static final int LED_RESET_uS = 55;
@@ -35,12 +46,15 @@ public class LEDStrip extends Component{
      * Creates a new simpleLed component with a custom BCM pin.
      *
      * @param pi4j    Pi4J context
-     * @param address Custom BCM pin address
      * @param numLeds    How many LEDs are on this Strand
      */
-    public LEDStrip(Context pi4j, PIN address, int numLeds, int brightness) {
+    public LEDStrip(Context pi4j, int numLeds, int brightness) {
+        this(pi4j, numLeds, brightness, DEFAULT_CHANNEL);
+    }
+
+    public LEDStrip(Context pi4j, int numLeds, int brightness, int channel) {
         logger.info("initialising a ledstrip with "+numLeds+" leds");
-        this.spi = pi4j.create(buildSpiConfig(pi4j));
+        this.spi = pi4j.create(buildSpiConfig(pi4j, channel));
         this.numLeds = numLeds;
         this.leds = new int[numLeds];
         this.gamma = new byte[256];
@@ -56,19 +70,23 @@ public class LEDStrip extends Component{
 
         // 1.25us per bit (1250ns)
         renderWaitTime = numLeds * 3 * 8 * 1250 + LED_RESET_WAIT_TIME;
-    }
+        setEnabled(Boolean.TRUE);
 
+        //TODO Delete
+        logger.info("Bytes "+PCM_BYTE_COUNT(numLeds, 800_000));
+    }
     /**
      * Builds a new SPI instance for the LED matrix
      *
      * @param pi4j    Pi4J context
      * @return SPI instance
      */
-    private static SpiConfig buildSpiConfig(Context pi4j) {
+    private static SpiConfig buildSpiConfig(Context pi4j, int channel) {
         return Spi.newConfigBuilder(pi4j)
                 .id("SPI" + 1)
                 .name("LED Matrix")
-                .address(1)
+                .address(channel)
+                .mode(SpiMode.MODE_0)
                 .baud(800000)
                 .build();
     }
@@ -77,6 +95,7 @@ public class LEDStrip extends Component{
     public void close() {
         logger.info("Turning all leds off before close");
         allOff();
+        setEnabled(Boolean.FALSE);
     }
 
     /**
@@ -136,7 +155,7 @@ public class LEDStrip extends Component{
 
         for (int i = 0; i < numLeds; i++) {
             // Swap the colors around based on the led strip type
-            byte[] colour = { gamma[(((leds[i] >> 8) & 0xff) * scale) >> 8],
+            byte[] color = { gamma[(((leds[i] >> 8) & 0xff) * scale) >> 8],
                     gamma[(((leds[i] >> 16) & 0xff) * scale) >> 8],
                     gamma[(((leds[i] >> 0) & 0xff) * scale) >> 8],
                     gamma[(((leds[i] >> 0) & 0xff) * scale) >> 8] };
@@ -145,7 +164,7 @@ public class LEDStrip extends Component{
             for (int j = 0; j < color_count; j++) {
                 // Bit
                 for (int k = 7; k >= 0; k--) {
-                    int symbol = ((colour[j] & (1 << k)) != 0) ? SYMBOL_HIGH : SYMBOL_LOW;
+                    int symbol = ((color[j] & (1 << k)) != 0) ? SYMBOL_HIGH : SYMBOL_LOW;
 
                     // Symbol
                     for (int l = 2; l >= 0; l--) {
@@ -167,7 +186,6 @@ public class LEDStrip extends Component{
                 }
             }
         }
-
         if (lastRenderTime != 0) {
             int diff = (int) (System.nanoTime() - lastRenderTime);
             if (renderWaitTime > diff) {
@@ -177,7 +195,8 @@ public class LEDStrip extends Component{
 
         //TODO Call Write
         for (byte led:pixelRaw) {
-            execute((byte)0x01, led);
+            execute((byte)0x00, led);
+            //logger.info("LED "+led);
         }
         logger.info("finished rendering");
         lastRenderTime = System.nanoTime();
@@ -188,7 +207,10 @@ public class LEDStrip extends Component{
      */
     public void allOff() {
         Arrays.fill(leds, 0);
-        render();
+        for (int led:leds) {
+            execute((byte)0x00, (byte) led);
+        }
+        lastRenderTime = System.nanoTime();
     }
 
     private static final int LED_BIT_COUNT(int numLeds, int frequency) {
@@ -197,6 +219,20 @@ public class LEDStrip extends Component{
 
     private static final int PCM_BYTE_COUNT(int numLeds, int frequency) {
         return (((LED_BIT_COUNT(numLeds, frequency) >> 3) & ~0x7) + 4) + 4;
+    }
+
+    /**
+     * Specifies if the LED matrix should be enabled or disabled.
+     * This will also setup the proper decoding mode and scan limit when enabling the chip.
+     *
+     * @param enabled LED matrix state (true = ON, false = OFF)
+     */
+    public void setEnabled(boolean enabled) {
+        if (enabled) {
+            execute(CMD_SHUTDOWN, (byte) 0x01);
+        } else {
+            execute(CMD_SHUTDOWN, (byte) 0x00);
+        }
     }
 
     /**

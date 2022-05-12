@@ -10,14 +10,14 @@ public class LEDStrip_App implements Application {
     @Override
     public void execute(Context pi4j) {
         // Initialize the RGB
-        int pixels = 8;
-        final var ledstrip = new LEDStrip(pi4j, PIN.D26, pixels, 127);
+        int pixels = 10;
+        final var ledstrip = new LEDStrip(pi4j, pixels, 127);
 
         //set them all off, so nothing is shining
         logger.info("Starting with setting all leds off");
         ledstrip.allOff();
 
-        for(int i = 0; i < 5; i++){
+        /*for(int i = 0; i < 1; i++){
 
             //increment red value
             logger.info("setting the leds to a shade of red");
@@ -51,15 +51,17 @@ public class LEDStrip_App implements Application {
             //show it on the strip
             ledstrip.render();
             delay(2000);
-        }
+        }*/
 
-        logger.info("setting the leds to purple");
-        ledstrip.setStripColor(PixelColor.PURPLE);
+        logger.info("setting the leds to RED");
+        ledstrip.setStripColor(PixelColor.RED);
         ledstrip.render();
+        logger.info("Color "+ ledstrip.getPixelColor(0));
         delay(3000);
 
         //finishing and closing
         ledstrip.close();
         logger.info("closing the app");
+        logger.info("Color "+ ledstrip.getPixelColor(0));
     }
 }
