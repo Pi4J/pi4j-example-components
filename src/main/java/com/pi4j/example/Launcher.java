@@ -5,9 +5,9 @@ import com.pi4j.context.Context;
 import com.pi4j.example.applications.*;
 import com.pi4j.example.helpers.SingletonAppHelper;
 import com.pi4j.library.pigpio.PiGpio;
+import com.pi4j.plugin.linuxfs.provider.i2c.LinuxFsI2CProvider;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalOutputProvider;
-import com.pi4j.plugin.linuxfs.provider.i2c.LinuxFsI2CProvider;
 import com.pi4j.plugin.pigpio.provider.pwm.PiGpioPwmProvider;
 import com.pi4j.plugin.pigpio.provider.serial.PiGpioSerialProvider;
 import com.pi4j.plugin.pigpio.provider.spi.PiGpioSpiProvider;
@@ -15,7 +15,6 @@ import com.pi4j.plugin.raspberrypi.platform.RaspberryPiPlatform;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
-
 import java.util.*;
 
 @Command(name = "Raspberry Pi Example Launcher", version = "1.0.0", mixinStandardHelpOptions = true)
@@ -24,13 +23,13 @@ public final class Launcher implements Runnable {
      * This list must contain all applications which should be executable through the launcher.
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
-    public static final List<Application> APPLICATIONS = new ArrayList<Application>(Arrays.asList(
+    public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
         new SimpleButton_App(),
         new SimpleLED_App(),
         new LEDButton_App(),
-        new Joystick_App(),
-        new ADS1115_App(),
-        new LCDDisplay_App()
+            new Joystick_App(),
+            new ADS1115_App(),
+            new PotentiometerApp()
     ));
 
     /**
