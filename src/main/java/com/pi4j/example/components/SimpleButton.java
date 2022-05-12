@@ -1,6 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
+import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.io.gpio.digital.*;
 
 public class SimpleButton extends Component  {

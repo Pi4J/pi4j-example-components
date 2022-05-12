@@ -30,12 +30,14 @@ module com.pi4j.example {
     exports com.pi4j.example.components;
     exports com.pi4j.example.components.events;
     exports com.pi4j.example.helpers;
+    exports com.pi4j.example.components.helpers;
 
     // Pi4J MODULES
     requires com.pi4j;
     requires com.pi4j.plugin.pigpio;
     requires com.pi4j.plugin.raspberrypi;
     requires com.pi4j.library.pigpio;
+    requires com.pi4j.plugin.linuxfs;
 
     uses com.pi4j.extension.Extension;
     uses com.pi4j.provider.Provider;
@@ -47,5 +49,4 @@ module com.pi4j.example {
     opens com.pi4j.example.util to com.pi4j;
     opens com.pi4j.example.serial.gps to com.pi4j;
     opens com.pi4j.example to info.picocli, com.pi4j;
-
 }

@@ -1,4 +1,4 @@
-package com.pi4j.example.components;
+package com.pi4j.example.components.helpers;
 
 public enum PIN {
     SDA1(2),

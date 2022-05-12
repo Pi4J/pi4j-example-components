@@ -4,7 +4,6 @@ import com.pi4j.context.Context;
 import com.pi4j.example.Application;
 import com.pi4j.example.components.ADS1115;
 
-
 public class ADS1115_App implements Application {
 
     @Override
@@ -24,8 +23,5 @@ public class ADS1115_App implements Application {
         }
 
         logInfo("ADS1115 app done.");
-
-
-
     }
 }

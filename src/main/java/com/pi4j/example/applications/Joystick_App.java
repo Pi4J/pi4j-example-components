@@ -2,8 +2,8 @@ package com.pi4j.example.applications;
 
 import com.pi4j.context.Context;
 import com.pi4j.example.Application;
+import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.example.components.Joystick;
-import com.pi4j.example.components.PIN;
 
 public class Joystick_App implements Application {
     @Override
