@@ -24,9 +24,9 @@ public class PotentiometerApp implements Application {
         logInfo("The potentiometer slider is currently at " + poti.getPercent() + " % of its full travel.");
 
         // Register event handlers to print a message when poti is moved
-        poti.setRunnable(() -> {logInfo("The current voltage drop is currently "
-                + poti.getActualValue()
-                + " volts");});
+        poti.setRunnable(() -> {
+            logInfo("The current voltage drop is currently " + poti.getActualValue() + " volts");
+        });
 
         //start continious reading with single shot in this mode you can connect up to 4 devices to the analog module
         poti.startSlowContiniousReading(0.1, 1);

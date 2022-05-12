@@ -19,7 +19,7 @@ public class ADS1115_App implements Application {
         logInfo("ADS1115 test done");
     }
 
-    private void singleRead(Context pi4j){
+    private void singleRead(Context pi4j) {
         //start test
         logInfo("Single read started ...");
         logInfo("Create ADS1115 object");
@@ -31,10 +31,7 @@ public class ADS1115_App implements Application {
             double aIn1 = adc.singleShotAIn1();
             double aIn2 = adc.singleShotAIn2();
             double aIn3 = adc.singleShotAIn3();
-            logInfo("[" + i + "] Voltages: a0=" + String.format("%.3f", aIn0)
-                    + " V, a1=" + String.format("%.3f", aIn1)
-                    + " V, a2=" + String.format("%.3f", aIn2)
-                    + " V, a3=" + String.format("%.3f", aIn3) + " V");
+            logInfo("[" + i + "] Voltages: a0=" + String.format("%.3f", aIn0) + " V, a1=" + String.format("%.3f", aIn1) + " V, a2=" + String.format("%.3f", aIn2) + " V, a3=" + String.format("%.3f", aIn3) + " V");
 
             //wait for next read
             try {
@@ -48,15 +45,16 @@ public class ADS1115_App implements Application {
         logInfo("Single read done.");
     }
 
-    private void continiousRead(Context pi4j){
+    private void continiousRead(Context pi4j) {
         //start test
         logInfo("Continious read test started ...");
         logInfo("create ads instance");
         ADS1115 ads1115 = new ADS1115(pi4j);
 
         // Register event handlers to print a message on value change
-        ads1115.setRunnable(()->{System.out.println("The actual value is: "
-                + String.format("%.3f", ads1115.continiousReadAI()) + "voltage.");});
+        ads1115.setRunnable(() -> {
+            System.out.println("The actual value is: " + String.format("%.3f", ads1115.continiousReadAI()) + "voltage.");
+        });
 
         //start continious measuring
         ads1115.startContiniousReading(ADS1115.MUX.AIN0_GND, 20, 1);

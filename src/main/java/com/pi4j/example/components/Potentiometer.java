@@ -2,7 +2,7 @@ package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
 
-public class Potentiometer extends Component{
+public class Potentiometer extends Component {
     /**
      * ads1115 instance
      */
@@ -45,10 +45,11 @@ public class Potentiometer extends Component{
     /**
      * Create a new potentiometer component with custom mux and custom maxVoltage
      *
-     * @param mux custom mux
+     * @param ads1115    ads instance
+     * @param mux        custom mux
      * @param maxVoltage custom maxVoltage
      */
-    public Potentiometer(ADS1115 ads1115, ADS1115.MUX mux, double maxVoltage){
+    public Potentiometer(ADS1115 ads1115, ADS1115.MUX mux, double maxVoltage) {
         this.ads1115 = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = maxVoltage;
@@ -58,9 +59,9 @@ public class Potentiometer extends Component{
     /**
      * Create a new potentiometer componentn with default mux and maxVoltage for Raspberry pi
      *
-     * @param pij4 Pi4J context
+     * @param ads1115 ads instance
      */
-    public Potentiometer(ADS1115 ads1115){
+    public Potentiometer(ADS1115 ads1115) {
         this.ads1115 = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = 3.3;
@@ -72,16 +73,16 @@ public class Potentiometer extends Component{
      *
      * @return voltage from potentiometer
      */
-    public Double getVoltage(){
+    public Double getVoltage() {
         double result = 0.0;
-        if(mux == ADS1115.MUX.AIN0_GND){
+        if (mux == ADS1115.MUX.AIN0_GND) {
             result = ads1115.singleShotAIn0();
         } else if (mux == ADS1115.MUX.AIN1_GND) {
-            result =  ads1115.singleShotAIn1();
+            result = ads1115.singleShotAIn1();
         } else if (mux == ADS1115.MUX.AIN2_GND) {
-            result =  ads1115.singleShotAIn2();
+            result = ads1115.singleShotAIn2();
         } else if (mux == ADS1115.MUX.AIN3_GND) {
-            result =  ads1115.singleShotAIn3();
+            result = ads1115.singleShotAIn3();
         }
 
         if (result < minValue) {
@@ -98,8 +99,8 @@ public class Potentiometer extends Component{
      *
      * @return position in %
      */
-    public Double getPercent(){
-        return getVoltage()/maxValue;
+    public Double getPercent() {
+        return getVoltage() / maxValue;
     }
 
     /**
@@ -107,7 +108,9 @@ public class Potentiometer extends Component{
      *
      * @return actual value
      */
-    public Double getActualValue(){return actualValue;}
+    public Double getActualValue() {
+        return actualValue;
+    }
 
     /**
      * Sets or disables the handler for the onValueChange event.
@@ -138,16 +141,13 @@ public class Potentiometer extends Component{
                     double result = getVoltage();
                     logInfo("Current value: " + result);
                     if (oldValue - threshold > result || oldValue + threshold < result) {
-                        logInfo("New event triggered on value change, old value: "
-                                + oldValue
-                                + " , new value: "
-                                + result);
+                        logInfo("New event triggered on value change, old value: " + oldValue + " , new value: " + result);
                         oldValue = actualValue;
                         actualValue = result;
                         runnable.run();
                     }
                     try {
-                        Thread.sleep(1/readFrequency * 1000);
+                        Thread.sleep(1 / readFrequency * 1000);
                     } catch (InterruptedException e) {
                         logError("Error: " + e);
                     }
@@ -166,7 +166,7 @@ public class Potentiometer extends Component{
      * The maximum allowed sampling frequency of the signal is 1/2 the sampling rate of the ad converter.
      * The reciprocal of this sampling rate finally results in the minimum response time to a signal request.
      * (the delay of the bus is not included).
-     *
+     * <p>
      * This leads to the following table for the maximum allowed readFrequency by a sampling rate of 128 sps:
      * 1 chanel in use -> readFrequency max 64Hz (min. response time = 16ms)
      * 2 chanel in use -> readFrequency max 32Hz (min. response time = 32ms)
@@ -198,14 +198,14 @@ public class Potentiometer extends Component{
      * @param readFrequency read frequency to get new value from device, must be lower than the
      *                      sampling rate of the device
      */
-    public void startFastContiniousReading(int threshold, int readFrequency){
+    public void startFastContiniousReading(int threshold, int readFrequency) {
         ads1115.startContiniousReading(mux, threshold, readFrequency);
     }
 
     /**
      * stops fast continious reading
      */
-    public void stopFastContiniousReading(){
+    public void stopFastContiniousReading() {
         ads1115.stopContiniousReading();
     }
 

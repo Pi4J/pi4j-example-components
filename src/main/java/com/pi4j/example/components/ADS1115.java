@@ -913,7 +913,9 @@ public class ADS1115 extends Component {
      *
      * @return samplingrate
      */
-    public int getSamplingRate(){return dr;}
+    public int getSamplingRate() {
+        return dr;
+    }
 
     /**
      * Returns voltage value from AIn0
@@ -986,16 +988,13 @@ public class ADS1115 extends Component {
                     int result = readConversionRegister();
                     logInfo("Current value: " + result);
                     if (oldValue.get() - threshold > result || oldValue.get() + threshold < result) {
-                        logInfo("New event triggered on value change, old value: "
-                                + oldValue.get()
-                                + " , new value: "
-                                + result);
+                        logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
                         oldValue = actualValue;
                         actualValue.set(result);
                         runnable.run();
                     }
                     try {
-                        Thread.sleep(1/readFrequency * 1000);
+                        Thread.sleep(1 / readFrequency * 1000);
                     } catch (InterruptedException e) {
                         logError("Error: " + e);
                     }
@@ -1040,7 +1039,7 @@ public class ADS1115 extends Component {
         logInfo("start write configuration");
         i2c.writeRegisterWord(CONFIG_REGISTER, config);
         //wait until ad converter has stored new value in conversion register
-        delay(2/dr);
+        delay(2 / dr);
 
         readConfigRegister();
     }
@@ -1051,52 +1050,23 @@ public class ADS1115 extends Component {
      * @return configuration from device
      */
     public int readConfigRegister() {
-        String[] osInfo = {"0 : Device is currently performing a conversion\n",
-                "1 : Device is not currently performing a conversion\n"};
+        String[] osInfo = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
 
-        String[] muxInfo = {"000 : AINP = AIN0 and AINN = AIN1\n",
-                "001 : AINP = AIN0 and AINN = AIN3\n",
-                "010 : AINP = AIN1 and AINN = AIN3\n",
-                "011 : AINP = AIN2 and AINN = AIN3\n",
-                "100 : AINP = AIN0 and AINN = GND\n",
-                "101 : AINP = AIN1 and AINN = GND\n",
-                "110 : AINP = AIN2 and AINN = GND\n",
-                "111 : AINP = AIN3 and AINN = GND\n"};
+        String[] muxInfo = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
 
-        String[] pgaInfo = {"000 : FSR = ±6.144 V(1)\n",
-                "001 : FSR = ±4.096 V(1)\n",
-                "010 : FSR = ±2.048 V\n",
-                "011 : FSR = ±1.024 V\n",
-                "100 : FSR = ±0.512 V\n",
-                "101 : FSR = ±0.256 V\n",
-                "110 : FSR = ±0.256 V\n",
-                "111 : FSR = ±0.256 V\n"};
+        String[] pgaInfo = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
 
-        String[] modeInfo = {"0 : Continuous-conversion mode\n",
-                "1 : Single-shot mode or power-down state\n"};
+        String[] modeInfo = {"0 : Continuous-conversion mode\n", "1 : Single-shot mode or power-down state\n"};
 
-        String[] drInfo = {"000 : 8 SPS\n",
-                "001 : 16 SPS\n",
-                "010 : 32 SPS\n",
-                "011 : 64 SPS\n",
-                "100 : 128 SPS\n",
-                "101 : 250 SPS\n",
-                "110 : 475 SPS\n",
-                "111 : 860 SPS\n"};
+        String[] drInfo = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
 
-        String[] compModeInfo = {"0 : Traditional comparator (default)\n",
-                "1 : Window comparator\n"};
+        String[] compModeInfo = {"0 : Traditional comparator (default)\n", "1 : Window comparator\n"};
 
-        String[] compPolInfo = {"0 : Active low (default)\n",
-                "1 : Active high\n"};
+        String[] compPolInfo = {"0 : Active low (default)\n", "1 : Active high\n"};
 
-        String[] compLatInfo = {"0 : Nonlatching comparator\n",
-                "1 : Latching comparator\n"};
+        String[] compLatInfo = {"0 : Nonlatching comparator\n", "1 : Latching comparator\n"};
 
-        String[] compQueInfo = {"00 : Assert after one conversion\n",
-                "01 : Assert after two conversions\n",
-                "10 : Assert after four conversions\n",
-                "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
+        String[] compQueInfo = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
 
         //get configuration from device
         int result = i2c.readRegisterWord(CONFIG_REGISTER);
@@ -1191,12 +1161,7 @@ public class ADS1115 extends Component {
      * @return I2C configuration
      */
     private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
-        return I2C.newConfigBuilder(pi4j)
-                .id("I2C-" + device + "@" + bus)
-                .name("AD Converter")
-                .bus(bus)
-                .device(device)
-                .build();
+        return I2C.newConfigBuilder(pi4j).id("I2C-" + device + "@" + bus).name("AD Converter").bus(bus).device(device).build();
     }
 
 }
