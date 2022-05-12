@@ -33,20 +33,44 @@ public class ADS1115 extends Component{
     private final int i2cDefaultBus = 0x01;
 
     /**
-     * programmable gain amplifier
-     */
-    private final ADS1115.GAIN gain;
-
-    /**
      * device address
      */
-    // TODO: 01.05.22 is adress stored in enum? 
     private final ADDRESS address;
+
+    /**
+     * Operational status or single-shot conversion start
+     */
+    private int os;
+
+    /**
+     * programmable gain amplifier
+     */
+    private final ADS1115.GAIN pga;
 
     /**
      * sampling rate of device
      */
-    private final int samplingRate;
+    private final int dr;
+
+    /**
+     * Comparator mode
+     */
+    private final int compMode;
+
+    /**
+     * Comparator polarity
+     */
+    private final int compPol;
+
+    /**
+     * Latching comparator
+     */
+    private final int compLat;
+
+    /**
+     * Comparator queue and disable
+     */
+    private final int compQue;
 
     /**
      * actual value form conversion register
@@ -60,7 +84,6 @@ public class ADS1115 extends Component{
     /**
      * continious reading acitve
      */
-
     protected boolean continiousReadingActive;
 
     /**
@@ -87,27 +110,8 @@ public class ADS1115 extends Component{
 
     /**
      * Config register default configuration
-     * <p>
-     * OS -> 1 : Start a single conversion
-     * MUX -> 000 : AINP = AIN0 and AINN = AIN1
-     * PGA -> 000 : FSR = ±6.144 V(
-     * MODE -> 1 : Single-shot mode or power-down state
-     * DR -> 100 : 128 SPS
-     * COMP_MODE -> 0 : Traditional comparator
-     * COMP_POL -> 0 : Active low
-     * COMP_LAT -> 0 : Nonlatching comparator . The ALERT/RDY pin does not latch when asserted
-     * COMP_QUE -> 11 : Disable comparator and set ALERT/RDY pin to high-impedance
      */
-    private static final int CONFIG_REGISTER_TEMPLATE =
-            OS.WRITE_START.os
-                    | MUX.AIN0_AIN1.mux
-                    | PGA.FSR_6_144.pga
-                    | MODE.SINGLE.mode
-                    | DR.SPS_128.sps
-                    | COMP_MODE.TRAD_COMP.compMode
-                    | COMP_POL.ACTIVE_LOW.compPol
-                    | COMP_LAT.NON_LATCH.latching
-                    | COMP_QUE.DISABLE_COMP.compQue;
+    private int CONFIG_REGISTER_TEMPLATE;
 
 
     /**
@@ -811,11 +815,23 @@ public class ADS1115 extends Component{
      * @param address Custom device address on I2C
      */
     public ADS1115(Context pi4j, int bus, GAIN gain, ADDRESS address) {
-        this.deviceId = "ADS1115";
-        this.samplingRate = DR.SPS_128.getSpS();
         this.context = pi4j;
+
+        //write default configuration
+        this.os = OS.WRITE_START.getOs();
+        //mux will be set in function
+        this.pga = gain;
+        //mode will be set in function
+        this.dr = DR.SPS_128.getSpS();
+        this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
+        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
+        this.compLat = COMP_LAT.NON_LATCH.getLatching();
+        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
+        createTemplateConfiguration();
+
+        //i2c parameter
+        this.deviceId = "ADS1115";
         this.i2cBus = bus;
-        this.gain = gain;
         this.address = address;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress()));
     }
@@ -827,13 +843,28 @@ public class ADS1115 extends Component{
      * @param pi4j Pi4J context
      */
     public ADS1115(Context pi4j) {
-        this.deviceId = "ADS1115";
-        this.samplingRate = DR.SPS_128.getSpS();
+
         this.context = pi4j;
+
+        //write default configuration
+        this.os = OS.WRITE_START.getOs();
+        //mux will be set in function
+        this.pga = GAIN.GAIN_4_096V;
+        //mode will be set in function
+        this.dr = DR.SPS_128.getSpS();
+        this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
+        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
+        this.compLat = COMP_LAT.NON_LATCH.getLatching();
+        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
+        createTemplateConfiguration();
+
+        //i2c parameter
+        this.deviceId = "ADS1115";
         this.i2cBus = i2cDefaultBus;
-        this.gain = GAIN.GAIN_4_096V;
         this.address = ADDRESS.GND;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress()));
+
+
     }
 
     /**
@@ -868,8 +899,8 @@ public class ADS1115 extends Component{
      *
      * @return GAIN object
      */
-    public GAIN getGain() {
-        return gain;
+    public GAIN getPga() {
+        return pga;
     }
 
     /**
@@ -878,7 +909,7 @@ public class ADS1115 extends Component{
      * @return double voltage
      */
     public double singleShotAIn0() {
-        return gain.gainPerBit * readSingleShot(calculateConfig(MUX.AIN0_GND.mux));
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -887,7 +918,7 @@ public class ADS1115 extends Component{
      * @return double voltage
      */
     public double singleShotAIn1() {
-        return gain.gainPerBit * readSingleShot(calculateConfig(MUX.AIN1_GND.mux));
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -896,7 +927,7 @@ public class ADS1115 extends Component{
      * @return double voltage
      */
     public double singleShotAIn2() {
-        return gain.gainPerBit * readSingleShot(calculateConfig(MUX.AIN2_GND.mux));
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -905,7 +936,7 @@ public class ADS1115 extends Component{
      * @return double voltage
      */
     public double singleShotAIn3() {
-        return gain.gainPerBit * readSingleShot(calculateConfig(MUX.AIN3_GND.mux));
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -916,18 +947,23 @@ public class ADS1115 extends Component{
      */
     private int readSingleShot(int config) {
         writeConfigRegister(config);
-        try {
-            Thread.sleep(15);
-        } catch (InterruptedException e) {
-            logInfo("Error: " + e);
-        }
+
         int result = i2c.readRegisterWord(CONVERSION_REGISTER);
         logInfo("readIn: " + config + ", raw " + result);
         return result;
     }
 
-    private void readContiniousValue(int config, double threshold, int readFrequency) {
-        if (1/readFrequency * 2 < samplingRate){
+    /**
+     * Sends configuration for continious reading to device, updates actual value from analog input
+     * and triggers valueChange event
+     *
+     * @param config Configuration for config register
+     * @param threshold threshold for trigger new value change event
+     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
+     *                      sampling rate of device
+     */
+    private void readContiniousValue(int config, int threshold, int readFrequency) {
+        if (1/readFrequency * 2 < dr){
             logInfo("Start continious reading");
             //set configuration
             writeConfigRegister(config);
@@ -937,22 +973,22 @@ public class ADS1115 extends Component{
                 while (continiousReadingActive) {
                     int result = readConversionRegister();
                     logInfo("Current value: " + result);
-                    if(oldValue.get()*(1-threshold) > result || oldValue.get()*(1+threshold) < result){
-                        oldValue = actualValue;
-                        actualValue.set(result);
-                        onValueChange.run();
+                    if(oldValue.get()-threshold > result || oldValue.get()+threshold < result){
                         logInfo("New event triggered on value change, old value: "
                                 + oldValue.get()
                                 +" , new value: "
-                                + actualValue.get());
+                                + result);
+                        oldValue = actualValue;
+                        actualValue.set(result);
+                        onValueChange.run();
                     }
                     try {
-                        Thread.sleep(readFrequency);
+                        Thread.sleep(readFrequency*1000);
                     } catch (InterruptedException e) {
                         logError("Error: " + e);
                     }
                 }
-            });
+            }).start();
         }else{
             logError("readFrequency to high, Nyquist rate");
         }
@@ -961,9 +997,9 @@ public class ADS1115 extends Component{
     /**
      * start continuous reading
      */
-    public void startContiniousReading(int config, double threshold, int readFrequenzy){
+    public void startContiniousReading(MUX mux, int threshold, int readFrequenzy){
         continiousReadingActive = true;
-        readContiniousValue(config, threshold, readFrequenzy);
+        readContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequenzy);
 
 
     }
@@ -971,9 +1007,10 @@ public class ADS1115 extends Component{
      * stops continious reading
      */
     public void stopContiniousReading(){
-
+        logInfo("Stop continious reading");
         continiousReadingActive = false;
-        // TODO: 12.05.22 stop conitnious reading with configuration
+        // write single shot configuration to stop reading process in device
+        writeConfigRegister(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -982,7 +1019,14 @@ public class ADS1115 extends Component{
      * @param config custom configuration
      */
     public void writeConfigRegister(int config) {
+       logInfo("start write configuration");
         i2c.writeRegisterWord(CONFIG_REGISTER, config);
+        try {
+            Thread.sleep(15);
+        } catch (InterruptedException e) {
+            logInfo("Error: " + e);
+        }
+        readConfigRegister();
     }
 
     /**
@@ -1108,12 +1152,18 @@ public class ADS1115 extends Component{
 
     /**
      * Setup configuration for config register
-     *
-     * @param mux input multiplexer configuration
-     * @return Configuration for config register
      */
-    private int calculateConfig(int mux) {
-        return CONFIG_REGISTER_TEMPLATE | gain.gain | mux;
+    private void createTemplateConfiguration(){
+        CONFIG_REGISTER_TEMPLATE = os | pga.gain | dr | compMode | compPol | compLat | compQue;
+    }
+
+    /**
+     * Returns voltage value from continious reading
+     *
+     * @return voltage value
+     */
+    public double continiousReadAI(){
+        return pga.gainPerBit()*actualValue.get();
     }
 
     /**
@@ -1124,7 +1174,6 @@ public class ADS1115 extends Component{
      * @param device I2C Device address
      * @return I2C configuration
      */
-    // TODO: 01.05.22 does this has to be static? otherwise variable could be used for name
     private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
         return I2C.newConfigBuilder(pi4j)
                 .id("I2C-" + device + "@" + bus)

@@ -15,7 +15,7 @@ public class ADS1115_App implements Application {
         logInfo("Create ADS1115 object");
         ADS1115 adc = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND);
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 50; i++) {
             double aIn0 = adc.singleShotAIn0();
             double aIn1 = adc.singleShotAIn1();
             double aIn2 = adc.singleShotAIn2();
