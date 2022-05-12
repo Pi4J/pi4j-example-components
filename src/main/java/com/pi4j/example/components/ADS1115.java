@@ -33,7 +33,6 @@ public class ADS1115 extends Component {
     /**
      * device address
      */
-    // TODO: 01.05.22 is adress stored in enum? 
     private final ADDRESS address;
 
     /**
@@ -703,7 +702,7 @@ public class ADS1115 extends Component {
         this.i2cBus = bus;
         this.gain = gain;
         this.address = address;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress()));
+        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), deviceId));
     }
 
     /**
@@ -814,11 +813,10 @@ public class ADS1115 extends Component {
      * @param device I2C Device address
      * @return I2C configuration
      */
-    // TODO: 01.05.22 does this has to be static? otherwise variable could be used for name
-    private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
+    private I2CConfig buildI2CConfig(Context pi4j, int bus, int device, String name) {
         return I2C.newConfigBuilder(pi4j)
                 .id("I2C-" + device + "@" + bus)
-                .name("AD Converter")
+                .name(name)
                 .bus(bus)
                 .device(device)
                 .build();

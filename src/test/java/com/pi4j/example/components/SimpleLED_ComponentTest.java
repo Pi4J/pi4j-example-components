@@ -1,6 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.example.ComponentTest;
+import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalState;
 import org.junit.jupiter.api.BeforeEach;
