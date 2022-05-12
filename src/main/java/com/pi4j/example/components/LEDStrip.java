@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class LEDStrip extends Component{
     protected final Spi spi;
-
+    protected final Context context;
     /**
      * Default SPI channel for the LED matrix on the CrowPi
      */
@@ -59,6 +59,7 @@ public class LEDStrip extends Component{
         this.leds = new int[numLeds];
         this.gamma = new byte[256];
         this.brightness = brightness;
+        this.context = pi4j;
 
         // Set default uncorrected gamma table
         for (int x = 0; x < 256; x++) {
@@ -91,6 +92,10 @@ public class LEDStrip extends Component{
                 .build();
     }
 
+    /**
+     * @return the pi4j context
+     */
+    public Context getContext(){return this.context;}
 
     public void close() {
         logger.info("Turning all leds off before close");
