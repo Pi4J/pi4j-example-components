@@ -4,6 +4,8 @@ import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class ADS1115 extends Component{
     /**
      * i2c component
@@ -49,7 +51,11 @@ public class ADS1115 extends Component{
     /**
      * actual value form conversion register
      */
-    private int actualValue = 0;
+    private AtomicInteger actualValue = new AtomicInteger(0);
+    /**
+     * old value from last successful read of conversion register
+     */
+    private AtomicInteger oldValue = new AtomicInteger(0);
 
     /**
      * continious reading acitve
@@ -920,31 +926,44 @@ public class ADS1115 extends Component{
         return result;
     }
 
-    private void readContiniousValue(int config, int readFrequency) {
-        // TODO: 11.05.22 niquist error
-        //set configuration
-        writeConfigRegister(config);
+    private void readContiniousValue(int config, double threshold, int readFrequency) {
+        if (1/readFrequency * 2 < samplingRate){
+            logInfo("Start continious reading");
+            //set configuration
+            writeConfigRegister(config);
 
-        //start new thread for continuous reading
-        new Thread(() -> {
-            while (continiousReadingActive) {
-                actualValue = readConversionRegister();
-                try {
-                    Thread.sleep(readFrequency);
-                } catch (InterruptedException e) {
-                    logError("Error: " + e);
+            //start new thread for continuous reading
+            new Thread(() -> {
+                while (continiousReadingActive) {
+                    int result = readConversionRegister();
+                    logInfo("Current value: " + result);
+                    if(oldValue.get()*(1-threshold) > result || oldValue.get()*(1+threshold) < result){
+                        oldValue = actualValue;
+                        actualValue.set(result);
+                        onValueChange.run();
+                        logInfo("New event triggered on value change, old value: " 
+                                + oldValue.get() 
+                                +" , new value: " 
+                                + actualValue.get());
+                    }
+                    try {
+                        Thread.sleep(readFrequency);
+                    } catch (InterruptedException e) {
+                        logError("Error: " + e);
+                    }
                 }
-            }
-        });
-
+            });
+        }else{
+            logError("readFrequency to high, Nyquist rate");
+        }
     }
 
     /**
      * start continuous reading
      */
-    public void startContiniousReading(int config, int readFrequenzy){
+    public void startContiniousReading(int config, double threshold, int readFrequenzy){
         continiousReadingActive = true;
-        readContiniousValue(config, readFrequenzy);
+        readContiniousValue(config, threshold, readFrequenzy);
 
 
     }
@@ -952,7 +971,9 @@ public class ADS1115 extends Component{
      * stops continious reading
      */
     public void stopContiniousReading(){
+        
         continiousReadingActive = false;
+        // TODO: 12.05.22 stop conitnious reading with configuration
     }
 
     /**

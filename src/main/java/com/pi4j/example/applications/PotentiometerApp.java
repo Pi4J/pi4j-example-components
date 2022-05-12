@@ -23,8 +23,8 @@ public class PotentiometerApp implements Application {
      */
     private static final int CONFIG_REGISTER_CONTINIOUS_READING =
             ADS1115.OS.WRITE_START.getOs()
-                    | ADS1115.MUX.AIN0_AIN1.getMux()
-                    | ADS1115.PGA.FSR_6_144.getPga()
+                    | ADS1115.MUX.AIN0_GND.getMux()
+                    | ADS1115.PGA.FSR_4_096.getPga()
                     | ADS1115.MODE.CONTINUOUS.getMode()
                     | ADS1115.DR.SPS_128.getSpS()
                     | ADS1115.COMP_MODE.TRAD_COMP.getCompMode()
@@ -47,8 +47,8 @@ public class PotentiometerApp implements Application {
      */
     private static final int CONFIG_REGISTER_SINGLE_SHOT =
             ADS1115.OS.WRITE_START.getOs()
-                    | ADS1115.MUX.AIN0_AIN1.getMux()
-                    | ADS1115.PGA.FSR_6_144.getPga()
+                    | ADS1115.MUX.AIN0_GND.getMux()
+                    | ADS1115.PGA.FSR_4_096.getPga()
                     | ADS1115.MODE.SINGLE.getMode()
                     | ADS1115.DR.SPS_128.getSpS()
                     | ADS1115.COMP_MODE.TRAD_COMP.getCompMode()
@@ -60,17 +60,28 @@ public class PotentiometerApp implements Application {
     public void execute(Context pi4j) {
         System.out.println("create ads instance");
         ADS1115 ads1115 = new ADS1115(pi4j);
-        System.out.println("write configuration");
-        ads1115.writeConfigRegister(CONFIG_REGISTER_SINGLE_SHOT);
-        System.out.println("start reading conversion register");
-        for (int i = 0; i < 10; i++){
-            System.out.println(ads1115.readConversionRegister());
-            System.out.println(ads1115.readConfigRegister());
-            try {
-                sleep(1000);
-            } catch (InterruptedException e) {
-                logError("Error: " + e);
-            }
+//        System.out.println("write configuration");
+//        ads1115.writeConfigRegister(CONFIG_REGISTER_SINGLE_SHOT);
+//        System.out.println("start reading conversion register");
+//        for (int i = 0; i < 10; i++){
+//            System.out.println(ads1115.readConversionRegister());
+//            System.out.println(ads1115.readConfigRegister());
+//            try {
+//                sleep(1000);
+//            } catch (InterruptedException e) {
+//                logError("Error: " + e);
+//            }
+//        }
+        System.out.println("set onValueChange");
+        ads1115.setOnValueChange(()->System.out.println("neuer Wert von AD Wandler"));
+        ads1115.startContiniousReading(CONFIG_REGISTER_CONTINIOUS_READING, 0.1, 2);
+        try {
+            sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+        ads1115.stopContiniousReading();
+        ads1115.writeConfigRegister(CONFIG_REGISTER_SINGLE_SHOT);
+
     }
 }
