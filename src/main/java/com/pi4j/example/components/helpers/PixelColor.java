@@ -1,27 +1,27 @@
 package com.pi4j.example.components.helpers;
 
 public class PixelColor {
-    public static final int WHITE			= 0x20202020;
-    public static final int RED				= 0x00200000;
-    public static final int ORANGE			= 0x00201000;
-    public static final int YELLOW			= 0x00202000;
-    public static final int GREEN			= 0x00002000;
-    public static final int LIGHT_BLUE		= 0x00002020;
-    public static final int BLUE			= 0x00000020;
-    public static final int PURPLE			= 0x00100010;
-    public static final int PINK			= 0x00200010;
+    public static final int WHITE			= 0xFFFFFF;
+    public static final int RED				= 0xFF0000;
+    public static final int ORANGE			= 0xFFA500;
+    public static final int YELLOW			= 0xFFFF00;
+    public static final int GREEN			= 0x00FF00;
+    public static final int LIGHT_BLUE		= 0xadd8e6;
+    public static final int BLUE			= 0x0000FF;
+    public static final int PURPLE			= 0x800080;
+    public static final int PINK			= 0xFFC0CB;
 
     public static final int[] RAINBOW = { PixelColor.RED, PixelColor.ORANGE, PixelColor.YELLOW, PixelColor.GREEN,
             PixelColor.LIGHT_BLUE, PixelColor.BLUE, PixelColor.PURPLE, PixelColor.PINK };
 
-    private static final int WHITE_MASK		= 0x00ffffff;
-    private static final int RED_MASK		= 0x00ff0000;
-    private static final int GREEN_MASK		= 0x0000ff00;
-    private static final int BLUE_MASK		= 0x000000ff;
+    private static final int WHITE_MASK		= 0xffffff;
+    private static final int RED_MASK		= 0xff0000;
+    private static final int GREEN_MASK		= 0x00ff00;
+    private static final int BLUE_MASK		= 0x0000ff;
 
-    private static final int RED_OFF_MASK	= 0x0000ffff;
-    private static final int GREEN_OFF_MASK	= 0x00ff00ff;
-    private static final int BLUE_OFF_MASK	= 0x00ffff00;
+    private static final int RED_OFF_MASK	= 0x00ffff;
+    private static final int GREEN_OFF_MASK	= 0xff00ff;
+    private static final int BLUE_OFF_MASK	= 0xffff00;
 
     public static final int Color_COMPONENT_MAX = 0xff;
 
