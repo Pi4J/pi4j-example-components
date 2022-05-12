@@ -14,6 +14,8 @@ public abstract class Component {
     protected void logError(String msg){
         logger.severe(() -> msg);
     }
+    protected void logConfig(String msg) {logger.config(()-> msg);}
+    private void logDebug(String msg) {logger.fine(() -> msg);}
 
     /**
      * Utility function to sleep for the specified amount of milliseconds.

@@ -6,7 +6,7 @@ import com.pi4j.io.i2c.I2CConfig;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ADS1115 extends Component{
+public class ADS1115 extends Component {
     /**
      * i2c component
      */
@@ -87,6 +87,11 @@ public class ADS1115 extends Component{
     protected boolean continiousReadingActive;
 
     /**
+     * Wait for response after sending a new configuration to the device
+     */
+    private int delayResponseTime = 15;
+
+    /**
      * The Conversion register contains the result of the last conversion.
      */
     private static final int CONVERSION_REGISTER = 0x00;
@@ -106,7 +111,7 @@ public class ADS1115 extends Component{
     /**
      * Runnable code when current value is changed
      */
-    private Runnable onValueChange;
+    private Runnable runnable;
 
     /**
      * Config register default configuration
@@ -904,6 +909,13 @@ public class ADS1115 extends Component{
     }
 
     /**
+     * Retrun sampling rate from device
+     *
+     * @return samplingrate
+     */
+    public int getSamplingRate(){return dr;}
+
+    /**
      * Returns voltage value from AIn0
      *
      * @return double voltage
@@ -957,13 +969,13 @@ public class ADS1115 extends Component{
      * Sends configuration for continious reading to device, updates actual value from analog input
      * and triggers valueChange event
      *
-     * @param config Configuration for config register
-     * @param threshold threshold for trigger new value change event
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      sampling rate of device
+     * @param config        Configuration for config register
+     * @param threshold     threshold for trigger new value change event
+     * @param readFrequency read frequency to get new value from device, must be lower than
+     *                      the sampling rate of the device
      */
     private void readContiniousValue(int config, int threshold, int readFrequency) {
-        if (1/readFrequency * 2 < dr){
+        if (readFrequency < dr) {
             logInfo("Start continious reading");
             //set configuration
             writeConfigRegister(config);
@@ -973,40 +985,46 @@ public class ADS1115 extends Component{
                 while (continiousReadingActive) {
                     int result = readConversionRegister();
                     logInfo("Current value: " + result);
-                    if(oldValue.get()-threshold > result || oldValue.get()+threshold < result){
+                    if (oldValue.get() - threshold > result || oldValue.get() + threshold < result) {
                         logInfo("New event triggered on value change, old value: "
                                 + oldValue.get()
-                                +" , new value: "
+                                + " , new value: "
                                 + result);
                         oldValue = actualValue;
                         actualValue.set(result);
-                        onValueChange.run();
+                        runnable.run();
                     }
                     try {
-                        Thread.sleep(readFrequency*1000);
+                        Thread.sleep(1/readFrequency * 1000);
                     } catch (InterruptedException e) {
                         logError("Error: " + e);
                     }
                 }
             }).start();
-        }else{
-            logError("readFrequency to high, Nyquist rate");
+        } else {
+            logError("readFrequency to high");
         }
     }
 
     /**
      * start continuous reading
+     *
+     * @param mux           Input multiplexer configuration
+     * @param threshold     threshold for trigger new value change event (+- digit)
+     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
+     *                      sampling rate of device
      */
-    public void startContiniousReading(MUX mux, int threshold, int readFrequenzy){
+    public void startContiniousReading(MUX mux, int threshold, int readFrequency) {
         continiousReadingActive = true;
-        readContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequenzy);
+        readContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
 
 
     }
+
     /**
      * stops continious reading
      */
-    public void stopContiniousReading(){
+    public void stopContiniousReading() {
         logInfo("Stop continious reading");
         continiousReadingActive = false;
         // write single shot configuration to stop reading process in device
@@ -1019,13 +1037,11 @@ public class ADS1115 extends Component{
      * @param config custom configuration
      */
     public void writeConfigRegister(int config) {
-       logInfo("start write configuration");
+        logInfo("start write configuration");
         i2c.writeRegisterWord(CONFIG_REGISTER, config);
-        try {
-            Thread.sleep(15);
-        } catch (InterruptedException e) {
-            logInfo("Error: " + e);
-        }
+        //wait until ad converter has stored new value in conversion register
+        delay(2/dr);
+
         readConfigRegister();
     }
 
@@ -1106,7 +1122,7 @@ public class ADS1115 extends Component{
         //check comp que
         debugInfo.append(compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()]);
 
-        logger.info(debugInfo.toString());
+        logger.config(debugInfo.toString());
 
         return result;
     }
@@ -1146,14 +1162,14 @@ public class ADS1115 extends Component{
      *
      * @param method Event handler to call or null to disable
      */
-    public void setOnValueChange(Runnable method) {
-        this.onValueChange = method;
+    public void setRunnable(Runnable method) {
+        this.runnable = method;
     }
 
     /**
      * Setup configuration for config register
      */
-    private void createTemplateConfiguration(){
+    private void createTemplateConfiguration() {
         CONFIG_REGISTER_TEMPLATE = os | pga.gain | dr | compMode | compPol | compLat | compQue;
     }
 
@@ -1162,8 +1178,8 @@ public class ADS1115 extends Component{
      *
      * @return voltage value
      */
-    public double continiousReadAI(){
-        return pga.gainPerBit()*actualValue.get();
+    public double continiousReadAI() {
+        return pga.gainPerBit() * actualValue.get();
     }
 
     /**
