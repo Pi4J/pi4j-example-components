@@ -941,9 +941,9 @@ public class ADS1115 extends Component{
                         oldValue = actualValue;
                         actualValue.set(result);
                         onValueChange.run();
-                        logInfo("New event triggered on value change, old value: " 
-                                + oldValue.get() 
-                                +" , new value: " 
+                        logInfo("New event triggered on value change, old value: "
+                                + oldValue.get()
+                                +" , new value: "
                                 + actualValue.get());
                     }
                     try {
@@ -971,7 +971,7 @@ public class ADS1115 extends Component{
      * stops continious reading
      */
     public void stopContiniousReading(){
-        
+
         continiousReadingActive = false;
         // TODO: 12.05.22 stop conitnious reading with configuration
     }
