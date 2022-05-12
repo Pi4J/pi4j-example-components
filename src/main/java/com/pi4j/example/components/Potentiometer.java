@@ -45,12 +45,11 @@ public class Potentiometer extends Component{
     /**
      * Create a new potentiometer component with custom mux and custom maxVoltage
      *
-     * @param pi4j Pi4J context
      * @param mux custom mux
      * @param maxVoltage custom maxVoltage
      */
-    public Potentiometer(Context pi4j, ADS1115.MUX mux, double maxVoltage){
-        this.ads1115 = new ADS1115(pi4j);
+    public Potentiometer(ADS1115 ads1115, ADS1115.MUX mux, double maxVoltage){
+        this.ads1115 = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = maxVoltage;
         this.mux = mux;
@@ -61,8 +60,8 @@ public class Potentiometer extends Component{
      *
      * @param pij4 Pi4J context
      */
-    public Potentiometer(Context pij4){
-        this.ads1115 = new ADS1115(pij4);
+    public Potentiometer(ADS1115 ads1115){
+        this.ads1115 = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = 3.3;
         this.mux = ADS1115.MUX.AIN0_GND;

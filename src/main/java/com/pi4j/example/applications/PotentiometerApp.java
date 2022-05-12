@@ -12,7 +12,10 @@ public class PotentiometerApp implements Application {
     @Override
     public void execute(Context pi4j) {
         logInfo("Potentiometer test started ...");
-        Potentiometer poti = new Potentiometer(pi4j, ADS1115.MUX.AIN0_GND, 3.3);
+
+        ADS1115 ads1115 = new ADS1115(pi4j);
+
+        Potentiometer poti = new Potentiometer(ads1115, ADS1115.MUX.AIN0_GND, 3.3);
 
         //read current value from poti one time
         logInfo("Current value of the poti is " + poti.getVoltage() + " voltage.");
