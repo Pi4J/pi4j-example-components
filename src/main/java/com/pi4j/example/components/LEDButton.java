@@ -149,10 +149,25 @@ public class LEDButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void btnwhilePressed(long millis, Runnable method) {button.whilePressed(method, millis); }
+    public void btnwhilePressed(Runnable method, long millis) {button.whilePressed(method, millis); }
 
     /**
      * disables all the handlers for the onUp, onDown and WhilePressed Events
      */
     public void btndeRegisterAll(){ button.deRegisterAll(); }
+
+    /**
+     * @return the current Runnable that is set
+     */
+    public Runnable btnGetOnUp(){return button.getOnUp();}
+
+    /**
+     * @return the current Runnable that is set
+     */
+    public Runnable btnGetOnDown(){return button.getOnDown();}
+
+    /**
+     * @return the current Runnable that is set
+     */
+    public Runnable btnGetWhilePressed(){return button.getWhilePressed();}
 }
