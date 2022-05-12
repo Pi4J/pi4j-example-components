@@ -14,9 +14,10 @@ public class SimpleButton_App implements Application {
 
     @Override
     public void execute(Context pi4j) {
+        logInfo("Simple button  app started ...");
+
         // Initialize the button component
         final var button = new SimpleButton(pi4j, PIN.D26, Boolean.FALSE);
-
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
         button.onDown      (() -> logInfo("Pressing the button"));
@@ -34,5 +35,7 @@ public class SimpleButton_App implements Application {
         if you want to deRegister only a single function, you can do so like this:
         button.onUp(null);
         */
+
+        logInfo("Simple button app done.");
     }
 }

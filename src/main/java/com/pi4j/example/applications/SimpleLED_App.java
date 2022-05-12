@@ -12,23 +12,28 @@ import com.pi4j.example.components.SimpleLED;
 public class SimpleLED_App implements Application {
     @Override
     public void execute(Context pi4j) {
+        logInfo("Simple LED app started ...");
+
         // Create a new SimpleLED component
         SimpleLED led = new SimpleLED(pi4j, PIN.D26);
 
         // Turn on the LED to have a defined state
+        logInfo("Turn on LED.");
         led.setStateOn();
         delay(1000);
 
         // Make a flashing light by toggling the LED every second
         for (int i = 0; i < 10; i++) {
-            System.out.println(led.toggleState());
+            logInfo("Current LED state is " + led.toggleState() +".");
             delay(1000);
         }
 
         // That's all so turn off the relay and quit
         led.setStateOff();
-        System.out.println("off");
+        logInfo("Turn off LED.");
         delay(2000);
+
+        logInfo("Simple LED app done.");
     }
 }
 

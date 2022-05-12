@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Implementation of a joystick using 5 GPIO up, left, down, right and push  with Pi4J
  */
-public class Joystick {
+public class Joystick extends Component{
 
     /**
      * Default debounce time in microseconds
@@ -54,7 +54,7 @@ public class Joystick {
      * @param addrEast  GPIO address of button right
      * @param addrPush  GPIO address of button push
      */
-    public Joystick (Context pi4j, PIN addrNorth, PIN addrWest, PIN addrSouth, PIN addrEast, PIN addrPush){
+    public Joystick (Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest, PIN addrPush){
         bNorth = new SimpleButton(pi4j, addrNorth, false, DEFAULT_DEBOUNCE);
         bWest  = new SimpleButton(pi4j, addrWest,  false, DEFAULT_DEBOUNCE);
         bSouth = new SimpleButton(pi4j, addrSouth, false, DEFAULT_DEBOUNCE);
@@ -73,7 +73,7 @@ public class Joystick {
      * @param addrSouth  GPIO address of button down
      * @param addrEast  GPIO address of button right
      */
-    public Joystick (Context pi4j, PIN addrNorth, PIN addrWest, PIN addrSouth, PIN addrEast){
+    public Joystick (Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest){
         bNorth = new SimpleButton(pi4j, addrNorth, false, DEFAULT_DEBOUNCE);
         bWest = new SimpleButton(pi4j,  addrWest,  false, DEFAULT_DEBOUNCE);
         bSouth = new SimpleButton(pi4j, addrSouth, false, DEFAULT_DEBOUNCE);
@@ -93,9 +93,9 @@ public class Joystick {
         List<DigitalState> buttonStates = new ArrayList<>();
 
         buttonStates.add(bNorth.getState());
-        buttonStates.add(bWest.getState());
-        buttonStates.add(bSouth.getState());
         buttonStates.add(bEast.getState());
+        buttonStates.add(bSouth.getState());
+        buttonStates.add(bWest.getState());
         //only if joystick has a push button
         if (pushIsPresent){
             buttonStates.add(bPush.getState());
@@ -314,6 +314,9 @@ public class Joystick {
     public void onPushDown(Runnable handler) {
         if (pushIsPresent){
             bPush.onDown(handler);}
+        else{
+            logError("No runnable on pushDown");
+        }
     }
     /**
      * Sets or disables the handler for the onUp event.
@@ -323,7 +326,11 @@ public class Joystick {
      * @param method Event handler to call or null to disable
      */
     public void onPushUp(Runnable method) {
-        bPush.onUp(method);
+        if (pushIsPresent){
+            bPush.onUp(method);
+        }else{
+            logError("No runnable on pushUp.");
+        }
     }
     /**
      * Sets or disables the handler for the whilePressed event.
@@ -332,8 +339,13 @@ public class Joystick {
      *
      * @param method Event handler to call or null to disable
      */
-    public void buttonPushwhilePressed(long millis, Runnable method) {
-        bPush.whilePressed(method, millis);
+    public void pushWhilePushed(long millis, Runnable method) {
+        if(pushIsPresent){
+            bPush.whilePressed(method, millis);
+        }else{
+            logError("No runnable on buttonPushWhilePressed.");
+        }
+
     }
 
     /**
@@ -370,7 +382,7 @@ public class Joystick {
      * @return Returns the Pi4J DigitalInput associated with this component.
      */
     public DigitalInput getDigitalInputButtonPush(){
-        return pushIsPresent ? bNorth.getDigitalInput() : null;
+        return pushIsPresent ? bPush.getDigitalInput() : null;
     }
 
     /**
@@ -382,5 +394,85 @@ public class Joystick {
         bWest.deRegisterAll();
         bSouth.deRegisterAll();
         bEast.deRegisterAll();
+    }
+
+    /**
+     * Returns the methode for OnDown
+     * @return Runnable onDown
+     */
+    public Runnable getOnNorth(){
+        return bNorth.getOnDown();
+    }
+
+    /**
+     * Returns the methode for OnDown
+     * @return Runnable onDown
+     */
+    public Runnable getOnEast(){
+        return bEast.getOnDown();
+    }
+
+    /**
+     * Returns the methode for OnDown
+     * @return Runnable onDown
+     */
+    public Runnable getOnSouth(){
+        return bSouth.getOnDown();
+    }
+
+    /**
+     * Returns the methode for OnDown
+     * @return Runnable onDown
+     */
+    public Runnable getOnWest(){
+        return bWest.getOnDown();
+    }
+
+    /**
+     * Returns the methode for OnDown
+     * @return Runnable onDown
+     */
+    public Runnable getOnPush(){
+        return pushIsPresent? bPush.getOnDown() : null;
+    }
+
+    /**
+     * Returns the methode for whilePressed
+     * @return Runnable whilePressed
+     */
+    public Runnable getWhileNorth(){
+        return bNorth.getWhilePressed();
+    }
+
+    /**
+     * Returns the methode for whilePressed
+     * @return Runnable whilePressed
+     */
+    public Runnable getWhileEast(){
+        return bEast.getWhilePressed();
+    }
+
+    /**
+     * Returns the methode for whilePressed
+     * @return Runnable whilePressed
+     */
+    public Runnable getWhileSouth(){
+        return bSouth.getWhilePressed();
+    }
+
+    /**
+     * Returns the methode for whilePressed
+     * @return Runnable whilePressed
+     */
+    public Runnable getWhileWest(){
+        return bWest.getWhilePressed();
+    }
+
+    /**
+     * Returns the methode for whilePressed
+     * @return Runnable whilePressed
+     */
+    public Runnable getWhilePush(){
+        return pushIsPresent? bPush.getWhilePressed() : null;
     }
 }
