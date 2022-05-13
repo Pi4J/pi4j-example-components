@@ -1,7 +1,5 @@
 package com.pi4j.example.components;
 
-import com.pi4j.context.Context;
-
 public class Potentiometer extends Component {
     /**
      * ads1115 instance
@@ -38,9 +36,19 @@ public class Potentiometer extends Component {
      */
     private double oldValue;
     /**
-     * value from current read
+     * voltage value from current read
      */
     private double actualValue;
+
+    /**
+     * fast continuous reading is active
+     */
+    private boolean fastContiniousReadingActive = false;
+
+    /**
+     * slow continious reading is active
+     */
+    private boolean slowContiniousReadingActive = false;
 
     /**
      * Create a new potentiometer component with custom mux and custom maxVoltage
@@ -73,7 +81,7 @@ public class Potentiometer extends Component {
      *
      * @return voltage from potentiometer
      */
-    public Double getVoltage() {
+    public double singleShotGetVoltage() {
         double result = 0.0;
         if (mux == ADS1115.MUX.AIN0_GND) {
             result = ads1115.singleShotAIn0();
@@ -90,26 +98,34 @@ public class Potentiometer extends Component {
         } else if (result > maxValue) {
             maxValue = result;
         }
-
         return result;
     }
 
     /**
-     * Returns actual position of potentiometer by value from 0 to 100 %
+     * Returns normalized value from 0 to 100
      *
-     * @return position in %
+     * @return normalized value
      */
-    public Double getPercent() {
-        return getVoltage() / maxValue;
+    public double singleShotGetNormalizedValue() {
+        return singleShotGetVoltage() / maxValue;
     }
 
     /**
-     * Returns actual value from continious reading
+     * Returns actual voltage value from continious reading
      *
-     * @return actual value
+     * @return actual voltage value
      */
-    public Double getActualValue() {
+    public double continiousReadingGetVoltage() {
         return actualValue;
+    }
+
+    /**
+     * Returns actual normalized value form 0 to 100 from continious reading
+     *
+     * @return normalized value
+     */
+    public double continiousReadingGetNormalizedValue() {
+        return actualValue / maxValue;
     }
 
     /**
@@ -138,19 +154,15 @@ public class Potentiometer extends Component {
             //start new thread for continuous reading
             new Thread(() -> {
                 while (continiousReadingActive) {
-                    double result = getVoltage();
-                    logInfo("Current value: " + result);
+                    double result = singleShotGetVoltage();
+                    //logInfo("Current value: " + result);
                     if (oldValue - threshold > result || oldValue + threshold < result) {
-                        logInfo("New event triggered on value change, old value: " + oldValue + " , new value: " + result);
+                        //logInfo("New event triggered on value change, old value: " + oldValue + " , new value: " + result);
                         oldValue = actualValue;
                         actualValue = result;
                         runnable.run();
                     }
-                    try {
-                        Thread.sleep(1 / readFrequency * 1000);
-                    } catch (InterruptedException e) {
-                        logError("Error: " + e);
-                    }
+                    delay((long) Math.ceil(1000.0 / readFrequency));
                 }
             }).start();
         } else {
@@ -178,15 +190,23 @@ public class Potentiometer extends Component {
      *                      sampling rate of device
      */
     public void startSlowContiniousReading(double threshold, int readFrequency) {
-        continiousReadingActive = true;
-        readContiniousValue(threshold, readFrequency);
+        if (fastContiniousReadingActive) {
+            logDebug("fast continious reading currently active");
+        } else {
+            //set slow continuous reading active to lock fast continious reading
+            slowContiniousReadingActive = true;
+            continiousReadingActive = true;
+            readContiniousValue(threshold, readFrequency);
+        }
     }
+
 
     /**
      * stops slow continious reading
      */
     public void stopSlowContiniousReading() {
         logInfo("Stop continious reading");
+        slowContiniousReadingActive = false;
         continiousReadingActive = false;
     }
 
@@ -199,15 +219,40 @@ public class Potentiometer extends Component {
      *                      sampling rate of the device
      */
     public void startFastContiniousReading(int threshold, int readFrequency) {
-        ads1115.startContiniousReading(mux, threshold, readFrequency);
+        if (slowContiniousReadingActive) {
+            logDebug("slow continious reading currently active");
+        } else {
+            //set fast continuous reading active to lock slow continious reading
+            fastContiniousReadingActive = true;
+            //set continious reading active to lock single shot reading
+            continiousReadingActive = true;
+            //set runnable code on ads1115 to update actualValue if value change is triggered on ads1115
+            ads1115.setRunnable(() -> {
+                double result = ads1115.continiousReadAI();
+                logInfo("New event triggered on value change, old value: " + oldValue + " , new value: " + result);
+                oldValue = actualValue;
+                actualValue = result;
+                runnable.run();
+            });
+            //start continious reading on ads1115
+            ads1115.startContiniousReading(mux, threshold, readFrequency);
+        }
     }
 
     /**
      * stops fast continious reading
      */
     public void stopFastContiniousReading() {
+        logInfo("Stop fast continious reading");
+        fastContiniousReadingActive = false;
+        continiousReadingActive = false;
+        //set runnable to null
+        ads1115.setRunnable(null);
         ads1115.stopContiniousReading();
     }
 
-
+    public void deregisterAll(){
+        ads1115.setRunnable(null);
+        setRunnable(null);
+    }
 }

@@ -190,4 +190,28 @@ public class SimpleButton extends Component {
         this.onUp = null;
         this.whilePressed = null;
     }
+
+    /**
+     * Returns the methode for OnDown
+     * @return Runnable onDown
+     */
+    public Runnable getOnDown(){
+        return onDown;
+    }
+
+    /**
+     * Returns the methode for OnUp
+     * @return Runnable onUp
+     */
+    public Runnable getOnUp(){
+        return onUp;
+    }
+
+    /**
+     * Returns the methode for whilePressed
+     * @return Runnable whilePressed
+     */
+    public Runnable getWhilePressed(){
+        return whilePressed;
+    }
 }

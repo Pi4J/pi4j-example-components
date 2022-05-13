@@ -50,7 +50,7 @@ public class ADS1115 extends Component {
     /**
      * sampling rate of device
      */
-    private final int dr;
+    private final DR dr;
 
     /**
      * Comparator mode
@@ -73,11 +73,11 @@ public class ADS1115 extends Component {
     private final int compQue;
 
     /**
-     * actual value form conversion register
+     * actual value form conversion register (raw data)
      */
     private AtomicInteger actualValue = new AtomicInteger(0);
     /**
-     * old value from last successful read of conversion register
+     * old value from last successful read of conversion register (raw data)
      */
     private AtomicInteger oldValue = new AtomicInteger(0);
 
@@ -490,44 +490,48 @@ public class ADS1115 extends Component {
         /**
          * 8 sampling per second
          */
-        SPS_8(0b0000_0000_0000_0000),
+        SPS_8(0b0000_0000_0000_0000, 8),
         /**
          * 16 sampling per second
          */
-        SPS_16(0b0000_0000_0010_0000),
+        SPS_16(0b0000_0000_0010_0000, 16),
         /**
          * 32 sampling per second
          */
-        SPS_32(0b0000_0000_0100_0000),
+        SPS_32(0b0000_0000_0100_0000, 32),
         /**
          * 64 sampling per second
          */
-        SPS_64(0b0000_0000_0110_0000),
+        SPS_64(0b0000_0000_0110_0000, 64),
         /**
          * 128 sampling per second
          */
-        SPS_128(0b0000_0000_1000_0000),
+        SPS_128(0b0000_0000_1000_0000, 128),
         /**
          * 250 sampling per second
          */
-        SPS_250(0b0000_0000_1010_0000),
+        SPS_250(0b0000_0000_1010_0000, 250),
         /**
          * 8475sampling per second
          */
-        SPS_475(0b0000_0000_1100_0000),
+        SPS_475(0b0000_0000_1100_0000, 475),
         /**
          * 860 sampling per second
          */
-        SPS_860(0b0000_0000_1110_0000),
+        SPS_860(0b0000_0000_1110_0000, 860),
         /**
          * With an AND operation all other parameters will be set to 0
          */
-        CLR_OTHER_CONF_PARAM(0b0000_0000_1110_0000),
+        CLR_OTHER_CONF_PARAM(0b0000_0000_1110_0000, 0),
         /**
          * With an AND operation the current parameters will be set to 0
          * all other parameters remain unchanged
          */
-        CLR_CURRENT_CONF_PARAM(0b1111_1111_0001_1111);
+        CLR_CURRENT_CONF_PARAM(0b1111_1111_0001_1111, 0);
+        /**
+         * configuration
+         */
+        private final int conf;
         /**
          * sampling per second
          */
@@ -538,20 +542,28 @@ public class ADS1115 extends Component {
          *
          * @param sps sampling rate for configuration
          */
-        DR(int sps) {
+        DR(int conf, int sps) {
+            this.conf = conf;
             this.sps = sps;
         }
 
         /**
-         * Retruns sampling rate for configuration
+         * Retruns sampling rate
          *
-         * @return sampling rate for configuration
+         * @return sampling rate
          */
         public int getSpS() {
             return this.sps;
-        }
+        };
 
-        ;
+        /**
+         * Returns samplingrate for configuration
+         *
+         * @return sampling rate for configuration
+         */
+        public int getConf(){
+            return this.conf;
+        }
     }
 
     /**
@@ -827,7 +839,7 @@ public class ADS1115 extends Component {
         //mux will be set in function
         this.pga = gain;
         //mode will be set in function
-        this.dr = DR.SPS_128.getSpS();
+        this.dr = DR.SPS_128;
         this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
         this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
         this.compLat = COMP_LAT.NON_LATCH.getLatching();
@@ -856,7 +868,7 @@ public class ADS1115 extends Component {
         //mux will be set in function
         this.pga = GAIN.GAIN_4_096V;
         //mode will be set in function
-        this.dr = DR.SPS_128.getSpS();
+        this.dr = DR.SPS_128;
         this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
         this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
         this.compLat = COMP_LAT.NON_LATCH.getLatching();
@@ -914,7 +926,7 @@ public class ADS1115 extends Component {
      * @return samplingrate
      */
     public int getSamplingRate() {
-        return dr;
+        return dr.getSpS();
     }
 
     /**
@@ -963,7 +975,7 @@ public class ADS1115 extends Component {
         writeConfigRegister(config);
 
         int result = i2c.readRegisterWord(CONVERSION_REGISTER);
-        logInfo("readIn: " + config + ", raw " + result);
+        //logInfo("readIn: " + config + ", raw " + result);
         return result;
     }
 
@@ -977,7 +989,7 @@ public class ADS1115 extends Component {
      *                      the sampling rate of the device
      */
     private void readContiniousValue(int config, int threshold, int readFrequency) {
-        if (readFrequency < dr) {
+        if (readFrequency < dr.getSpS()) {
             logInfo("Start continious reading");
             //set configuration
             writeConfigRegister(config);
@@ -986,18 +998,14 @@ public class ADS1115 extends Component {
             new Thread(() -> {
                 while (continiousReadingActive) {
                     int result = readConversionRegister();
-                    logInfo("Current value: " + result);
+                    //logInfo("Current value: " + result);
                     if (oldValue.get() - threshold > result || oldValue.get() + threshold < result) {
-                        logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
+                        //logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
                         oldValue = actualValue;
                         actualValue.set(result);
                         runnable.run();
                     }
-                    try {
-                        Thread.sleep(1 / readFrequency * 1000);
-                    } catch (InterruptedException e) {
-                        logError("Error: " + e);
-                    }
+                    delay(1 / readFrequency * 1000);
                 }
             }).start();
         } else {
@@ -1036,10 +1044,12 @@ public class ADS1115 extends Component {
      * @param config custom configuration
      */
     public void writeConfigRegister(int config) {
-        logInfo("start write configuration");
+        //logInfo("start write configuration");
         i2c.writeRegisterWord(CONFIG_REGISTER, config);
         //wait until ad converter has stored new value in conversion register
-        delay(2 / dr);
+        //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
+        //round value up to wait long enough
+        delay((long)Math.ceil(2000.0/dr.getSpS()));
 
         readConfigRegister();
     }
@@ -1082,7 +1092,7 @@ public class ADS1115 extends Component {
         //check mode
         debugInfo.append(modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8]);
         //check dr
-        debugInfo.append(drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getSpS()) >> 5]);
+        debugInfo.append(drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5]);
         //check comp mode
         debugInfo.append(compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4]);
         //check comp pol
@@ -1136,11 +1146,18 @@ public class ADS1115 extends Component {
         this.runnable = method;
     }
 
+
+    /**
+     * disables all handlers on componente
+     */
+    public void deregsiterAll(){
+        setRunnable(null);
+    }
     /**
      * Setup configuration for config register
      */
     private void createTemplateConfiguration() {
-        CONFIG_REGISTER_TEMPLATE = os | pga.gain | dr | compMode | compPol | compLat | compQue;
+        CONFIG_REGISTER_TEMPLATE = os | pga.gain | dr.getConf() | compMode | compPol | compLat | compQue;
     }
 
     /**
