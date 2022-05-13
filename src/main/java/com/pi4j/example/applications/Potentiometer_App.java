@@ -13,9 +13,9 @@ public class Potentiometer_App implements Application {
     public void execute(Context pi4j) {
         logInfo("Potentiometer test started ...");
 
-        ADS1115 ads1115 = new ADS1115(pi4j);
+        ADS1115 ads1115 = new ADS1115(pi4j, 0x01, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND,4);
 
-        Potentiometer poti = new Potentiometer(ads1115, ADS1115.MUX.AIN0_GND, 3.3);
+        Potentiometer poti = new Potentiometer(ads1115, 2, 3.3);
 
         //read current value from poti one time
         logInfo("Current value of the poti is " + String.format("%.3f",poti.singleShotGetVoltage()) + " voltage.");
@@ -23,8 +23,8 @@ public class Potentiometer_App implements Application {
         //read current value from the poti in percent one time
         logInfo("The potentiometer slider is currently at " + String.format("%.3f", poti.singleShotGetNormalizedValue()) + " % of its full travel.");
 
-        // Register event handlers to print a message when poti is moved
-        poti.setRunnable(() -> {
+        // Register event handlers to print a message when potentiometer is moved
+        poti.setRunnableSlowReadChan(() -> {
             logInfo("The current voltage drop is currently " + String.format("%.3f", poti.continiousReadingGetVoltage()) + " volts");
         });
 

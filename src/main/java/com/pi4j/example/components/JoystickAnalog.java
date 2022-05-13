@@ -16,25 +16,25 @@ public class JoystickAnalog extends Component{
 
     public JoystickAnalog(Context pi4j, ADS1115 ads1115){
         this.ads1115 = ads1115;
-        this.x = new Potentiometer(ads1115, ADS1115.MUX.AIN0_GND, 3.3);
-        this.y = new Potentiometer(ads1115, ADS1115.MUX.AIN1_GND, 3.3);
+        this.x = new Potentiometer(ads1115, 0, 3.3);
+        this.y = new Potentiometer(ads1115, 1, 3.3);
         this.push = new SimpleButton(pi4j, PIN.D26, false);
     }
 
     public void setXRunnable(Runnable methode){
-        x.setRunnable(methode);
+        x.setRunnableSlowReadChan(methode);
     }
 
     public void setYRunnable(Runnable methode){
-        y.setRunnable(methode);
+        y.setRunnableSlowReadChan(methode);
     }
 
     public void setPushOnUp(Runnable methode){
-        push.onDown(methode);
+        push.onUp(methode);
     }
 
     public void setPushOnDown(Runnable methode){
-        push.onUp(methode);
+        push.onDown(methode);
     }
 
     public void setPushWhilePressed(Runnable methode, long whilePressedDelay){
