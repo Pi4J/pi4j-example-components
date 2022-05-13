@@ -880,8 +880,6 @@ public class ADS1115 extends Component {
         this.i2cBus = i2cDefaultBus;
         this.address = ADDRESS.GND;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress()));
-
-
     }
 
     /**
