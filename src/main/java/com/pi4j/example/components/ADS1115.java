@@ -3,6 +3,7 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ADS1115 extends Component {
     /**
@@ -26,14 +27,68 @@ public class ADS1115 extends Component {
     private final int i2cBus;
 
     /**
-     * programmable gain amplifier
+     * default bus number
      */
-    private final ADS1115.GAIN gain;
+    private final int i2cDefaultBus = 0x01;
 
     /**
      * device address
      */
     private final ADDRESS address;
+
+    /**
+     * Operational status or single-shot conversion start
+     */
+    private int os;
+
+    /**
+     * programmable gain amplifier
+     */
+    private final ADS1115.GAIN pga;
+
+    /**
+     * sampling rate of device
+     */
+    private final int dr;
+
+    /**
+     * Comparator mode
+     */
+    private final int compMode;
+
+    /**
+     * Comparator polarity
+     */
+    private final int compPol;
+
+    /**
+     * Latching comparator
+     */
+    private final int compLat;
+
+    /**
+     * Comparator queue and disable
+     */
+    private final int compQue;
+
+    /**
+     * actual value form conversion register
+     */
+    private AtomicInteger actualValue = new AtomicInteger(0);
+    /**
+     * old value from last successful read of conversion register
+     */
+    private AtomicInteger oldValue = new AtomicInteger(0);
+
+    /**
+     * continious reading acitve
+     */
+    protected boolean continiousReadingActive;
+
+    /**
+     * Wait for response after sending a new configuration to the device
+     */
+    private int delayResponseTime = 15;
 
     /**
      * The Conversion register contains the result of the last conversion.
@@ -53,29 +108,14 @@ public class ADS1115 extends Component {
     private static final int HI_THRESH_REGISTER = 0x03;
 
     /**
-     * Config register default configuration
-     * <p>
-     * OS -> 1 : Start a single conversion
-     * MUX -> 000 : AINP = AIN0 and AINN = AIN1
-     * PGA -> 000 : FSR = ±6.144 V(
-     * MODE -> 1 : Single-shot mode or power-down state
-     * DR -> 100 : 128 SPS
-     * COMP_MODE -> 0 : Traditional comparator
-     * COMP_POL -> 0 : Active low
-     * COMP_LAT -> 0 : Nonlatching comparator . The ALERT/RDY pin does not latch when asserted
-     * COMP_QUE -> 11 : Disable comparator and set ALERT/RDY pin to high-impedance
+     * Runnable code when current value is changed
      */
-    private static final int CONFIG_REGISTER_TEMPLATE =
-            OS.WRITE_START.os
-                    | MUX.AIN0_AIN1.mux
-                    | PGA.FSR_6_144.pga
-                    | MODE.SINGLE.mode
-                    | DR.SPS_128.sps
-                    | COMP_MODE.TRAD_COMP.compMode
-                    | COMP_POL.ACTIVE_LOW.compPol
-                    | COMP_LAT.NON_LATCH.latching
-                    | COMP_QUE.DISABLE_COMP.compQue;
+    private Runnable runnable;
 
+    /**
+     * Config register default configuration
+     */
+    private int CONFIG_REGISTER_TEMPLATE;
 
     /**
      * I2C Address Selection
@@ -223,7 +263,7 @@ public class ADS1115 extends Component {
      * {@link #ASSERT_FOUR}
      * {@link #DISABLE_COMP}
      */
-    private enum COMP_QUE {
+    public enum COMP_QUE {
         /**
          * Assert after one conversion
          */
@@ -239,7 +279,16 @@ public class ADS1115 extends Component {
         /**
          * Disable comparator and set ALERT/RDY pin to high-impedance
          */
-        DISABLE_COMP(0b0000_0000_0000_0011);
+        DISABLE_COMP(0b0000_0000_0000_0011),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0000_0000_0000_0011),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1111_1111_1111_1100);
         /**
          * comparator queue
          */
@@ -275,7 +324,7 @@ public class ADS1115 extends Component {
      * {@link #NON_LATCH}
      * {@link #DO_LATCH}
      */
-    private enum COMP_LAT {
+    public enum COMP_LAT {
         /**
          * Nonlatching comparator. The ALERT/RDY pin does not latch when asserted.
          */
@@ -286,10 +335,19 @@ public class ADS1115 extends Component {
          * is sent by the master. The device responds with its address, and it is the lowest
          * address currently asserting the ALERT/RDY bus line.
          */
-        DO_LATCH(0b0000_0000_0000_0100);
+        DO_LATCH(0b0000_0000_0000_0100),
         /**
          * latching
          */
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0000_0000_0000_0100),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1111_1111_1111_1011);
         private final int latching;
 
         /**
@@ -319,7 +377,7 @@ public class ADS1115 extends Component {
      * {@link #ACTIVE_LOW}
      * {@link #ACTIVE_HIGH}
      */
-    private enum COMP_POL {
+    public enum COMP_POL {
         /**
          * Active low
          */
@@ -327,7 +385,16 @@ public class ADS1115 extends Component {
         /**
          * Active high
          */
-        ACTIVE_HIGH(0b0000_0000_0000_1000);
+        ACTIVE_HIGH(0b0000_0000_0000_1000),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0000_0000_0000_1000),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1111_1111_1111_0111);
         /**
          * comparator polarity
          */
@@ -360,7 +427,7 @@ public class ADS1115 extends Component {
      * {@link #TRAD_COMP}
      * {@link #WINDOW_COMP}
      */
-    private enum COMP_MODE {
+    public enum COMP_MODE {
         /**
          * Traditional comparator (
          */
@@ -368,7 +435,16 @@ public class ADS1115 extends Component {
         /**
          * Window comparator
          */
-        WINDOW_COMP(0b0000_0000_0001_0000);
+        WINDOW_COMP(0b0000_0000_0001_0000),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0000_0000_0001_0000),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1111_1111_1110_1111);
         /**
          * comparator mode
          */
@@ -408,7 +484,7 @@ public class ADS1115 extends Component {
      * {@link #SPS_475}
      * {@link #SPS_860}
      */
-    private enum DR {
+    public enum DR {
         /**
          * 8 sampling per second
          */
@@ -440,7 +516,16 @@ public class ADS1115 extends Component {
         /**
          * 860 sampling per second
          */
-        SPS_860(0b0000_0000_1110_0000);
+        SPS_860(0b0000_0000_1110_0000),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0000_0000_1110_0000),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1111_1111_0001_1111);
         /**
          * sampling per second
          */
@@ -475,7 +560,7 @@ public class ADS1115 extends Component {
      * {@link #CONTINUOUS}
      * {@link #SINGLE}
      */
-    private enum MODE {
+    public enum MODE {
         /**
          * Continuous-conversion mode
          */
@@ -483,7 +568,16 @@ public class ADS1115 extends Component {
         /**
          * Single-shot mode or power-down state
          */
-        SINGLE(0b0000_0001_0000_0000);
+        SINGLE(0b0000_0001_0000_0000),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0000_0001_0000_0000),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1111_1110_1111_1111);
         /**
          * device operation mode
          */
@@ -520,7 +614,7 @@ public class ADS1115 extends Component {
      * {@link #FSR_0_512}
      * {@link #FSR_0_256}
      */
-    private enum PGA {
+    public enum PGA {
         /**
          * 000 : FSR = ±6.144 V
          */
@@ -544,7 +638,16 @@ public class ADS1115 extends Component {
         /**
          * 101 : FSR = ±0.256 V
          */
-        FSR_0_256(0b0000_1010_0000_0000);
+        FSR_0_256(0b0000_1010_0000_0000),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0000_1110_0000_0000),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1111_0001_1111_1111);
         /**
          * Programmable gain amplifier
          */
@@ -584,7 +687,7 @@ public class ADS1115 extends Component {
      * {@link #AIN2_GND}
      * {@link #AIN3_GND}
      */
-    private enum MUX {
+    public enum MUX {
         /**
          * 000 : AINP = AIN0 and AINN = AIN1
          */
@@ -616,7 +719,16 @@ public class ADS1115 extends Component {
         /**
          * 111 : AINP = AIN3 and AINN = GND
          */
-        AIN3_GND(0b0111_0000_0000_0000);
+        AIN3_GND(0b0111_0000_0000_0000),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b0111_0000_0000_0000),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b1000_1111_1111_1111);
         /**
          * Input multiplexer configuration
          */
@@ -651,7 +763,7 @@ public class ADS1115 extends Component {
      * {@link #READ_CONV}
      * {@link #READ_NO_CONV}
      */
-    private enum OS {
+    public enum OS {
         /**
          * When writing: start a single conversion (when in power-down state)
          */
@@ -663,7 +775,16 @@ public class ADS1115 extends Component {
         /**
          * When reading: Device is not currently performing a conversion
          */
-        READ_NO_CONV(0b1000_0000_0000_0000);
+        READ_NO_CONV(0b1000_0000_0000_0000),
+        /**
+         * With an AND operation all other parameters will be set to 0
+         */
+        CLR_OTHER_CONF_PARAM(0b1000_0000_0000_0000),
+        /**
+         * With an AND operation the current parameters will be set to 0
+         * all other parameters remain unchanged
+         */
+        CLR_CURRENT_CONF_PARAM(0b0111_1111_1111_1111);
         /**
          * Operational status or single-shot conversion start
          */
@@ -697,12 +818,56 @@ public class ADS1115 extends Component {
      * @param address Custom device address on I2C
      */
     public ADS1115(Context pi4j, int bus, GAIN gain, ADDRESS address) {
-        this.deviceId = "ADS1115";
         this.context = pi4j;
+
+        //write default configuration
+        this.os = OS.WRITE_START.getOs();
+        //mux will be set in function
+        this.pga = gain;
+        //mode will be set in function
+        this.dr = DR.SPS_128.getSpS();
+        this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
+        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
+        this.compLat = COMP_LAT.NON_LATCH.getLatching();
+        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
+        createTemplateConfiguration();
+
+        //i2c parameter
+        this.deviceId = "ADS1115";
         this.i2cBus = bus;
-        this.gain = gain;
         this.address = address;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), deviceId));
+    }
+
+    /**
+     * Creates a new AD converter component with default bus 0x01, device bus address 0x48 (GND)
+     * and max gain 4.096 V (parameters for raspberry pi)
+     *
+     * @param pi4j Pi4J context
+     */
+    public ADS1115(Context pi4j) {
+
+        this.context = pi4j;
+
+        //write default configuration
+        this.os = OS.WRITE_START.getOs();
+        //mux will be set in function
+        this.pga = GAIN.GAIN_4_096V;
+        //mode will be set in function
+        this.dr = DR.SPS_128.getSpS();
+        this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
+        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
+        this.compLat = COMP_LAT.NON_LATCH.getLatching();
+        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
+        createTemplateConfiguration();
+
+        //i2c parameter
+        this.deviceId = "ADS1115";
+        this.i2cBus = i2cDefaultBus;
+        this.address = ADDRESS.GND;
+        this.i2c = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress()));
+
+
     }
 
     /**
@@ -737,8 +902,17 @@ public class ADS1115 extends Component {
      *
      * @return GAIN object
      */
-    public GAIN getGain() {
-        return gain;
+    public GAIN getPga() {
+        return pga;
+    }
+
+    /**
+     * Retrun sampling rate from device
+     *
+     * @return samplingrate
+     */
+    public int getSamplingRate() {
+        return dr;
     }
 
     /**
@@ -746,8 +920,8 @@ public class ADS1115 extends Component {
      *
      * @return double voltage
      */
-    public double getAIn0() {
-        return gain.gainPerBit * readIn(calculateConfig(MUX.AIN0_GND.mux));
+    public double singleShotAIn0() {
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -755,8 +929,8 @@ public class ADS1115 extends Component {
      *
      * @return double voltage
      */
-    public double getAIn1() {
-        return gain.gainPerBit * readIn(calculateConfig(MUX.AIN1_GND.mux));
+    public double singleShotAIn1() {
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -764,8 +938,8 @@ public class ADS1115 extends Component {
      *
      * @return double voltage
      */
-    public double getAIn2() {
-        return gain.gainPerBit * readIn(calculateConfig(MUX.AIN2_GND.mux));
+    public double singleShotAIn2() {
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -773,8 +947,8 @@ public class ADS1115 extends Component {
      *
      * @return double voltage
      */
-    public double getAIn3() {
-        return gain.gainPerBit * readIn(calculateConfig(MUX.AIN3_GND.mux));
+    public double singleShotAIn3() {
+        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
     }
 
     /**
@@ -783,26 +957,196 @@ public class ADS1115 extends Component {
      * @param config Configuration for config register
      * @return int conversion register
      */
-    private int readIn(int config) {
-        i2c.writeRegisterWord(CONFIG_REGISTER, config);
-        try {
-            Thread.sleep(15);
-        } catch (InterruptedException e) {
-            logError("Error. " + e);
-        }
+    private int readSingleShot(int config) {
+        writeConfigRegister(config);
+
         int result = i2c.readRegisterWord(CONVERSION_REGISTER);
-        logInfo("readIn: " + config + " raw: " + result);
+        logInfo("readIn: " + config + ", raw " + result);
         return result;
     }
 
     /**
-     * Setup configuration for config register
+     * Sends configuration for continious reading to device, updates actual value from analog input
+     * and triggers valueChange event
      *
-     * @param mux input multiplexer configuration
-     * @return Configuration for config register
+     * @param config        Configuration for config register
+     * @param threshold     threshold for trigger new value change event
+     * @param readFrequency read frequency to get new value from device, must be lower than
+     *                      the sampling rate of the device
      */
-    private int calculateConfig(int mux) {
-        return CONFIG_REGISTER_TEMPLATE | gain.gain | mux;
+    private void readContiniousValue(int config, int threshold, int readFrequency) {
+        if (readFrequency < dr) {
+            logInfo("Start continious reading");
+            //set configuration
+            writeConfigRegister(config);
+
+            //start new thread for continuous reading
+            new Thread(() -> {
+                while (continiousReadingActive) {
+                    int result = readConversionRegister();
+                    logInfo("Current value: " + result);
+                    if (oldValue.get() - threshold > result || oldValue.get() + threshold < result) {
+                        logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
+                        oldValue = actualValue;
+                        actualValue.set(result);
+                        runnable.run();
+                    }
+                    try {
+                        Thread.sleep(1 / readFrequency * 1000);
+                    } catch (InterruptedException e) {
+                        logError("Error: " + e);
+                    }
+                }
+            }).start();
+        } else {
+            logError("readFrequency to high");
+        }
+    }
+
+    /**
+     * start continuous reading
+     *
+     * @param mux           Input multiplexer configuration
+     * @param threshold     threshold for trigger new value change event (+- digit)
+     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
+     *                      sampling rate of device
+     */
+    public void startContiniousReading(MUX mux, int threshold, int readFrequency) {
+        continiousReadingActive = true;
+        readContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
+
+
+    }
+
+    /**
+     * stops continious reading
+     */
+    public void stopContiniousReading() {
+        logInfo("Stop continious reading");
+        continiousReadingActive = false;
+        // write single shot configuration to stop reading process in device
+        writeConfigRegister(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
+    }
+
+    /**
+     * write custom configuration to device
+     *
+     * @param config custom configuration
+     */
+    public void writeConfigRegister(int config) {
+        logInfo("start write configuration");
+        i2c.writeRegisterWord(CONFIG_REGISTER, config);
+        //wait until ad converter has stored new value in conversion register
+        delay(2 / dr);
+
+        readConfigRegister();
+    }
+
+    /**
+     * read configuration from device
+     *
+     * @return configuration from device
+     */
+    public int readConfigRegister() {
+        String[] osInfo = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
+
+        String[] muxInfo = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
+
+        String[] pgaInfo = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
+
+        String[] modeInfo = {"0 : Continuous-conversion mode\n", "1 : Single-shot mode or power-down state\n"};
+
+        String[] drInfo = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
+
+        String[] compModeInfo = {"0 : Traditional comparator (default)\n", "1 : Window comparator\n"};
+
+        String[] compPolInfo = {"0 : Active low (default)\n", "1 : Active high\n"};
+
+        String[] compLatInfo = {"0 : Nonlatching comparator\n", "1 : Latching comparator\n"};
+
+        String[] compQueInfo = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
+
+        //get configuration from device
+        int result = i2c.readRegisterWord(CONFIG_REGISTER);
+
+        //create logger message
+        StringBuilder debugInfo = new StringBuilder();
+        //check os
+        debugInfo.append((osInfo[result >> 15]));
+        //check mux
+        debugInfo.append(muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12]);
+        //check pga
+        debugInfo.append(pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9]);
+        //check mode
+        debugInfo.append(modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8]);
+        //check dr
+        debugInfo.append(drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getSpS()) >> 5]);
+        //check comp mode
+        debugInfo.append(compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4]);
+        //check comp pol
+        debugInfo.append(compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3]);
+        //check comp lat
+        debugInfo.append(compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2]);
+        //check comp que
+        debugInfo.append(compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()]);
+
+        logger.config(debugInfo.toString());
+        return result;
+    }
+
+    /**
+     * read last stored conversion from device
+     *
+     * @return last stored conversion
+     */
+    public int readConversionRegister() {
+        return i2c.readRegisterWord(CONVERSION_REGISTER);
+    }
+
+    /**
+     * read lower threshold from device
+     *
+     * @return lower threshold
+     */
+    public int readLoThreshRegister() {
+        return i2c.readRegisterWord(LO_THRESH_REGISTER);
+    }
+
+    /**
+     * read upper threshold from device
+     *
+     * @return upper thershold
+     */
+    public int readHiThreshRegister() {
+        return i2c.readRegisterWord(HI_THRESH_REGISTER);
+    }
+
+    /**
+     * Sets or disables the handler for the onValueChange event.
+     * This event gets triggered whenever the analog value
+     * from the device changes.
+     * Only a single event handler can be registered at once.
+     *
+     * @param method Event handler to call or null to disable
+     */
+    public void setRunnable(Runnable method) {
+        this.runnable = method;
+    }
+
+    /**
+     * Setup configuration for config register
+     */
+    private void createTemplateConfiguration() {
+        CONFIG_REGISTER_TEMPLATE = os | pga.gain | dr | compMode | compPol | compLat | compQue;
+    }
+
+    /**
+     * Returns voltage value from continious reading
+     *
+     * @return voltage value
+     */
+    public double continiousReadAI() {
+        return pga.gainPerBit() * actualValue.get();
     }
 
     /**
@@ -813,13 +1157,8 @@ public class ADS1115 extends Component {
      * @param device I2C Device address
      * @return I2C configuration
      */
-    private I2CConfig buildI2CConfig(Context pi4j, int bus, int device, String name) {
-        return I2C.newConfigBuilder(pi4j)
-                .id("I2C-" + device + "@" + bus)
-                .name(name)
-                .bus(bus)
-                .device(device)
-                .build();
+    private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
+        return I2C.newConfigBuilder(pi4j).id("I2C-" + device + "@" + bus).name("AD Converter").bus(bus).device(device).build();
     }
 
 }
