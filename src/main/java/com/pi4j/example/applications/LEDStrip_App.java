@@ -15,8 +15,9 @@ public class LEDStrip_App implements Application {
 
         //set them all off, so nothing is shining
         logger.info("Starting with setting all leds off");
-        ledstrip.allOff();
-
+        //ledstrip.allOff();
+        ledstrip.setStripColor(PixelColor.RED);
+        ledstrip.render();
         /*for(int i = 0; i < 1; i++){
 
             //increment red value
@@ -53,8 +54,20 @@ public class LEDStrip_App implements Application {
             delay(2000);
         }*/
 
-        logger.info("setting the leds to RED");
+        /*logger.info("setting the leds to RED");
         ledstrip.setStripColor(PixelColor.RED);
+        ledstrip.render();
+        logger.info("Color "+ ledstrip.getPixelColor(0));
+        delay(3000);
+
+        logger.info("setting the leds to WHITE");
+        ledstrip.setStripColor(PixelColor.WHITE);
+        ledstrip.render();
+        logger.info("Color "+ ledstrip.getPixelColor(0));
+        delay(3000);
+
+        logger.info("setting the first led to RED");
+        ledstrip.setPixelColor(0, PixelColor.RED);
         ledstrip.render();
         logger.info("Color "+ ledstrip.getPixelColor(0));
         delay(3000);
@@ -63,5 +76,6 @@ public class LEDStrip_App implements Application {
         ledstrip.close();
         logger.info("closing the app");
         logger.info("Color "+ ledstrip.getPixelColor(0));
+        */
     }
 }

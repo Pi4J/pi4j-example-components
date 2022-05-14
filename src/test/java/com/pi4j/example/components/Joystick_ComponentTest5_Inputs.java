@@ -24,11 +24,11 @@ public class Joystick_ComponentTest5_Inputs extends ComponentTest {
     private MockDigitalInput diWest;
     private MockDigitalInput diPush;
 
-    private PIN pinNorth = PIN.D21;
-    private PIN pinEast = PIN.D22;
-    private PIN pinSouth = PIN.D23;
-    private PIN pinWest = PIN.D24;
-    private PIN pinPush = PIN.D25;
+    private final PIN pinNorth = PIN.D21;
+    private final PIN pinEast = PIN.D22;
+    private final PIN pinSouth = PIN.D23;
+    private final PIN pinWest = PIN.D24;
+    private final PIN pinPush = PIN.D25;
 
     @BeforeEach
     public void setUp() {

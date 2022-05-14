@@ -465,7 +465,6 @@ public class ADS1115 extends Component {
             return this.sps;
         }
 
-        ;
     }
 
     /**

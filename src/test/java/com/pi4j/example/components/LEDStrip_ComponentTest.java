@@ -50,4 +50,30 @@ public class LEDStrip_ComponentTest extends ComponentTest {
     public void testGetNumLEDS(){
         assertEquals(pixels, strip.getNumPixels());
     }
+
+    @Test
+    public void testGetPixelChannels(){
+        //when
+        int red = PixelColor.RED;
+        int blue = PixelColor.BLUE;
+        int green = PixelColor.GREEN;
+        int white = PixelColor.WHITE;
+
+        //then
+        assertEquals(PixelColor.getRedComponent(red), 255);
+        assertEquals(PixelColor.getGreenComponent(red), 0);
+        assertEquals(PixelColor.getBlueComponent(red), 0);
+
+        assertEquals(PixelColor.getRedComponent(green), 0);
+        assertEquals(PixelColor.getGreenComponent(green), 255);
+        assertEquals(PixelColor.getBlueComponent(green), 0);
+
+        assertEquals(PixelColor.getRedComponent(blue), 0);
+        assertEquals(PixelColor.getGreenComponent(blue), 0);
+        assertEquals(PixelColor.getBlueComponent(blue), 255);
+
+        assertEquals(255, PixelColor.getRedComponent(white));
+        assertEquals(255, PixelColor.getGreenComponent(white));
+        assertEquals(255, PixelColor.getBlueComponent(white));
+    }
 }
