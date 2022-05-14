@@ -3,7 +3,6 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ADS1115 extends Component {
@@ -117,7 +116,6 @@ public class ADS1115 extends Component {
      * Config register default configuration
      */
     private int CONFIG_REGISTER_TEMPLATE;
-
 
     /**
      * I2C Address Selection
@@ -838,7 +836,7 @@ public class ADS1115 extends Component {
         this.deviceId = "ADS1115";
         this.i2cBus = bus;
         this.address = address;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress()));
+        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), deviceId));
     }
 
     /**
@@ -1093,7 +1091,6 @@ public class ADS1115 extends Component {
         debugInfo.append(compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()]);
 
         logger.config(debugInfo.toString());
-
         return result;
     }
 

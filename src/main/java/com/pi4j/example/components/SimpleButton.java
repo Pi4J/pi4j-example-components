@@ -61,7 +61,7 @@ public class SimpleButton extends Component {
         /*
          * Gets a DigitalStateChangeEvent directly from the Provider, as this
          * Class is a listener. This runs in a different Thread than main.
-         * Calls the mehtods onUp, onDown and whilePressed. WhilePressed gets
+         * Calls the methods onUp, onDown and whilePressed. WhilePressed gets
          * executed in an own Thread, as to not block other resources.
          */
         this.digitalInput.addListener(digitalStateChangeEvent -> {
@@ -190,5 +190,29 @@ public class SimpleButton extends Component {
         this.onDown = null;
         this.onUp = null;
         this.whilePressed = null;
+    }
+
+    /**
+     * Returns the methode for OnDown
+     * @return Runnable onDown
+     */
+    public Runnable getOnDown(){
+        return onDown;
+    }
+
+    /**
+     * Returns the methode for OnUp
+     * @return Runnable onUp
+     */
+    public Runnable getOnUp(){
+        return onUp;
+    }
+
+    /**
+     * Returns the methode for whilePressed
+     * @return Runnable whilePressed
+     */
+    public Runnable getWhilePressed(){
+        return whilePressed;
     }
 }
