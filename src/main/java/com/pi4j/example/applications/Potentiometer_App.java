@@ -7,7 +7,7 @@ import com.pi4j.example.components.Potentiometer;
 
 import static java.lang.Thread.sleep;
 
-public class PotentiometerApp implements Application {
+public class Potentiometer_App implements Application {
 
     @Override
     public void execute(Context pi4j) {

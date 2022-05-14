@@ -30,7 +30,7 @@ public class SimpleButton extends Component {
     /**
      * Timer while button is pressed
      */
-    private long whilePressedDEBOUNCE;
+    private long whilePressedDelay;
     /**
      * Runnable Code when button is depressed
      */
@@ -77,7 +77,7 @@ public class SimpleButton extends Component {
                     if (whilePressed != null) {
                         new Thread(() -> {
                             while (isDown()) {
-                                delay(whilePressedDEBOUNCE);
+                                delay(whilePressedDelay);
                                 if (isDown()) {
                                     whilePressed.run();
                                 }
@@ -178,9 +178,9 @@ public class SimpleButton extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void whilePressed(Runnable task, long whilePressedDEBOUNCE) {
+    public void whilePressed(Runnable task, long whilePressedDelay) {
         this.whilePressed = task;
-        this.whilePressedDEBOUNCE = whilePressedDEBOUNCE;
+        this.whilePressedDelay = whilePressedDelay;
     }
 
     /**
