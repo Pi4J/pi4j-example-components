@@ -16,6 +16,22 @@ public class JoystickAnalog extends Component {
      * button push
      */
     private final SimpleButton push;
+    /**
+     * normalized center position
+     */
+    private final double NORMALIZED_CENTER_POSITION = 0.5;
+    /**
+     * offset center x-axis
+     */
+    private double xOffset = 0.0;
+    /**
+     * offset center y-axis
+     */
+    private double yOffset = 0.0;
+    /**
+     * if true normalized axis from 0 to 1 center is 0.5, if false normalized axis from -1 to 1 center is 0
+     */
+    private final boolean normalized0to1;
 
     /**
      * Builds a new JoystickAnalog component with custom input for x-, y-axis, custom pin for push button.
@@ -28,10 +44,11 @@ public class JoystickAnalog extends Component {
      * @param maxVoltage  max voltage expects on analog input x- and y-axis
      * @param push        additional push button on joystick
      */
-    public JoystickAnalog(Context pi4j, ADS1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, PIN push) {
+    public JoystickAnalog(Context pi4j, ADS1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
         this.x = new Potentiometer(ads1115, chanelXAxis, maxVoltage);
         this.y = new Potentiometer(ads1115, chanelYAxis, maxVoltage);
         this.push = new SimpleButton(pi4j, push, false);
+        this.normalized0to1 = normalized0to1;
     }
 
     /**
@@ -45,6 +62,7 @@ public class JoystickAnalog extends Component {
         this.x = new Potentiometer(ads1115, 0, 3.3);
         this.y = new Potentiometer(ads1115, 1, 3.3);
         this.push = new SimpleButton(pi4j, push, false);
+        normalized0to1 = true;
     }
 
     /**
@@ -108,7 +126,15 @@ public class JoystickAnalog extends Component {
      * @return normalized value
      */
     public double getXValue() {
-        return x.continiousReadingGetNormalizedValue();
+        double result = x.continiousReadingGetNormalizedValue() + xOffset;
+
+        result = Math.max(result, 0.0);
+        result = Math.min(result, 1.0);
+
+        if (!normalized0to1) {
+            result = rescaleValue(result);
+        }
+        return result;
     }
 
     /**
@@ -117,7 +143,16 @@ public class JoystickAnalog extends Component {
      * @return normalized value
      */
     public double getYValue() {
-        return y.continiousReadingGetNormalizedValue();
+        double result = y.continiousReadingGetNormalizedValue() + yOffset;
+
+        result = Math.max(result, 0.0);
+        result = Math.min(result, 1.0);
+
+        if (!normalized0to1) {
+            result = rescaleValue(result);
+        }
+
+        return result;
     }
 
     /**
@@ -146,6 +181,24 @@ public class JoystickAnalog extends Component {
         x.deregisterAll();
         y.deregisterAll();
         push.deRegisterAll();
+    }
+
+    /**
+     * calibrates the center position of the joystick
+     */
+    public void calibrateJoystick() {
+        xOffset = NORMALIZED_CENTER_POSITION - x.singleShotGetNormalizedValue();
+        yOffset = NORMALIZED_CENTER_POSITION - y.singleShotGetNormalizedValue();
+    }
+
+    /**
+     * Changes the output value from 0 to 1 to -1 to 1
+     *
+     * @param in original output value between 0 and 1
+     * @return new output value between -1 and 1
+     */
+    private double rescaleValue(double in) {
+        return (in - NORMALIZED_CENTER_POSITION) * 2;
     }
 
 

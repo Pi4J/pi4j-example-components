@@ -15,7 +15,7 @@ public class Potentiometer_App implements Application {
 
         ADS1115 ads1115 = new ADS1115(pi4j, 0x01, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND,4);
 
-        Potentiometer poti = new Potentiometer(ads1115, 2, 3.3);
+        Potentiometer poti = new Potentiometer(ads1115, 0, 3.3);
 
         //read current value from poti one time
         logInfo("Current value of the poti is " + String.format("%.3f",poti.singleShotGetVoltage()) + " voltage.");
@@ -37,7 +37,6 @@ public class Potentiometer_App implements Application {
 
         //stop continious reading
         poti.stopSlowContiniousReading();
-
 
         logInfo("Potentiometer test done");
     }

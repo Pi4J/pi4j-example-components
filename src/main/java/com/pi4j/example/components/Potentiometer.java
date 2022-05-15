@@ -52,7 +52,7 @@ public class Potentiometer extends Component {
     }
 
     /**
-     * Create a new potentiometer componentn with default chanel and maxVoltage for Raspberry pi
+     * Create a new potentiometer component with default chanel and maxVoltage for Raspberry pi
      *
      * @param ads1115 ads instance
      */
@@ -205,6 +205,7 @@ public class Potentiometer extends Component {
     public void stopSlowContiniousReading() {
         logInfo("Stop continious reading");
         slowContiniousReadingActive = false;
+        ads1115.stopSlowReadContiniousReading();
     }
 
     /**
