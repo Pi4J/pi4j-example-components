@@ -20,9 +20,11 @@ public abstract class Component {
         logger.config(() -> msg);
     }
 
-    private void logDebug(String msg) {
+    protected void logDebug(String msg) {
         logger.fine(() -> msg);
     }
+
+    protected void logWarning(String msg){ logger.warning(() -> msg); }
 
     /**
      * Utility function to sleep for the specified amount of milliseconds.
