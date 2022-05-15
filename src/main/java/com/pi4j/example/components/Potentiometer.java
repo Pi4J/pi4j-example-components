@@ -46,7 +46,7 @@ public class Potentiometer extends Component {
         this.channel = chanel;
 
         //check if chanel is in range of ad converter
-        if(chanel < 0 || chanel > 3){
+        if (chanel < 0 || chanel > 3) {
             throw new ConfigException("Channel number for ad converter not possible, choose channel between 0 to 3");
         }
     }
@@ -70,18 +70,26 @@ public class Potentiometer extends Component {
      */
     public double singleShotGetVoltage() {
         double result = 0.0;
-        switch (channel){
-            case 0: result = ads1115.singleShotAIn0(); break;
-            case 1: result = ads1115.singleShotAIn1(); break;
-            case 2: result = ads1115.singleShotAIn2(); break;
-            case 3: result = ads1115.singleShotAIn3(); break;
+        switch (channel) {
+            case 0:
+                result = ads1115.singleShotAIn0();
+                break;
+            case 1:
+                result = ads1115.singleShotAIn1();
+                break;
+            case 2:
+                result = ads1115.singleShotAIn2();
+                break;
+            case 3:
+                result = ads1115.singleShotAIn3();
+                break;
         }
         updateMinMaxValue(result);
         return result;
     }
 
     /**
-     * Returns normalized value from 0 to 100
+     * Returns normalized value from 0 to 1
      *
      * @return normalized value
      */
@@ -96,14 +104,22 @@ public class Potentiometer extends Component {
      */
     public double continiousReadingGetVoltage() {
         double result = 0.0;
-        if(fastContiniousReadingActive){
+        if (fastContiniousReadingActive) {
             result = ads1115.getFastContiniousReadAI();
-        }else {
+        } else {
             switch (channel) {
-                case 0: result = ads1115.getSlowContiniousReadAIn0(); break;
-                case 1: result = ads1115.getSlowContiniousReadAIn1(); break;
-                case 2: result = ads1115.getSlowContiniousReadAIn2(); break;
-                case 3: result = ads1115.getSlowContiniousReadAIn3(); break;
+                case 0:
+                    result = ads1115.getSlowContiniousReadAIn0();
+                    break;
+                case 1:
+                    result = ads1115.getSlowContiniousReadAIn1();
+                    break;
+                case 2:
+                    result = ads1115.getSlowContiniousReadAIn2();
+                    break;
+                case 3:
+                    result = ads1115.getSlowContiniousReadAIn3();
+                    break;
             }
         }
         updateMinMaxValue(result);
@@ -111,7 +127,7 @@ public class Potentiometer extends Component {
     }
 
     /**
-     * Returns actual normalized value form 0 to 100 from continious reading
+     * Returns actual normalized value form 0 to 1 from continious reading
      *
      * @return normalized value
      */
@@ -137,12 +153,20 @@ public class Potentiometer extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void setRunnableSlowReadChan(Runnable method){
-        switch (channel){
-            case 0: ads1115.setRunnableSlowReadChannel0(method); break;
-            case 1: ads1115.setRunnableSlowReadChannel1(method); break;
-            case 2: ads1115.setRunnableSlowReadChannel2(method); break;
-            case 3: ads1115.setRunnableSlowReadChannel3(method); break;
+    public void setRunnableSlowReadChan(Runnable method) {
+        switch (channel) {
+            case 0:
+                ads1115.setRunnableSlowReadChannel0(method);
+                break;
+            case 1:
+                ads1115.setRunnableSlowReadChannel1(method);
+                break;
+            case 2:
+                ads1115.setRunnableSlowReadChannel2(method);
+                break;
+            case 3:
+                ads1115.setRunnableSlowReadChannel3(method);
+                break;
         }
     }
 
@@ -217,15 +241,29 @@ public class Potentiometer extends Component {
      * disables all handlers
      */
     public void deregisterAll() {
-        switch (channel){
-            case 0: ads1115.setRunnableSlowReadChannel0(null);break;
-            case 1: ads1115.setRunnableSlowReadChannel1(null);break;
-            case 2: ads1115.setRunnableSlowReadChannel2(null);break;
-            case 3: ads1115.setRunnableSlowReadChannel3(null);break;
+        switch (channel) {
+            case 0:
+                ads1115.setRunnableSlowReadChannel0(null);
+                break;
+            case 1:
+                ads1115.setRunnableSlowReadChannel1(null);
+                break;
+            case 2:
+                ads1115.setRunnableSlowReadChannel2(null);
+                break;
+            case 3:
+                ads1115.setRunnableSlowReadChannel3(null);
+                break;
         }
     }
 
-    private void updateMinMaxValue(double result){
+    /**
+     * Check if new value is bigger than current max value or lower than min value
+     * In this case update min or max value
+     *
+     * @param result value to check against min Max value
+     */
+    private void updateMinMaxValue(double result) {
         if (result < minValue) {
             minValue = result;
         } else if (result > maxValue) {

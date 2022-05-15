@@ -35,6 +35,7 @@ public class SimpleButton extends Component {
      * Runnable Code when button is depressed
      */
     private Runnable onUp;
+
     /**
      * Creates a new button component
      *
@@ -193,25 +194,28 @@ public class SimpleButton extends Component {
 
     /**
      * Returns the methode for OnDown
+     *
      * @return Runnable onDown
      */
-    public Runnable getOnDown(){
+    public Runnable getOnDown() {
         return onDown;
     }
 
     /**
      * Returns the methode for OnUp
+     *
      * @return Runnable onUp
      */
-    public Runnable getOnUp(){
+    public Runnable getOnUp() {
         return onUp;
     }
 
     /**
      * Returns the methode for whilePressed
+     *
      * @return Runnable whilePressed
      */
-    public Runnable getWhilePressed(){
+    public Runnable getWhilePressed() {
         return whilePressed;
     }
 }

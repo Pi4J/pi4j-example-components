@@ -95,9 +95,9 @@ public class ADS1115_App implements Application {
             System.out.println("The actual value from fast read channel is: " + String.format("%.3f", ads1115.getSlowContiniousReadAIn0()) + "voltage.");
         });
 
-        for (int i = 0; i < 4; i++){
+        for (int i = 0; i < 4; i++) {
             //start continious measuring
-            ads1115.startFastContiniousReading(i,0.1, 10);
+            ads1115.startFastContiniousReading(i, 0.1, 10);
 
             // Wait while handling events before exiting
             delay(20000);
@@ -105,7 +105,6 @@ public class ADS1115_App implements Application {
             //stop continious measuring
             ads1115.stopFastContiniousReading();
         }
-
 
 
         //deregister all handlers
