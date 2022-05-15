@@ -8,18 +8,10 @@ import com.pi4j.io.spi.SpiMode;
 import java.util.Arrays;
 
 public class LEDStrip extends Component {
-    /**
-     * Default SPI channel for the LED matrix on the CrowPi
-     */
+
     protected static final int DEFAULT_CHANNEL = 0;
-    // MAX7219: Internal Commands
-    private static final byte CMD_SET_FIRST_ROW = 0x01;
-    private static final byte CMD_DECODE_MODE = 0x09;
-    private static final byte CMD_INTENSITY = 0x0A;
-    private static final byte CMD_SCAN_LIMIT = 0x0B;
-    private static final byte CMD_SHUTDOWN = 0x0C;
-    private static final byte CMD_DISPLAY_TEST = 0x0F;
-    private static final int LED_COLOURS = 4;
+
+    private static final int LED_COLORS = 3;
     private static final int LED_RESET_uS = 55;
     /* Minimum time to wait for reset to occur in nanoseconds. */
     private static final int LED_RESET_WAIT_TIME = 300_000;
@@ -71,16 +63,13 @@ public class LEDStrip extends Component {
 
         // 1.25us per bit (1250ns)
         renderWaitTime = numLeds * 3 * 8 * 1250 + LED_RESET_WAIT_TIME;
-
-        //TODO
-        //setEnabled(Boolean.TRUE);
     }
 
-    private static final int LED_BIT_COUNT(int numLeds, int frequency) {
-        return (numLeds * LED_COLOURS * 8 * 3) + ((LED_RESET_uS * (frequency * 3)) / 1000000);
+    private int LED_BIT_COUNT(int numLeds, int frequency) {
+        return (numLeds * LED_COLORS * 8 * 3) + ((LED_RESET_uS * (frequency * 3)) / 1000000);
     }
 
-    private static final int PCM_BYTE_COUNT(int numLeds, int frequency) {
+    private int PCM_BYTE_COUNT(int numLeds, int frequency) {
         return (((LED_BIT_COUNT(numLeds, frequency) >> 3) & ~0x7) + 4) + 4;
     }
 
@@ -110,7 +99,6 @@ public class LEDStrip extends Component {
     public void close() {
         logger.info("Turning all leds off before close");
         allOff();
-        setEnabled(Boolean.FALSE);
     }
 
     /**
@@ -172,7 +160,7 @@ public class LEDStrip extends Component {
             // Swap the colors around based on the led strip type
             byte[] color = {gamma[(((leds[i] >> 8) & 0xff) * scale) >> 8],
                     gamma[(((leds[i] >> 16) & 0xff) * scale) >> 8],
-                    gamma[(((leds[i] >> 0) & 0xff) * scale) >> 8]};
+                    gamma[((leds[i] & 0xff) * scale) >> 8]};
 
             // Color
             for (int j = 0; j < color_count; j++) {
@@ -233,20 +221,6 @@ public class LEDStrip extends Component {
     }
 
     /**
-     * Specifies if the LED matrix should be enabled or disabled.
-     * This will also setup the proper decoding mode and scan limit when enabling the chip.
-     *
-     * @param enabled LED matrix state (true = ON, false = OFF)
-     */
-    public void setEnabled(boolean enabled) {
-        if (enabled) {
-            execute(CMD_SHUTDOWN, (byte) 0x01);
-        } else {
-            execute(CMD_SHUTDOWN, (byte) 0x00);
-        }
-    }
-
-    /**
      * Helper method for sending a command to the chip with data. Communication happens over SPI by simply sending two pieces of
      * data, more specifically the desired command as a byte value, followed by the data as another byte value.
      *
@@ -256,19 +230,6 @@ public class LEDStrip extends Component {
     private void execute(byte command, byte data) {
         spi.write(command, data);
     }
-
-    /*public void write(byte... data) {
-        write(data, 0);
-    }
-
-    public void write(byte[] data, int delayUSecs) {
-        write(data, delayUSecs, false);
-    }
-
-    public void write(byte[] txBuffer, int delayUSecs, boolean csChange) {
-        spi.transfer(txBuffer, 0, null, txBuffer.length, 800000, delayUSecs, bitsPerWord, csChange);
-        spi.transfer(pixelRaw);
-    }*/
 
     /**
      * Utility function to sleep for the specified amount of milliseconds. An {@link InterruptedException} will be catched and ignored while setting the
