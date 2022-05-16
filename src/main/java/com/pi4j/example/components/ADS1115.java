@@ -865,7 +865,7 @@ public class ADS1115 extends Component {
         this.deviceId = "ADS1115";
         this.i2cBus = i2cDefaultBus;
         this.address = ADDRESS.GND;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress()));
+        this.i2c = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress(), deviceId));
 
 
     }
@@ -1157,8 +1157,8 @@ public class ADS1115 extends Component {
      * @param device I2C Device address
      * @return I2C configuration
      */
-    private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
-        return I2C.newConfigBuilder(pi4j).id("I2C-" + device + "@" + bus).name("AD Converter").bus(bus).device(device).build();
+    private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device, String deviceID) {
+        return I2C.newConfigBuilder(pi4j).id("I2C-" + device + "@" + bus).name(deviceID).bus(bus).device(device).build();
     }
 
 }
