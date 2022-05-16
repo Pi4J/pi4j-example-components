@@ -1,6 +1,6 @@
 package com.pi4j.example.components;
 
-import com.pi4j.context.Context;
+import com.pi4j.config.exception.ConfigException;
 
 public class Potentiometer extends Component {
     /**
@@ -9,10 +9,11 @@ public class Potentiometer extends Component {
     private final ADS1115 ads1115;
 
     /**
-     * Input multiplexer configuration
-     */
-    private final ADS1115.MUX mux;
 
+     * AD channel connected to potentiometer (must be between 0 to 3)
+     */
+    private final int channel;
+  
     /**
      * min value which potentiometer has reached
      */
@@ -24,40 +25,37 @@ public class Potentiometer extends Component {
     private double maxValue;
 
     /**
-     * Runnable code when potentiometer change value
+     * fast continuous reading is active
      */
-    private Runnable runnable;
+    private boolean fastContiniousReadingActive = false;
 
     /**
-     * continious reading is active
+     * slow continious reading is active
      */
-    private boolean continiousReadingActive;
+    private boolean slowContiniousReadingActive = false;
 
     /**
-     * value from last read
-     */
-    private double oldValue;
-    /**
-     * value from current read
-     */
-    private double actualValue;
-
-    /**
-     * Create a new potentiometer component with custom mux and custom maxVoltage
+     * Create a new potentiometer component with custom chanel and custom maxVoltage
      *
      * @param ads1115    ads instance
-     * @param mux        custom mux
+     * @param chanel     custom ad chanel
      * @param maxVoltage custom maxVoltage
      */
-    public Potentiometer(ADS1115 ads1115, ADS1115.MUX mux, double maxVoltage) {
+    public Potentiometer(ADS1115 ads1115, int chanel, double maxVoltage) {
         this.ads1115 = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = maxVoltage;
-        this.mux = mux;
+        this.channel = chanel;
+
+        //check if chanel is in range of ad converter
+        if (chanel < 0 || chanel > 3) {
+            throw new ConfigException("Channel number for ad converter not possible, choose channel between 0 to 3");
+        }
     }
 
     /**
-     * Create a new potentiometer componentn with default mux and maxVoltage for Raspberry pi
+     * Create a new potentiometer component with default chanel and maxVoltage for Raspberry pi
+
      *
      * @param ads1115 ads instance
      */
@@ -65,7 +63,7 @@ public class Potentiometer extends Component {
         this.ads1115 = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = 3.3;
-        this.mux = ADS1115.MUX.AIN0_GND;
+        this.channel = 0;
     }
 
     /**
@@ -73,43 +71,71 @@ public class Potentiometer extends Component {
      *
      * @return voltage from potentiometer
      */
-    public Double getVoltage() {
+    public double singleShotGetVoltage() {
         double result = 0.0;
-        if (mux == ADS1115.MUX.AIN0_GND) {
-            result = ads1115.singleShotAIn0();
-        } else if (mux == ADS1115.MUX.AIN1_GND) {
-            result = ads1115.singleShotAIn1();
-        } else if (mux == ADS1115.MUX.AIN2_GND) {
-            result = ads1115.singleShotAIn2();
-        } else if (mux == ADS1115.MUX.AIN3_GND) {
-            result = ads1115.singleShotAIn3();
+        switch (channel) {
+            case 0:
+                result = ads1115.singleShotAIn0();
+                break;
+            case 1:
+                result = ads1115.singleShotAIn1();
+                break;
+            case 2:
+                result = ads1115.singleShotAIn2();
+                break;
+            case 3:
+                result = ads1115.singleShotAIn3();
+                break;
         }
-
-        if (result < minValue) {
-            minValue = result;
-        } else if (result > maxValue) {
-            maxValue = result;
-        }
-
+        updateMinMaxValue(result);
         return result;
     }
 
     /**
-     * Returns actual position of potentiometer by value from 0 to 100 %
+     * Returns normalized value from 0 to 1
      *
-     * @return position in %
+     * @return normalized value
      */
-    public Double getPercent() {
-        return getVoltage() / maxValue;
+    public double singleShotGetNormalizedValue() {
+        return singleShotGetVoltage() / maxValue;
     }
 
     /**
-     * Returns actual value from continious reading
+     * Returns actual voltage value from continious reading
      *
-     * @return actual value
+     * @return actual voltage value
      */
-    public Double getActualValue() {
-        return actualValue;
+    public double continiousReadingGetVoltage() {
+        double result = 0.0;
+        if (fastContiniousReadingActive) {
+            result = ads1115.getFastContiniousReadAI();
+        } else {
+            switch (channel) {
+                case 0:
+                    result = ads1115.getSlowContiniousReadAIn0();
+                    break;
+                case 1:
+                    result = ads1115.getSlowContiniousReadAIn1();
+                    break;
+                case 2:
+                    result = ads1115.getSlowContiniousReadAIn2();
+                    break;
+                case 3:
+                    result = ads1115.getSlowContiniousReadAIn3();
+                    break;
+            }
+        }
+        updateMinMaxValue(result);
+        return result;
+    }
+
+    /**
+     * Returns actual normalized value form 0 to 1 from continious reading
+     *
+     * @return normalized value
+     */
+    public double continiousReadingGetNormalizedValue() {
+        return continiousReadingGetVoltage() / maxValue;
     }
 
     /**
@@ -119,42 +145,31 @@ public class Potentiometer extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void setRunnable(Runnable method) {
-        this.runnable = method;
+    public void setRunnableFastRead(Runnable method) {
+        ads1115.setRunnableFastRead(method);
     }
 
     /**
-     * Sends configuration for continious reading to device, updates actual value from analog input
-     * and triggers valueChange event
+     * Sets or disables the handler for the onValueChange event.
+     * This event gets triggered whenever the value changes.
+     * Only a single event handler can be registered at once.
      *
-     * @param threshold     threshold for trigger new value change event
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      sampling rate of device
+     * @param method Event handler to call or null to disable
      */
-    private void readContiniousValue(double threshold, int readFrequency) {
-        if (readFrequency < ads1115.getSamplingRate()) {
-            logInfo("Start continious reading");
-
-            //start new thread for continuous reading
-            new Thread(() -> {
-                while (continiousReadingActive) {
-                    double result = getVoltage();
-                    logInfo("Current value: " + result);
-                    if (oldValue - threshold > result || oldValue + threshold < result) {
-                        logInfo("New event triggered on value change, old value: " + oldValue + " , new value: " + result);
-                        oldValue = actualValue;
-                        actualValue = result;
-                        runnable.run();
-                    }
-                    try {
-                        Thread.sleep(1 / readFrequency * 1000);
-                    } catch (InterruptedException e) {
-                        logError("Error: " + e);
-                    }
-                }
-            }).start();
-        } else {
-            logError("readFrequency to high");
+    public void setRunnableSlowReadChan(Runnable method) {
+        switch (channel) {
+            case 0:
+                ads1115.setRunnableSlowReadChannel0(method);
+                break;
+            case 1:
+                ads1115.setRunnableSlowReadChannel1(method);
+                break;
+            case 2:
+                ads1115.setRunnableSlowReadChannel2(method);
+                break;
+            case 3:
+                ads1115.setRunnableSlowReadChannel3(method);
+                break;
         }
     }
 
@@ -173,13 +188,18 @@ public class Potentiometer extends Component {
      * 3 chanel in use -> readFrequency max 21Hz (min. response time = 48ms)
      * 4 chanel in use -> readFrequency max 16Hz (min. response time = 63ms)
      *
-     * @param threshold     threshold for trigger new value change event (+- digit)
+     * @param threshold     threshold for trigger new value change event (+- voltage)
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
      */
     public void startSlowContiniousReading(double threshold, int readFrequency) {
-        continiousReadingActive = true;
-        readContiniousValue(threshold, readFrequency);
+        if (fastContiniousReadingActive) {
+            logDebug("fast continious reading currently active");
+        } else {
+            //set slow continuous reading active to lock fast continious reading
+            slowContiniousReadingActive = true;
+            ads1115.startSlowContiniousReading(threshold, readFrequency);
+        }
     }
 
     /**
@@ -187,27 +207,71 @@ public class Potentiometer extends Component {
      */
     public void stopSlowContiniousReading() {
         logInfo("Stop continious reading");
-        continiousReadingActive = false;
+        slowContiniousReadingActive = false;
+        ads1115.stopSlowReadContiniousReading();
     }
 
     /**
      * Starts fast continious reading. In this mode only on device can be connected to the ad converter.
      * The maximum allowed readFrequency ist equal to the sample rate of the ad converter
      *
-     * @param threshold     threshold for trigger new value change event (+- digit)
+     * @param threshold     threshold for trigger new value change event (+- voltage)
      * @param readFrequency read frequency to get new value from device, must be lower than the
      *                      sampling rate of the device
      */
-    public void startFastContiniousReading(int threshold, int readFrequency) {
-        ads1115.startContiniousReading(mux, threshold, readFrequency);
+    public void startFastContiniousReading(double threshold, int readFrequency) {
+        if (slowContiniousReadingActive) {
+            logDebug("slow continious reading currently active");
+        } else {
+            //set fast continuous reading active to lock slow continious reading
+            fastContiniousReadingActive = true;
+
+            //start continious reading on ads1115
+            ads1115.startFastContiniousReading(channel, threshold, readFrequency);
+        }
     }
 
     /**
      * stops fast continious reading
      */
     public void stopFastContiniousReading() {
-        ads1115.stopContiniousReading();
+        logInfo("Stop fast continious reading");
+        fastContiniousReadingActive = false;
+        //stop continious reading
+        ads1115.stopFastContiniousReading();
     }
 
+    /**
+     * disables all handlers
+     */
+    public void deregisterAll() {
+        switch (channel) {
+            case 0:
+                ads1115.setRunnableSlowReadChannel0(null);
+                break;
+            case 1:
+                ads1115.setRunnableSlowReadChannel1(null);
+                break;
+            case 2:
+                ads1115.setRunnableSlowReadChannel2(null);
+                break;
+            case 3:
+                ads1115.setRunnableSlowReadChannel3(null);
+                break;
+        }
+    }
 
+    /**
+     * Check if new value is bigger than current max value or lower than min value
+     * In this case update min or max value
+     *
+     * @param result value to check against min Max value
+     */
+    private void updateMinMaxValue(double result) {
+        if (result < minValue) {
+            minValue = result;
+        } else if (result > maxValue) {
+            maxValue = result;
+        }
+    }
 }

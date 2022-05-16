@@ -131,6 +131,8 @@
                         <!-- Used by PicoCLI annotation processor -->
                         <arg>-Aproject=${example.launcher.class}</arg>
                     </compilerArgs>
+                    <source>18</source>
+                    <target>18</target>
                 </configuration>
             </plugin>
 

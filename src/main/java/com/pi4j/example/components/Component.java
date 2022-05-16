@@ -20,7 +20,7 @@ public abstract class Component {
         logger.config(() -> msg);
     }
 
-    private void logDebug(String msg) {
+    protected void logDebug(String msg) {
         logger.fine(() -> msg);
     }
 
