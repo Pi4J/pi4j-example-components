@@ -343,6 +343,7 @@ public class Joystick extends Component{
         if(pushIsPresent){
             bPush.whilePressed(method, millis);
         }else{
+            //throw error
             logError("No runnable on buttonPushWhilePressed.");
         }
 

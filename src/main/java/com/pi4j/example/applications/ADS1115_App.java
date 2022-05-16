@@ -3,6 +3,7 @@ package com.pi4j.example.applications;
 import com.pi4j.context.Context;
 import com.pi4j.example.Application;
 import com.pi4j.example.components.ADS1115;
+import static java.lang.Thread.sleep;
 
 import static java.lang.Thread.sleep;
 

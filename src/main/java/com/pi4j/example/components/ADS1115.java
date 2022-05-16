@@ -5,6 +5,7 @@ import com.pi4j.context.Context;
 import com.pi4j.example.helpers.ContiniousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import java.util.concurrent.RunnableFuture;
 
@@ -52,6 +53,7 @@ public class ADS1115 extends Component {
     /**
      * sampling rate of device
      */
+
     private final DR dr;
 
     /**
@@ -75,6 +77,7 @@ public class ADS1115 extends Component {
     private final int compQue;
 
     /**
+
      * actual value form conversion register (raw data)
      */
     private int[] actualValue = new int[4];
@@ -1075,20 +1078,24 @@ public class ADS1115 extends Component {
         /**
          * 860 sampling per second
          */
+
         SPS_860(0b0000_0000_1110_0000, 860),
         /**
          * With an AND operation all other parameters will be set to 0
          */
         CLR_OTHER_CONF_PARAM(0b0000_0000_1110_0000, 0),
+
         /**
          * With an AND operation the current parameters will be set to 0
          * all other parameters remain unchanged
          */
+
         CLR_CURRENT_CONF_PARAM(0b1111_1111_0001_1111, 0);
         /**
          * configuration
          */
         private final int conf;
+
         /**
          * sampling per second
          */

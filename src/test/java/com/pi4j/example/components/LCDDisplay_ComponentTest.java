@@ -28,7 +28,7 @@ public class LCDDisplay_ComponentTest extends ComponentTest{
     @Test
     void testWriteTooLongText() {
         // when
-        String text = "too long text to write the display";
+        String text = "too long text to write the 2x16 display";
 
         // then
         assertThrows(IllegalArgumentException.class, () -> {

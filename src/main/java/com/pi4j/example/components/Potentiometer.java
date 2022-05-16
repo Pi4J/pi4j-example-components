@@ -9,9 +9,11 @@ public class Potentiometer extends Component {
     private final ADS1115 ads1115;
 
     /**
+
      * AD channel connected to potentiometer (must be between 0 to 3)
      */
     private final int channel;
+  
     /**
      * min value which potentiometer has reached
      */
@@ -53,6 +55,7 @@ public class Potentiometer extends Component {
 
     /**
      * Create a new potentiometer component with default chanel and maxVoltage for Raspberry pi
+
      *
      * @param ads1115 ads instance
      */

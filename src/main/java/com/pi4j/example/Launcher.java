@@ -27,10 +27,11 @@ public final class Launcher implements Runnable {
         new SimpleButton_App(),
         new SimpleLED_App(),
         new LEDButton_App(),
-            new Joystick_App(),
-            new ADS1115_App(),
-            new Potentiometer_App(),
-            new JoystickAnalog_App()
+        new Joystick_App(),
+        new ADS1115_App(),
+        new LCDDisplay_App(),
+        new Potentiometer_App(),
+        new JoystickAnalog_App()
     ));
 
     /**
