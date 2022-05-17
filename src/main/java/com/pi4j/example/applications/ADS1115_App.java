@@ -67,13 +67,13 @@ public class ADS1115_App implements Application {
         });
 
         //start continious measuring
-        ads1115.startSlowContiniousReading(0.1, 10);
+        ads1115.startSlowContiniousReadingAllChannels(0.1, 10);
 
         // Wait while handling events before exiting
         delay(30000);
 
         //stop continious measuring
-        ads1115.stopSlowReadContiniousReading();
+        ads1115.stopSlowReadContiniousReadingAllChannels();
 
         //deregister all handlers
         ads1115.deregisterAll();

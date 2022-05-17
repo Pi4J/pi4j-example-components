@@ -9,7 +9,7 @@ public class Potentiometer extends Component {
     private final ADS1115 ads1115;
 
     /**
-     * AD channel connected to potentiometer (must be between 0 to 3)
+     * AD channel connected to potentiometer (must be between 0 and 3)
      */
     private final int channel;
     /**
@@ -195,7 +195,7 @@ public class Potentiometer extends Component {
         } else {
             //set slow continuous reading active to lock fast continious reading
             slowContiniousReadingActive = true;
-            ads1115.startSlowContiniousReading(threshold, readFrequency);
+            ads1115.startSlowContiniousReading(channel, threshold, readFrequency);
         }
     }
 
@@ -205,7 +205,7 @@ public class Potentiometer extends Component {
     public void stopSlowContiniousReading() {
         logInfo("Stop continious reading");
         slowContiniousReadingActive = false;
-        ads1115.stopSlowReadContiniousReading();
+        ads1115.stopSlowReadContiniousReading(channel);
     }
 
     /**
