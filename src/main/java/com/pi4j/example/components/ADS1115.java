@@ -7,6 +7,7 @@ import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ADS1115 extends Component {
     /**
@@ -96,10 +97,20 @@ public class ADS1115 extends Component {
      */
     private boolean[] continiousReadingActiveChannel;
     /**
+     * has value form one chanel changed during slow continious reading
+     * yes triggers runnable for this channel
+     */
+    private boolean[] valueHasChanged;
+    /**
      * true if first read from continious reading is done -> array actual value has value stored
      * these values can now be read by getSlowContiniousRead and getFastContiniousRead
      */
     private boolean firstReadDone;
+    /**
+     * during this time, not value read is allowed -> consistence data all 4 values are
+     * always from the same ads1115 cycle
+     */
+    private boolean blockRead;
     /**
      * The Conversion register contains the result of the last conversion.
      */
@@ -126,7 +137,6 @@ public class ADS1115 extends Component {
      * Runnable code when current value from slow read is changed
      */
     private Runnable[] runnableSlowRead;
-
     /**
      * Config register default configuration
      */
@@ -146,6 +156,7 @@ public class ADS1115 extends Component {
         this.numberOfChannels = numberOfChannels;
         this.runnableSlowRead = new Runnable[numberOfChannels];
         this.continiousReadingActiveChannel = new boolean[numberOfChannels];
+        this.valueHasChanged = new boolean[numberOfChannels];
 
         //write default configuration
         this.os = OS.WRITE_START.getOs();
@@ -177,7 +188,9 @@ public class ADS1115 extends Component {
     public ADS1115(Context pi4j) {
         this.context = pi4j;
         this.numberOfChannels = 1;
-        this.runnableSlowRead = new Runnable[1];
+        this.runnableSlowRead = new Runnable[numberOfChannels];
+        this.continiousReadingActiveChannel = new boolean[numberOfChannels];
+        this.valueHasChanged = new boolean[numberOfChannels];
 
         //write default configuration
         this.os = OS.WRITE_START.getOs();
@@ -293,16 +306,22 @@ public class ADS1115 extends Component {
      */
     public void startFastContiniousReading(int channel, double threshold, int readFrequency) {
         //only if continious reading is not set to true by other component
-        if (!continiousReadingActive){
+        if (!continiousReadingActive) {
             //get mux from channel
             MUX mux = MUX.AIN0_GND;
-            switch (channel){
-                case 1 : mux = MUX.AIN1_GND; break;
-                case 2 : mux = MUX.AIN2_GND; break;
-                case 3 : mux = MUX.AIN3_GND; break;
+            switch (channel) {
+                case 1:
+                    mux = MUX.AIN1_GND;
+                    break;
+                case 2:
+                    mux = MUX.AIN2_GND;
+                    break;
+                case 3:
+                    mux = MUX.AIN3_GND;
+                    break;
             }
-            fastReadContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
             continiousReadingActive = true;
+            fastReadContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
             logDebug("Start fast continious reading");
         }
     }
@@ -328,9 +347,9 @@ public class ADS1115 extends Component {
     public void startSlowContiniousReading(int channel, double threshold, int readFrequency) {
         logDebug("Start slow continious reading chanel " + channel);
         //only start continious Reading if it is not already running because of other component
-        if(!continiousReadingActive){
-            slowReadContiniousValue(threshold, readFrequency);
+        if (!continiousReadingActive) {
             continiousReadingActive = true;
+            slowReadContiniousValue(threshold, readFrequency);
         }
         continiousReadingActiveChannel[channel] = true;
     }
@@ -342,8 +361,8 @@ public class ADS1115 extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
      */
-    public void startSlowContiniousReadingAllChannels(double threshold, int readFrequency){
-        for(int i = 0; i < numberOfChannels; i++){
+    public void startSlowContiniousReadingAllChannels(double threshold, int readFrequency) {
+        for (int i = 0; i < numberOfChannels; i++) {
             startSlowContiniousReading(i, threshold, readFrequency);
         }
     }
@@ -356,11 +375,12 @@ public class ADS1115 extends Component {
     public void stopSlowReadContiniousReading(int channel) {
         logDebug("Stop continious reading channel " + channel);
         continiousReadingActiveChannel[channel] = false;
-        for(int i = 0; i < continiousReadingActiveChannel.length; i++){
-            if(continiousReadingActiveChannel[i]){
+        for (int i = 0; i < continiousReadingActiveChannel.length; i++) {
+            if (continiousReadingActiveChannel[i]) {
                 return;
             }
         }
+
         continiousReadingActive = false;
         firstReadDone = false;
     }
@@ -368,8 +388,8 @@ public class ADS1115 extends Component {
     /**
      * stops slow continious reading on all channels
      */
-    public void stopSlowReadContiniousReadingAllChannels(){
-        for(int i = 0; i < numberOfChannels; i++){
+    public void stopSlowReadContiniousReadingAllChannels() {
+        for (int i = 0; i < numberOfChannels; i++) {
             stopSlowReadContiniousReading(i);
         }
     }
@@ -529,7 +549,7 @@ public class ADS1115 extends Component {
      */
     public void deregisterAll() {
         setRunnableFastRead(null);
-        for (int i = 1; i < 4; i++){
+        for (int i = 1; i < 4; i++) {
             runnableSlowRead[i] = null;
         }
     }
@@ -629,18 +649,29 @@ public class ADS1115 extends Component {
             //start new thread for continuous reading
             new Thread(() -> {
                 while (continiousReadingActive) {
+                    //start measuring time
+                    long startTime = System.nanoTime();
+
                     int result = readConversionRegister();
                     //logInfo("Current value: " + result);
                     //convert threshold voltage to digits
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
-                    if (oldValue[0]- thresholdDigits > result || oldValue[0] + thresholdDigits < result) {
+                    if (oldValue[0] - thresholdDigits > result || oldValue[0] + thresholdDigits < result) {
                         //logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
                         oldValue[0] = actualValue[0];
                         actualValue[0] = result;
-                        runnableFastRead.run();
-                        firstReadDone = true;
+                        if (firstReadDone && runnableFastRead != null) {
+                            runnableFastRead.run();
+                        }
                     }
-                    delay(1 / readFrequency * 1000);
+                    firstReadDone = true;
+                    //stop measuring time
+                    long stopTime = System.nanoTime();
+                    long delta = stopTime - startTime;
+                    long restDelay = (1 / readFrequency * 1000) - delta;
+                    restDelay = (restDelay > 0) ? restDelay : 0;
+                    //wait for rest of the cycle time
+                    delay(restDelay);
                 }
             }).start();
         } else {
@@ -656,12 +687,12 @@ public class ADS1115 extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      the sampling rate of the device
      */
-    private void slowReadContiniousValue(double threshold, int readFrequency){
-        //summ of readFrequency of all channels must be lower than 1/2 sampling rate
+    private void slowReadContiniousValue(double threshold, int readFrequency) {
+        //sum of readFrequency of all channels must be lower than 1/2 sampling rate
         if (readFrequency * numberOfChannels * 2 < dr.getSpS()) {
-            logInfo("Start continious reading");
+            logDebug("Start continious reading");
             //start new thread for continuous reading
-            new Thread(()-> {
+            new Thread(() -> {
                 while (continiousReadingActive) {
                     //start measuring time
                     long startTime = System.nanoTime();
@@ -670,41 +701,54 @@ public class ADS1115 extends Component {
                     //at least on chanel bust be activated
                     result[0] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
                     //if at least two channels are activated
-                    if (numberOfChannels > 1){
+                    if (numberOfChannels > 1) {
                         result[1] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
                     }
                     //if at least three channels are activated
-                    if (numberOfChannels > 2){
+                    if (numberOfChannels > 2) {
                         result[2] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
                     }
                     //if all 4 channels are activated
-                    if (numberOfChannels > 3){
+                    if (numberOfChannels > 3) {
                         result[3] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
                     }
                     //convert threshold voltage to digits
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
-                    for(int i = 0; i < numberOfChannels; i++){
-                        if (oldValue[i]- thresholdDigits > result[i] || oldValue[i] + thresholdDigits < result[i]) {
-                            //logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
+                    //block read from actualValue array until the next few lines are processed (until blockRead is false again)
+                    blockRead = true;
+                    for (int i = 0; i < numberOfChannels; i++) {
+                        if (oldValue[i] - thresholdDigits > result[i] || oldValue[i] + thresholdDigits < result[i]) {
+                            //logInfo("New event triggered on value change, old value: " + oldValue[i] + " , new value: " + result[i]);
                             oldValue[i] = actualValue[i];
                             actualValue[i] = result[i];
-                            if (runnableSlowRead[i] != null){
-                                runnableSlowRead[i].run();
-                            }
-                            firstReadDone = true;
+                            //valueHasChanged not active during first read
+                            valueHasChanged[i] = firstReadDone;
                         }
                     }
+                    //read from activeValue array are allowed again
+                    blockRead = false;
+                    //initial firs read is done, value can now be read from actual value array
+                    firstReadDone = true;
+
+                    //call runnable if value has changed
+                    for (int i = 0; i < numberOfChannels; i++) {
+                        if (valueHasChanged[i] && runnableSlowRead[i] != null) {
+                            runnableSlowRead[i].run();
+                            valueHasChanged[i] = false;
+                        }
+                    }
+
                     //stop measuring time
                     long stopTime = System.nanoTime();
                     long delta = stopTime - startTime;
-                    long restDelay = (1/readFrequency * 1000) -delta;
-                    restDelay = (restDelay > 0)? restDelay : 0;
-                    //wait for rest of the cycletime
+                    long restDelay = (1 / readFrequency * 1000) - delta;
+                    restDelay = (restDelay > 0) ? restDelay : 0;
+                    //wait for rest of the cycle time
                     delay(restDelay);
                 }
             }).start();
         } else {
-            logError("readFrequency to high");
+            logInfo("readFrequency to high");
         }
     }
 
@@ -714,11 +758,17 @@ public class ADS1115 extends Component {
      * @param channel custom channel
      * @return voltage value
      */
-    private double getSlowContiniousReadAI(int channel){
+    private double getSlowContiniousReadAI(int channel) {
         if (!continiousReadingActive) throw new ContiniousMeasuringException("Continious measuring not active");
         //if first read is not done -> no value are stored in array
         while (!firstReadDone) {
             delay(dr.getSpS() / (2 * numberOfChannels));
+        }
+        //if values are written to array no read is allowed
+        //data consistency all 4 values are always from the
+        //same ads1115 read cycle
+        while (blockRead) {
+            delay(1);
         }
         return pga.gainPerBit() * actualValue[channel];
     }

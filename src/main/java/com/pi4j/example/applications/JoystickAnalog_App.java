@@ -33,12 +33,8 @@ public class JoystickAnalog_App implements Application {
 
         joystick.start(0.1,10);
 
-        delay(1000);
-
         System.out.println("Joystick x value before calibration is: " +  String.format("%.3f", joystick.getXValue()));
         System.out.println("Joystick y value before calibration is: " +  String.format("%.3f", joystick.getYValue()));
-
-        delay(1000);
 
         joystick.stop();
 
@@ -48,12 +44,8 @@ public class JoystickAnalog_App implements Application {
 
         joystick.start(0.1, 10);
 
-        delay(1000);
-
         System.out.println("Joystick x value after calibration is: " +  String.format("%.3f", joystick.getXValue()));
         System.out.println("Joystick y value after calibration is: " +  String.format("%.3f", joystick.getYValue()));
-
-        delay(1000);
 
         joystick.stop();
 
@@ -70,8 +62,7 @@ public class JoystickAnalog_App implements Application {
         //stop continious reading
         joystick.stop();
 
-        delay(1000
-        );
+        delay(1000);
 
         //deregister all event handlers
         joystick.deregisterAll();
