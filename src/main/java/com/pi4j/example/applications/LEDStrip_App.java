@@ -14,68 +14,34 @@ public class LEDStrip_App implements Application {
         final var ledstrip = new LEDStrip(pi4j, pixels, 127);
 
         //set them all off, so nothing is shining
-        logger.info("Starting with setting all leds off");
-        //ledstrip.allOff();
+        logInfo("Starting with setting all leds off");
+        ledstrip.allOff();
+
+        logInfo("setting the leds to RED");
         ledstrip.setStripColor(PixelColor.RED);
         ledstrip.render();
-        /*for(int i = 0; i < 1; i++){
-
-            //increment red value
-            logger.info("setting the leds to a shade of red");
-            int red = 0;
-            for (int j = 0; j < pixels; j++) {
-                ledstrip.setPixelColor(j, red);
-                red += 255 / pixels;
-            }
-            //show it on the strip
-            ledstrip.render();
-            delay(2000);
-
-            //increment green value
-            logger.info("setting the leds to a shade of green");
-            int green = 0;
-            for (int j = 0; j < pixels; j++) {
-                ledstrip.setPixelColor(j, green);
-                green += 255 / pixels;
-            }
-            //show it on the strip
-            ledstrip.render();
-            delay(2000);
-
-            //increment blue value
-            logger.info("setting the leds to a shade of blue");
-            int blue = 0;
-            for (int j = 0; j < pixels; j++) {
-                ledstrip.setPixelColor(j, blue);
-                blue += 255 / pixels;
-            }
-            //show it on the strip
-            ledstrip.render();
-            delay(2000);
-        }*/
-
-        /*logger.info("setting the leds to RED");
-        ledstrip.setStripColor(PixelColor.RED);
-        ledstrip.render();
-        logger.info("Color "+ ledstrip.getPixelColor(0));
         delay(3000);
 
-        logger.info("setting the leds to WHITE");
-        ledstrip.setStripColor(PixelColor.WHITE);
+        logInfo("setting the leds to Light Blue");
+        ledstrip.setStripColor(PixelColor.LIGHT_BLUE);
         ledstrip.render();
-        logger.info("Color "+ ledstrip.getPixelColor(0));
         delay(3000);
 
-        logger.info("setting the first led to RED");
-        ledstrip.setPixelColor(0, PixelColor.RED);
+        logInfo("setting the first led to Purple");
+        ledstrip.setPixelColor(0, PixelColor.PURPLE);
         ledstrip.render();
-        logger.info("Color "+ ledstrip.getPixelColor(0));
+        delay(3000);
+
+        logInfo("setting the brightness to full and just show the first led as White");
+        ledstrip.allOff();
+        ledstrip.setBrightness(255);
+        ledstrip.setPixelColor(0, PixelColor.WHITE);
+        ledstrip.render();
         delay(3000);
 
         //finishing and closing
         ledstrip.close();
-        logger.info("closing the app");
-        logger.info("Color "+ ledstrip.getPixelColor(0));
-        */
+        logInfo("closing the app");
+        logInfo("Color "+ ledstrip.getPixelColor(0));
     }
 }
