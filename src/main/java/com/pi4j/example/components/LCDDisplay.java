@@ -68,23 +68,44 @@ public class LCDDisplay extends Component {
     private byte displayControl;
     private boolean backlight;
 
+    /**
+     * Creates a new LCDDisplay component with default values
+     *
+     * @param pi4j
+     */
+    public LCDDisplay(Context pi4j){
+        this.CONTEXT = pi4j;
+        this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
+    }
+
+    /**
+     * Creates a new LCDDisplay component with custom rows and columns
+     *
+     * @param pi4j      Pi4J context
+     * @param ROWS      Custom amount of display lines
+     * @param COLUMNS   Custom amount of chars on line
+     */
     public LCDDisplay(Context pi4j, int ROWS, int COLUMNS) {
-        this(createI2C(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
         this.ROWS = ROWS;
         this.COLUMNS = COLUMNS;
         this.CONTEXT = pi4j;
+        this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
     }
 
+    /**
+     * Creates a new LCDDisplay component with custom rows and columns
+     *
+     * @param pi4j      Pi4J context
+     * @param ROWS      Custom amount of display lines
+     * @param COLUMNS   Custom amount of chars on line
+     * @param bus       Custom I2C bus address
+     * @param device    Custom I2C device Address
+     */
     public LCDDisplay(Context pi4j, int ROWS, int COLUMNS, int bus, int device) {
-        this(createI2C(pi4j, bus, device));
         this.ROWS = ROWS;
         this.COLUMNS = COLUMNS;
         this.CONTEXT = pi4j;
-    }
-
-    public LCDDisplay(I2C device) {
-        i2c = device;
-        init();
+        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, device));
     }
 
     /**
@@ -95,15 +116,13 @@ public class LCDDisplay extends Component {
      * @param device The I2C Device
      * @return A Provider of an I2C Bus
      */
-    private static I2C createI2C(Context pi4j, int bus, int device) {
-        I2CProvider i2CProvider = pi4j.getI2CProvider();
-        I2CConfig i2cConfig = I2C.newConfigBuilder(pi4j)
+    private I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
+        return I2C.newConfigBuilder(pi4j)
                 .id("I2C-" + device + "@" + bus)
                 .name("PCF8574AT")
                 .bus(bus)
                 .device(device)
                 .build();
-        return i2CProvider.create(i2cConfig);
     }
 
     /**

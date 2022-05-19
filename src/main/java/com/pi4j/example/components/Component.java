@@ -8,11 +8,20 @@ public abstract class Component {
      */
     protected final Logger logger = Logger.getLogger(getClass().getName());
 
-    protected void logInfo(String msg){
+    protected void logInfo(String msg) {
         logger.info(() -> msg);
     }
-    protected void logError(String msg){
+
+    protected void logError(String msg) {
         logger.severe(() -> msg);
+    }
+
+    protected void logConfig(String msg) {
+        logger.config(() -> msg);
+    }
+
+    protected void logDebug(String msg) {
+        logger.fine(() -> msg);
     }
 
     /**

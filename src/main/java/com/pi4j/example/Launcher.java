@@ -16,7 +16,6 @@ import com.pi4j.plugin.raspberrypi.platform.RaspberryPiPlatform;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,13 +26,15 @@ public final class Launcher implements Runnable {
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
     public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
-            new SimpleButton_App(),
-            new SimpleLED_App(),
-            new LEDButton_App(),
-            new Joystick_App(),
-            new ADS1115_App(),
-            new LCDDisplay_App(),
-            new LEDStrip_App()
+        new SimpleButton_App(),
+        new SimpleLED_App(),
+        new LEDButton_App(),
+        new Joystick_App(),
+        new ADS1115_App(),
+        new LCDDisplay_App(),
+        new Potentiometer_App(),
+        new JoystickAnalog_App(),
+        new LEDStrip_App()
     ));
 
     /**
