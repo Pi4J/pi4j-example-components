@@ -3,7 +3,6 @@ package com.pi4j.example.applications;
 import com.pi4j.context.Context;
 import com.pi4j.example.Application;
 import com.pi4j.example.components.LEDStrip;
-import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.example.components.helpers.PixelColor;
 
 public class LEDStrip_App implements Application {

@@ -8,7 +8,7 @@ import com.pi4j.io.spi.SpiMode;
 
 import java.util.Arrays;
 
-public class LEDStrip extends Component {
+public class LEDMatrix extends Component{
 
     protected static final int DEFAULT_CHANNEL = 0;
 
@@ -17,12 +17,12 @@ public class LEDStrip extends Component {
 
     protected final Spi spi;
     protected final Context context;
-    private final int numLeds;
     private final int frequency;
     private final int renderWaitTime;
     /** Brightness value between 0 and 255 */
     private int brightness;
-    private final int[] leds;
+    private final int[][] matrix;
+    private int numLeds;
     private final byte[] pixelRaw;
     private long lastRenderTime;
 
@@ -31,33 +31,52 @@ public class LEDStrip extends Component {
     private final byte Bit_Reset = (byte) 0b00000000;// 0 in Decimal
 
     /**
-     * Creates a new simpleLed component with a custom BCM pin.
+     * Creates a new LEDMatrix with the defined Matrix.
+     * You can give in something like int[3][4] or
+     * matrix = {{1, -2, 3},
+     * {-4, -5, 6, 9},
+     * {7}}
      *
      * @param pi4j    Pi4J context
-     * @param numLeds How many LEDs are on this Strand
+     * @param matrix How many LEDs are on this Strand
      * @param brightness How bright the leds can be at max, Range 0 - 255
      */
-    public LEDStrip(Context pi4j, int numLeds, int brightness) {
-        this(pi4j, numLeds, brightness, DEFAULT_CHANNEL);
+    public LEDMatrix(Context pi4j, int[][] matrix, int brightness) {
+        this(pi4j, matrix, brightness, DEFAULT_CHANNEL);
+    }
+
+    /**
+     * Creates a new LEDMatrix with the defined rows and columns
+     *
+     * @param pi4j      Pi4J context
+     * @param Rows      How many Rows of LED
+     * @param Columns   How many columns of LED
+     * @param brightness How bright the leds can be at max, Range 0 - 255
+     */
+    public LEDMatrix(Context pi4j, int Rows, int Columns, int brightness) {
+        this(pi4j, new int[Rows][Columns], brightness, DEFAULT_CHANNEL);
     }
 
     /**
      * Creates a new simpleLed component with a custom BCM pin.
      *
      * @param pi4j    Pi4J context
-     * @param numLeds How many LEDs are on this Strand
+     * @param matrix How many LEDs are on this Strand
      * @param brightness How bright the leds can be at max, Range 0 - 255
      * @param channel which channel to use
      */
-    public LEDStrip(Context pi4j, int numLeds, int brightness, int channel) {
-        logger.info("initialising a ledstrip with " + numLeds + " leds");
-        this.numLeds = numLeds;
-        this.leds = new int[numLeds];
+    public LEDMatrix(Context pi4j, int[][] matrix, int brightness, int channel) {
+        this.matrix = matrix;
         this.brightness = brightness;
         this.frequency = 800_000;
         this.context = pi4j;
         this.spi = pi4j.create(buildSpiConfig(pi4j, channel, frequency));
 
+        // Allocate SPI transmit buffer (same size as PCM)
+        this.numLeds = 0;
+        for (int[] ints : matrix) {
+            this.numLeds += ints.length;
+        }
         // The raw bytes that get sent to the ledstrip
         // 3 Color channels per led, at 8 bytes each, with 2 reset bytes
         pixelRaw = new byte[(3*numLeds*8)+2];
@@ -98,12 +117,24 @@ public class LEDStrip extends Component {
     }
 
     /**
-     * function to get the amount of the leds on the strip
+     * function to get the amount of the leds in the matrix
      *
-     * @return int with the amount of pixels
+     * @return int with the amount of leds over all
      */
     public int getNumPixels() {
         return numLeds;
+    }
+
+    /**
+     * function to get the amount of the leds in the specified strip
+     *
+     * @return int with the amount of leds over all
+     */
+    public int getNumPixels(int strip) {
+        if (strip > matrix.length || strip < 0) {
+            throw new IllegalArgumentException("the strip specified does not exist");
+        }
+        return matrix[strip].length;
     }
 
     /**
@@ -112,8 +143,11 @@ public class LEDStrip extends Component {
      * @param pixel which position on the ledstrip, range 0 - numLEDS-1
      * @return the color of the specified led on the strip
      */
-    public int getPixelColor(int pixel) {
-        return leds[pixel];
+    public int getPixelColor(int strip, int pixel) {
+        if (strip > matrix.length || strip < 0 || pixel > matrix[strip].length || pixel < 0) {
+            throw new IllegalArgumentException("the strip or led specified does not exist");
+        }
+        return matrix[strip][pixel];
     }
 
     /**
@@ -122,8 +156,23 @@ public class LEDStrip extends Component {
      * @param pixel which position on the strip, range 0 - numLEDS-1
      * @param color the color that is set
      */
-    public void setPixelColor(int pixel, int color) {
-        leds[pixel] = color;
+    public void setPixelColor(int strip, int pixel, int color) {
+        if (strip > matrix.length || strip < 0 || pixel > matrix[strip].length || pixel < 0) {
+            throw new IllegalArgumentException("the strip or led specified does not exist");
+        }
+        matrix[strip][pixel] = color;
+    }
+
+    /**
+     * Setting all leds of a Row to the same color
+     *
+     * @param color the color that is set
+     */
+    public void setStripColor(int strip, int color) {
+        if (strip > matrix.length || strip < 0) {
+            throw new IllegalArgumentException("the strip specified does not exist");
+        }
+        Arrays.fill(matrix[strip], color);
     }
 
     /**
@@ -131,9 +180,13 @@ public class LEDStrip extends Component {
      *
      * @param color the color that is set
      */
-    public void setStripColor(int color) {
-        Arrays.fill(leds, color);
+    public void setMatrixColor(int color) {
+        for (int[] ints : matrix) {
+            Arrays.fill(ints, color);
+        }
     }
+
+    //TODO maybe add function to write? or something like that
 
     /**
      * Pixels are sent as follows: - The first transmitted pixel is the pixel
@@ -148,33 +201,35 @@ public class LEDStrip extends Component {
     public void render() {
         //beginning at 1, because the first byte is a reset
         int counter = 1;
-        for (int i = 0; i < numLeds; i++) {
+        for (int x = 0; x < matrix.length; x++) {
+            for (int i = 0; i < matrix[x].length; i++) {
 
-            //Scaling the color to the max brightness
-            leds[i] = PixelColor.setRedComponent(leds[i], PixelColor.getRedComponent(leds[i])*brightness/256);
-            leds[i] = PixelColor.setGreenComponent(leds[i], PixelColor.getGreenComponent(leds[i])*brightness/256);
-            leds[i] = PixelColor.setBlueComponent(leds[i], PixelColor.getBlueComponent(leds[i])*brightness/256);
+                //Scaling the color to the max brightness
+                matrix[x][i] = PixelColor.setRedComponent(matrix[x][i], PixelColor.getRedComponent(matrix[x][i])*brightness/256);
+                matrix[x][i] = PixelColor.setGreenComponent(matrix[x][i], PixelColor.getGreenComponent(matrix[x][i])*brightness/256);
+                matrix[x][i] = PixelColor.setBlueComponent(matrix[x][i], PixelColor.getBlueComponent(matrix[x][i])*brightness/256);
 
-            /* Calculatin GRB from RGB */
-            for (int j = 15; j >= 8; j--) {
-                if(((leds[i] >> j) & 1) == 1){
-                    pixelRaw[counter++] = Bit_1;
-                }else{
-                    pixelRaw[counter++] = Bit_0;
+                /* Calculatin GRB from RGB */
+                for (int j = 15; j >= 8; j--) {
+                    if(((matrix[x][i] >> j) & 1) == 1){
+                        pixelRaw[counter++] = Bit_1;
+                    }else{
+                        pixelRaw[counter++] = Bit_0;
+                    }
                 }
-            }
-            for (int j = 23; j >= 16; j--) {
-                if(((leds[i] >> j) & 1) == 1){
-                    pixelRaw[counter++] = Bit_1;
-                }else{
-                    pixelRaw[counter++] = Bit_0;
+                for (int j = 23; j >= 16; j--) {
+                    if(((matrix[x][i] >> j) & 1) == 1){
+                        pixelRaw[counter++] = Bit_1;
+                    }else{
+                        pixelRaw[counter++] = Bit_0;
+                    }
                 }
-            }
-            for (int j = 7; j >= 0; j--) {
-                if(((leds[i] >> j) & 1) == 1){
-                    pixelRaw[counter++] = Bit_1;
-                }else{
-                    pixelRaw[counter++] = Bit_0;
+                for (int j = 7; j >= 0; j--) {
+                    if(((matrix[x][i] >> j) & 1) == 1){
+                        pixelRaw[counter++] = Bit_1;
+                    }else{
+                        pixelRaw[counter++] = Bit_0;
+                    }
                 }
             }
         }
@@ -204,7 +259,9 @@ public class LEDStrip extends Component {
      * setting all leds off
      */
     public void allOff() {
-        Arrays.fill(leds, 0);
+        for (int i = 0; i < matrix.length; i++) {
+            Arrays.fill(matrix[i], 0);
+        }
         render();
     }
 
