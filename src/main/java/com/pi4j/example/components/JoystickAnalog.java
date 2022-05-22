@@ -3,6 +3,8 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.example.components.helpers.PIN;
 
+import java.util.function.Consumer;
+
 public class JoystickAnalog extends Component {
     /**
      * potentiometer x axis
@@ -72,8 +74,8 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void xOnMove(Runnable task) {
-        x.setRunnableSlowReadChan(task);
+    public void xOnMove(Consumer<Double> task) {
+        x.setConsumerSlowReadChan(task);
     }
 
     /**
@@ -83,8 +85,8 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void yOnMove(Runnable task) {
-        y.setRunnableSlowReadChan(task);
+    public void yOnMove(Consumer<Double> task) {
+        y.setConsumerSlowReadChan(task);
     }
 
     /**
@@ -118,41 +120,6 @@ public class JoystickAnalog extends Component {
      */
     public void pushWhilePressed(Runnable task, long whilePressedDelay) {
         push.whilePressed(task, whilePressedDelay);
-    }
-
-    /**
-     * Returns the normalized value form 0 to 1 for x direction.
-     *
-     * @return normalized value
-     */
-    public double getXValue() {
-        double result = x.continiousReadingGetNormalizedValue() + xOffset;
-
-        result = Math.max(result, 0.0);
-        result = Math.min(result, 1.0);
-
-        if (!normalized0to1) {
-            result = rescaleValue(result);
-        }
-        return result;
-    }
-
-    /**
-     * Returns the normalized value form 0 to 1 for y direction.
-     *
-     * @return normalized value
-     */
-    public double getYValue() {
-        double result = y.continiousReadingGetNormalizedValue() + yOffset;
-
-        result = Math.max(result, 0.0);
-        result = Math.min(result, 1.0);
-
-        if (!normalized0to1) {
-            result = rescaleValue(result);
-        }
-
-        return result;
     }
 
     /**

@@ -9,7 +9,7 @@ import com.pi4j.example.components.helpers.PIN;
 public class JoystickAnalog_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        logInfo("Joystick test started ...");
+        System.out.println("Joystick test started ...");
 
         ADS1115 ads1115 = new ADS1115(pi4j, 0x01, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
 
@@ -20,11 +20,11 @@ public class JoystickAnalog_App implements Application {
         //JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, false, PIN.D26);
 
         //register event handlers
-        joystick.xOnMove(() -> {
-            logInfo("Current value of joystick x axis is: " + String.format("%.3f", joystick.getXValue()));
+        joystick.xOnMove((value) -> {
+            System.out.println("Current value of joystick x axis is: " + String.format("%.3f", value));
         });
-        joystick.yOnMove(() -> {
-            logInfo("Current value of joystick y axis is: " + String.format("%.3f", joystick.getYValue()));
+        joystick.yOnMove((value) -> {
+            System.out.println("Current value of joystick y axis is: " + String.format("%.3f", value));
         });
 
         joystick.pushOnDown(() -> logInfo("Pressing the Button"));
@@ -33,8 +33,7 @@ public class JoystickAnalog_App implements Application {
 
         joystick.start(0.1,10);
 
-        System.out.println("Joystick x value before calibration is: " +  String.format("%.3f", joystick.getXValue()));
-        System.out.println("Joystick y value before calibration is: " +  String.format("%.3f", joystick.getYValue()));
+        delay(1000);
 
         joystick.stop();
 
@@ -44,8 +43,7 @@ public class JoystickAnalog_App implements Application {
 
         joystick.start(0.1, 10);
 
-        System.out.println("Joystick x value after calibration is: " +  String.format("%.3f", joystick.getXValue()));
-        System.out.println("Joystick y value after calibration is: " +  String.format("%.3f", joystick.getYValue()));
+        delay(1000);
 
         joystick.stop();
 

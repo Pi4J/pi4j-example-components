@@ -2,6 +2,8 @@ package com.pi4j.example.components;
 
 import com.pi4j.config.exception.ConfigException;
 
+import java.util.function.Consumer;
+
 public class Potentiometer extends Component {
     /**
      * ads1115 instance
@@ -98,41 +100,14 @@ public class Potentiometer extends Component {
     }
 
     /**
-     * Returns actual voltage value from continious reading
+     * Sets or disables the handler for the onValueChange event.
+     * This event gets triggered whenever the value changes.
+     * Only a single event handler can be registered at once.
      *
-     * @return actual voltage value
+     * @param method Event handler to call or null to disable
      */
-    public double continiousReadingGetVoltage() {
-        double result = 0.0;
-        if (fastContiniousReadingActive) {
-            result = ads1115.getFastContiniousReadAI();
-        } else {
-            switch (channel) {
-                case 0:
-                    result = ads1115.getSlowContiniousReadAIn0();
-                    break;
-                case 1:
-                    result = ads1115.getSlowContiniousReadAIn1();
-                    break;
-                case 2:
-                    result = ads1115.getSlowContiniousReadAIn2();
-                    break;
-                case 3:
-                    result = ads1115.getSlowContiniousReadAIn3();
-                    break;
-            }
-        }
-        updateMinMaxValue(result);
-        return result;
-    }
-
-    /**
-     * Returns actual normalized value form 0 to 1 from continious reading
-     *
-     * @return normalized value
-     */
-    public double continiousReadingGetNormalizedValue() {
-        return continiousReadingGetVoltage() / maxValue;
+    public void setConsumerFastRead(Consumer<Double> method) {
+        ads1115.setConsumerFastRead(method);
     }
 
     /**
@@ -142,30 +117,19 @@ public class Potentiometer extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void setRunnableFastRead(Runnable method) {
-        ads1115.setRunnableFastRead(method);
-    }
-
-    /**
-     * Sets or disables the handler for the onValueChange event.
-     * This event gets triggered whenever the value changes.
-     * Only a single event handler can be registered at once.
-     *
-     * @param method Event handler to call or null to disable
-     */
-    public void setRunnableSlowReadChan(Runnable method) {
+    public void setConsumerSlowReadChan(Consumer<Double> method) {
         switch (channel) {
             case 0:
-                ads1115.setRunnableSlowReadChannel0(method);
+                ads1115.setConsumerSlowReadChannel0(method);
                 break;
             case 1:
-                ads1115.setRunnableSlowReadChannel1(method);
+                ads1115.setConsumerSlowReadChannel1(method);
                 break;
             case 2:
-                ads1115.setRunnableSlowReadChannel2(method);
+                ads1115.setConsumerSlowReadChannel2(method);
                 break;
             case 3:
-                ads1115.setRunnableSlowReadChannel3(method);
+                ads1115.setConsumerSlowReadChannel3(method);
                 break;
         }
     }
@@ -244,16 +208,16 @@ public class Potentiometer extends Component {
     public void deregisterAll() {
         switch (channel) {
             case 0:
-                ads1115.setRunnableSlowReadChannel0(null);
+                ads1115.setConsumerSlowReadChannel0(null);
                 break;
             case 1:
-                ads1115.setRunnableSlowReadChannel1(null);
+                ads1115.setConsumerSlowReadChannel1(null);
                 break;
             case 2:
-                ads1115.setRunnableSlowReadChannel2(null);
+                ads1115.setConsumerSlowReadChannel2(null);
                 break;
             case 3:
-                ads1115.setRunnableSlowReadChannel3(null);
+                ads1115.setConsumerSlowReadChannel3(null);
                 break;
         }
     }
