@@ -1120,8 +1120,6 @@ public class ADS1115 extends Component {
             return this.sps;
         }
 
-        ;
-
         /**
          * Returns samplingrate for configuration
          *

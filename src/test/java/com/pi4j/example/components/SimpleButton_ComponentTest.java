@@ -16,7 +16,7 @@ public class SimpleButton_ComponentTest extends ComponentTest {
 
     private SimpleButton button;
     private MockDigitalInput digitalInput;
-    private PIN PinNumber = PIN.D26;
+    private final PIN PinNumber = PIN.D26;
 
     @BeforeEach
     void setUp() {
