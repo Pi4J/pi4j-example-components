@@ -449,7 +449,7 @@ public class ADS1115 extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void setConsumerSlowReadChannel1(Consumer method) {
+    public void setConsumerSlowReadChannel1(Consumer<Double> method) {
         this.consumersSlowRead[1] = method;
     }
 
@@ -461,7 +461,7 @@ public class ADS1115 extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void setConsumerSlowReadChannel2(Consumer method) {
+    public void setConsumerSlowReadChannel2(Consumer<Double> method) {
         this.consumersSlowRead[2] = method;
     }
 
@@ -473,7 +473,7 @@ public class ADS1115 extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void setConsumerSlowReadChannel3(Consumer method) {
+    public void setConsumerSlowReadChannel3(Consumer<Double> method) {
         this.consumersSlowRead[3] = method;
     }
 

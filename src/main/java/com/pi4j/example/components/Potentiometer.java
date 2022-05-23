@@ -107,7 +107,11 @@ public class Potentiometer extends Component {
      * @param method Event handler to call or null to disable
      */
     public void setConsumerFastRead(Consumer<Double> method) {
-        ads1115.setConsumerFastRead(method);
+        ads1115.setConsumerFastRead((value)->{
+            updateMinMaxValue(value);
+            value = value / maxValue;
+            method.accept(value);
+        });
     }
 
     /**
@@ -120,16 +124,32 @@ public class Potentiometer extends Component {
     public void setConsumerSlowReadChan(Consumer<Double> method) {
         switch (channel) {
             case 0:
-                ads1115.setConsumerSlowReadChannel0(method);
+                ads1115.setConsumerSlowReadChannel0((value)->{
+                    updateMinMaxValue(value);
+                    value = value / maxValue;
+                    method.accept(value);
+                });
                 break;
             case 1:
-                ads1115.setConsumerSlowReadChannel1(method);
+                ads1115.setConsumerSlowReadChannel1((value)->{
+                    updateMinMaxValue(value);
+                    value = value / maxValue;
+                    method.accept(value);
+                });
                 break;
             case 2:
-                ads1115.setConsumerSlowReadChannel2(method);
+                ads1115.setConsumerSlowReadChannel2((value)->{
+                    updateMinMaxValue(value);
+                    value = value / maxValue;
+                    method.accept(value);
+                });
                 break;
             case 3:
-                ads1115.setConsumerSlowReadChannel3(method);
+                ads1115.setConsumerSlowReadChannel3((value)->{
+                    updateMinMaxValue(value);
+                    value = value / maxValue;
+                    method.accept(value);
+                });
                 break;
         }
     }

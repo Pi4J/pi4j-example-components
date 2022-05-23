@@ -75,7 +75,10 @@ public class JoystickAnalog extends Component {
      * @param task Event handler to call or null to disable
      */
     public void xOnMove(Consumer<Double> task) {
-        x.setConsumerSlowReadChan(task);
+        x.setConsumerSlowReadChan((value)->{
+            value = value + xOffset;
+            task.accept(value);
+        });
     }
 
     /**
@@ -86,7 +89,10 @@ public class JoystickAnalog extends Component {
      * @param task Event handler to call or null to disable
      */
     public void yOnMove(Consumer<Double> task) {
-        y.setConsumerSlowReadChan(task);
+        y.setConsumerSlowReadChan((value)->{
+            value = value + yOffset;
+            task.accept(value);
+        });
     }
 
     /**
