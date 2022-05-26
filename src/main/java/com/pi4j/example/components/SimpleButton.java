@@ -6,7 +6,6 @@ import com.pi4j.io.gpio.digital.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class SimpleButton extends Component {
     /**
@@ -83,7 +82,7 @@ public class SimpleButton extends Component {
         this.digitalInput.addListener(digitalStateChangeEvent -> {
             DigitalState state = getState();
 
-            logInfo("Button switched to '" + state + "'");
+            logDebug("Button switched to '" + state + "'");
 
             switch (state) {
                 case HIGH -> {

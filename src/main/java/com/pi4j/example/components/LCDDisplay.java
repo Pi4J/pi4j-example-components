@@ -9,6 +9,7 @@ import com.pi4j.io.i2c.I2CConfig;
  * For now, only works with the PCF8574T Backpack
  */
 public class LCDDisplay extends Component {
+    /** Flags for display commands */
     private static final byte LCD_CLEAR_DISPLAY   = (byte) 0x01;
     private static final byte LCD_RETURN_HOME     = (byte) 0x02;
     private static final byte LCD_ENTRY_MODE_SET  = (byte) 0x04;
@@ -71,7 +72,7 @@ public class LCDDisplay extends Component {
     /**
      * Creates a new LCDDisplay component with default values
      *
-     * @param pi4j
+     * @param pi4j Pi4J context
      */
     public LCDDisplay(Context pi4j){
         this(pi4j, 2, 16);
@@ -94,14 +95,14 @@ public class LCDDisplay extends Component {
      * Creates a new LCDDisplay component with custom rows and columns
      *
      * @param pi4j      Pi4J context
-     * @param ROWS      Custom amount of display lines
-     * @param COLUMNS   Custom amount of chars on line
+     * @param rows      Custom amount of display lines
+     * @param columns   Custom amount of chars on line
      * @param bus       Custom I2C bus address
      * @param device    Custom I2C device Address
      */
-    public LCDDisplay(Context pi4j, int ROWS, int COLUMNS, int bus, int device) {
-        this.rows = ROWS;
-        this.columns = COLUMNS;
+    public LCDDisplay(Context pi4j, int rows, int columns, int bus, int device) {
+        this.rows = rows;
+        this.columns = columns;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, device));
     }
 
@@ -453,7 +454,7 @@ public class LCDDisplay extends Component {
 
         // Enable backlight
         setDisplayBacklight(true);
-        //logInfo("LCD Display initialized");
+        logDebug("LCD Display initialized");
     }
 
     /**

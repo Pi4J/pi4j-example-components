@@ -18,8 +18,8 @@ public class LEDButtonTest extends ComponentTest {
     private LEDButton button;
     private MockDigitalInput digitalInput;
     private MockDigitalOutput digitalOutput;
-    private PIN BTNPinNumber = PIN.D26;
-    private PIN LEDPinNumber = PIN.D25;
+    private final PIN BTNPinNumber = PIN.D26;
+    private final PIN LEDPinNumber = PIN.D25;
 
     @BeforeEach
     void setUp() {

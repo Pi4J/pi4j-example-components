@@ -43,7 +43,7 @@ public class ADS1115 extends Component {
     /**
      * Operational status or single-shot conversion start
      */
-    private int os;
+    private final int os;
 
     /**
      * programmable gain amplifier
@@ -146,18 +146,18 @@ public class ADS1115 extends Component {
         //mux will be set in function
         this.pga = gain;
         //mode will be set in function
-        this.dr = DR.SPS_128;
+        this.dr       = DR.SPS_128;
         this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
-        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
-        this.compLat = COMP_LAT.NON_LATCH.getLatching();
-        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
+        this.compPol  = COMP_POL.ACTIVE_LOW.getCompPol();
+        this.compLat  = COMP_LAT.NON_LATCH.getLatching();
+        this.compQue  = COMP_QUE.DISABLE_COMP.getCompQue();
         createTemplateConfiguration();
 
         //i2c parameter
         this.deviceId = "ADS1115";
-        this.i2cBus = bus;
-        this.address = address;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), deviceId));
+        this.i2cBus   = bus;
+        this.address  = address;
+        this.i2c      = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), deviceId));
     }
 
     /**
@@ -178,16 +178,16 @@ public class ADS1115 extends Component {
         //mode will be set in function
         this.dr = DR.SPS_128;
         this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
-        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
-        this.compLat = COMP_LAT.NON_LATCH.getLatching();
-        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
+        this.compPol  = COMP_POL.ACTIVE_LOW.getCompPol();
+        this.compLat  = COMP_LAT.NON_LATCH.getLatching();
+        this.compQue  = COMP_QUE.DISABLE_COMP.getCompQue();
         createTemplateConfiguration();
 
         //i2c parameter
         this.deviceId = "ADS1115";
-        this.i2cBus = i2cDefaultBus;
-        this.address = ADDRESS.GND;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress(), deviceId));
+        this.i2cBus   = i2cDefaultBus;
+        this.address  = ADDRESS.GND;
+        this.i2c      = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress(), deviceId));
     }
 
     /**
@@ -223,7 +223,6 @@ public class ADS1115 extends Component {
      * @param config custom configuration
      */
     public int writeConfigRegister(int config) {
-        //logInfo("start write configuration");
         i2c.writeRegisterWord(CONFIG_REGISTER, config);
         //wait until ad converter has stored new value in conversion register
         //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
@@ -300,7 +299,7 @@ public class ADS1115 extends Component {
      * stops continuous reading
      */
     public void stopFastContinuousReading() {
-        logInfo("Stop continuous reading");
+        logDebug("Stop continuous reading");
         // write single shot configuration to stop reading process in device
         writeConfigRegister(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
         continuousReadingActive = false;
@@ -325,7 +324,7 @@ public class ADS1115 extends Component {
      * stops continuous reading
      */
     public void stopSlowReadContinuousReading() {
-        logInfo("Stop continuous reading");
+        logDebug("Stop continuous reading");
         continuousReadingActive = false;
     }
 
@@ -506,23 +505,23 @@ public class ADS1115 extends Component {
      * @return configuration from device
      */
     private int readConfigRegister() {
-        String[] osInfo = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
+        String[] osInfo   = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
 
-        String[] muxInfo = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
+        String[] muxInfo  = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
 
-        String[] pgaInfo = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
+        String[] pgaInfo  = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
 
         String[] modeInfo = {"0 : Continuous-conversion mode\n", "1 : Single-shot mode or power-down state\n"};
 
-        String[] drInfo = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
+        String[] drInfo   = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
 
         String[] compModeInfo = {"0 : Traditional comparator (default)\n", "1 : Window comparator\n"};
 
-        String[] compPolInfo = {"0 : Active low (default)\n", "1 : Active high\n"};
+        String[] compPolInfo  = {"0 : Active low (default)\n", "1 : Active high\n"};
 
-        String[] compLatInfo = {"0 : Nonlatching comparator\n", "1 : Latching comparator\n"};
+        String[] compLatInfo  = {"0 : Nonlatching comparator\n", "1 : Latching comparator\n"};
 
-        String[] compQueInfo = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
+        String[] compQueInfo  = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
 
         //get configuration from device
         int result = i2c.readRegisterWord(CONFIG_REGISTER);
@@ -565,10 +564,8 @@ public class ADS1115 extends Component {
         //check if configuration is correct written on device, ignore first bit (os)
         if ((confCheck & OS.CLR_CURRENT_CONF_PARAM.getOs()) != (config & OS.CLR_CURRENT_CONF_PARAM.getOs()))
             throw new ConfigException("Configuration not correctly written to device.");
-        //read actual ad value from device
-        int result = i2c.readRegisterWord(CONVERSION_REGISTER);
-        //logInfo("readIn: " + config + ", raw " + result);
-        return result;
+        //read actual ad value from device and return it
+        return i2c.readRegisterWord(CONVERSION_REGISTER);
     }
 
     /**
@@ -582,19 +579,17 @@ public class ADS1115 extends Component {
      */
     private void fastReadContinuousValue(int config, double threshold, int readFrequency) {
         if (readFrequency < dr.getSpS()) {
-            logInfo("Start continuous reading");
+            logDebug("Start continuous reading");
             //set configuration
             writeConfigRegister(config);
             //start new thread for continuous reading
             new Thread(() -> {
                 while (continuousReadingActive) {
                     int result = readConversionRegister();
-                    //logInfo("Current value: " + result);
                     //convert threshold voltage to digits
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
                     if (oldValue[0]- thresholdDigits > result || oldValue[0] + thresholdDigits < result) {
-                        //logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
-                        oldValue[0] = actualValue[0];
+                        oldValue[0]    = actualValue[0];
                         actualValue[0] = result;
                         runnableFastRead.run();
                     }
@@ -617,7 +612,7 @@ public class ADS1115 extends Component {
     private void slowReadContinuousValue(double threshold, int readFrequency){
         //summ of readFrequency of all channels must be lower than 1/2 sampling rate
         if (readFrequency * numberOfChannels * 2 < dr.getSpS()) {
-            logInfo("Start continuous reading");
+            logDebug("Start continuous reading");
             //start new thread for continuous reading
             new Thread(()-> {
                 while (continuousReadingActive) {
@@ -643,7 +638,6 @@ public class ADS1115 extends Component {
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
                     for(int i = 0; i < numberOfChannels; i++){
                         if (oldValue[i]- thresholdDigits > result[i] || oldValue[i] + thresholdDigits < result[i]) {
-                            //logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
                             oldValue[i] = actualValue[i];
                             actualValue[i] = result[i];
                             if (runnableSlowRead[i] != null){
@@ -898,9 +892,6 @@ public class ADS1115 extends Component {
          * address currently asserting the ALERT/RDY bus line.
          */
         DO_LATCH(0b0000_0000_0000_0100),
-        /**
-         * latching
-         */
         /**
          * With an AND operation all other parameters will be set to 0
          */
