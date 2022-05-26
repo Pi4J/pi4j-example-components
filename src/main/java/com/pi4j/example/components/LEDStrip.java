@@ -16,7 +16,6 @@ public class LEDStrip extends Component {
     private static final int LED_RESET_WAIT_TIME = 300_000;
 
     protected final Spi spi;
-    protected final Context context;
     private final int numLeds;
     private final int frequency;
     private final int renderWaitTime;
@@ -50,12 +49,11 @@ public class LEDStrip extends Component {
      * @param channel which channel to use
      */
     public LEDStrip(Context pi4j, int numLeds, int brightness, int channel) {
-        logger.info("initialising a ledstrip with " + numLeds + " leds");
+        logInfo("initialising a ledstrip with " + numLeds + " leds");
         this.numLeds = numLeds;
         this.leds = new int[numLeds];
         this.brightness = brightness;
         this.frequency = 800_000;
-        this.context = pi4j;
         this.spi = pi4j.create(buildSpiConfig(pi4j, channel, frequency));
 
         // Allocate SPI transmit buffer (same size as PCM)
@@ -81,12 +79,6 @@ public class LEDStrip extends Component {
                 .build();
     }
 
-    /**
-     * @return the pi4j context
-     */
-    public Context getContext() {
-        return this.context;
-    }
 
     /**
      * Setting all LEDS off and closing the strip
@@ -198,7 +190,7 @@ public class LEDStrip extends Component {
         //writing on the PIN
         spi.write(bytes);
 
-        logger.info("finished rendering");
+        logInfo("finished rendering");
         lastRenderTime = System.nanoTime();
     }
 

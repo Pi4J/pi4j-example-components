@@ -15,7 +15,7 @@ import java.util.List;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Joystick_ComponentTest4_Inputs extends ComponentTest {
+public class JoystickTest4_Inputs extends ComponentTest {
 
     private Joystick joysitck;
     private MockDigitalInput diNorth;

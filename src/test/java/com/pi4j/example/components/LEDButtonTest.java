@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LEDButton_ComponentTest extends ComponentTest {
+public class LEDButtonTest extends ComponentTest {
 
     private LEDButton button;
     private MockDigitalInput digitalInput;
