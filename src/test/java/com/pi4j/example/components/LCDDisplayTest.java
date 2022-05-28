@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LCDDisplay_ComponentTest extends ComponentTest{
+public class LCDDisplayTest extends ComponentTest{
     LCDDisplay lcd420Display;
     LCDDisplay lcd216Display;
     MockI2C i2c;
@@ -19,11 +19,6 @@ public class LCDDisplay_ComponentTest extends ComponentTest{
         i2c = toMock(lcd420Display.getI2C());
     }
 
-    @Test
-    public void testGetContext(){
-        assertEquals(pi4j, lcd420Display.getContext());
-        assertEquals(pi4j, lcd216Display.getContext());
-    }
 
     @Test
     void testWriteTooLongText() {

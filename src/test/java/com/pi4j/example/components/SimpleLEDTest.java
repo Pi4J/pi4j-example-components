@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class SimpleLED_ComponentTest extends ComponentTest {
+public class SimpleLEDTest extends ComponentTest {
 
     protected SimpleLED led;
 
@@ -50,7 +50,7 @@ public class SimpleLED_ComponentTest extends ComponentTest {
     @Test
     public void testSetStateOn(){
         //when
-        led.setStateOn();
+        led.on();
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
     }
@@ -58,9 +58,9 @@ public class SimpleLED_ComponentTest extends ComponentTest {
     @Test
     public void testSetStateOff(){
         //given
-        led.setStateOn();
+        led.on();
         //when
-        led.setStateOff();
+        led.off();
         //then
         assertEquals(DigitalState.LOW, digitalOutput.state());
     }

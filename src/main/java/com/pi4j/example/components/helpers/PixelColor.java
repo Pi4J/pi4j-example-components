@@ -128,7 +128,7 @@ public class PixelColor {
      * @param p
      * @param q
      * @param h
-     * @return
+     * @return RGB color
      */
     private static float HueToRGB(float p, float q, float h) {
         if (h < 0)

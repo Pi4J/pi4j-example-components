@@ -75,10 +75,10 @@ public class Joystick extends Component{
      */
     public Joystick (Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest){
         bNorth = new SimpleButton(pi4j, addrNorth, false, DEFAULT_DEBOUNCE);
-        bWest = new SimpleButton(pi4j,  addrWest,  false, DEFAULT_DEBOUNCE);
+        bWest  = new SimpleButton(pi4j,  addrWest,  false, DEFAULT_DEBOUNCE);
         bSouth = new SimpleButton(pi4j, addrSouth, false, DEFAULT_DEBOUNCE);
-        bEast = new SimpleButton(pi4j,  addrEast,  false, DEFAULT_DEBOUNCE);
-        bPush = null;
+        bEast  = new SimpleButton(pi4j,  addrEast,  false, DEFAULT_DEBOUNCE);
+        bPush  = null;
         //joystick without push button
         pushIsPresent = false;
     }
@@ -215,8 +215,6 @@ public class Joystick extends Component{
      */
     public boolean buttonPushIsUp() {
         return pushIsPresent && bPush.isUp();}
-
-
 
 
     /**

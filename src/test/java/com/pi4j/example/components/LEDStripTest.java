@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LEDStrip_ComponentTest extends ComponentTest {
+public class LEDStripTest extends ComponentTest {
 
     private MockSpi spi;
     private LEDStrip strip;
@@ -21,10 +21,6 @@ public class LEDStrip_ComponentTest extends ComponentTest {
         spi = toMock(strip.spi);
     }
 
-    @Test
-    public void testGetContext(){
-        assertEquals(pi4j, strip.getContext());
-    }
 
     @Test
     public void testSetPixelColor(){
