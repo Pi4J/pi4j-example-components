@@ -1,6 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.config.exception.ConfigException;
+import com.pi4j.example.helpers.ContiniousMeasuringException;
 
 import java.util.function.Consumer;
 
@@ -51,6 +52,7 @@ public class Potentiometer extends Component {
         if (chanel < 0 || chanel > 3) {
             throw new ConfigException("Channel number for ad converter not possible, choose channel between 0 to 3");
         }
+        logDebug("Build component potentiometer");
     }
 
     /**
@@ -63,6 +65,8 @@ public class Potentiometer extends Component {
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = 3.3;
         this.channel = 0;
+
+        logDebug("Build component potentiometer");
     }
 
     /**
@@ -107,7 +111,7 @@ public class Potentiometer extends Component {
      * @param method Event handler to call or null to disable
      */
     public void setConsumerFastRead(Consumer<Double> method) {
-        ads1115.setConsumerFastRead((value)->{
+        ads1115.setConsumerFastRead((value) -> {
             updateMinMaxValue(value);
             value = value / maxValue;
             method.accept(value);
@@ -124,28 +128,28 @@ public class Potentiometer extends Component {
     public void setConsumerSlowReadChan(Consumer<Double> method) {
         switch (channel) {
             case 0:
-                ads1115.setConsumerSlowReadChannel0((value)->{
+                ads1115.setConsumerSlowReadChannel0((value) -> {
                     updateMinMaxValue(value);
                     value = value / maxValue;
                     method.accept(value);
                 });
                 break;
             case 1:
-                ads1115.setConsumerSlowReadChannel1((value)->{
+                ads1115.setConsumerSlowReadChannel1((value) -> {
                     updateMinMaxValue(value);
                     value = value / maxValue;
                     method.accept(value);
                 });
                 break;
             case 2:
-                ads1115.setConsumerSlowReadChannel2((value)->{
+                ads1115.setConsumerSlowReadChannel2((value) -> {
                     updateMinMaxValue(value);
                     value = value / maxValue;
                     method.accept(value);
                 });
                 break;
             case 3:
-                ads1115.setConsumerSlowReadChannel3((value)->{
+                ads1115.setConsumerSlowReadChannel3((value) -> {
                     updateMinMaxValue(value);
                     value = value / maxValue;
                     method.accept(value);
@@ -175,7 +179,7 @@ public class Potentiometer extends Component {
      */
     public void startSlowContiniousReading(double threshold, int readFrequency) {
         if (fastContiniousReadingActive) {
-            logDebug("fast continious reading currently active");
+            throw new ContiniousMeasuringException("fast continious reading currently active");
         } else {
             //set slow continuous reading active to lock fast continious reading
             slowContiniousReadingActive = true;
@@ -187,7 +191,6 @@ public class Potentiometer extends Component {
      * stops slow continious reading
      */
     public void stopSlowContiniousReading() {
-        logInfo("Stop continious reading");
         slowContiniousReadingActive = false;
         ads1115.stopSlowReadContiniousReading(channel);
     }
@@ -202,7 +205,7 @@ public class Potentiometer extends Component {
      */
     public void startFastContiniousReading(double threshold, int readFrequency) {
         if (slowContiniousReadingActive) {
-            logDebug("slow continious reading currently active");
+            throw new ContiniousMeasuringException("slow continious reading currently active");
         } else {
             //set fast continuous reading active to lock slow continious reading
             fastContiniousReadingActive = true;
@@ -216,7 +219,6 @@ public class Potentiometer extends Component {
      * stops fast continious reading
      */
     public void stopFastContiniousReading() {
-        logInfo("Stop fast continious reading");
         fastContiniousReadingActive = false;
         //stop continious reading
         ads1115.stopFastContiniousReading();

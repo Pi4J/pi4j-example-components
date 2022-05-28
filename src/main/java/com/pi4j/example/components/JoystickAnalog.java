@@ -34,6 +34,22 @@ public class JoystickAnalog extends Component {
      * if true normalized axis from 0 to 1 center is 0.5, if false normalized axis from -1 to 1 center is 0
      */
     private final boolean normalized0to1;
+    /**
+     * minimal normalized value on x axis
+     */
+    private double xMinNormValue;
+    /**
+     * maximal normalized value on x axis
+     */
+    private double xMaxNormValue;
+    /**
+     * minimal normalized value on y axis
+     */
+    private double yMinNormValue;
+    /**
+     * maximal normalized value on y axis
+     */
+    private double yMaxNormValue;
 
     /**
      * Builds a new JoystickAnalog component with custom input for x-, y-axis, custom pin for push button.
@@ -51,6 +67,11 @@ public class JoystickAnalog extends Component {
         this.y = new Potentiometer(ads1115, chanelYAxis, maxVoltage);
         this.push = new SimpleButton(pi4j, push, true);
         this.normalized0to1 = normalized0to1;
+
+        xMinNormValue = 0.1;
+        xMaxNormValue = 0.9;
+        yMinNormValue = 0.1;
+        yMaxNormValue = 0.9;
     }
 
     /**
@@ -65,6 +86,11 @@ public class JoystickAnalog extends Component {
         this.y = new Potentiometer(ads1115, 1, 3.3);
         this.push = new SimpleButton(pi4j, push, true);
         normalized0to1 = true;
+
+        xMinNormValue = 0.1;
+        xMaxNormValue = 0.9;
+        yMinNormValue = 0.1;
+        yMaxNormValue = 0.9;
     }
 
     /**
@@ -75,8 +101,23 @@ public class JoystickAnalog extends Component {
      * @param task Event handler to call or null to disable
      */
     public void xOnMove(Consumer<Double> task) {
-        x.setConsumerSlowReadChan((value)->{
+        x.setConsumerSlowReadChan((value) -> {
+
             value = value + xOffset;
+            //check if min max value are ok
+            if (value < xMinNormValue) xMinNormValue = value;
+            if (value > xMaxNormValue) xMaxNormValue = value;
+            //scale axis from 0 to 1
+            if (value < NORMALIZED_CENTER_POSITION) {
+                value = (value - xMinNormValue) / (NORMALIZED_CENTER_POSITION - xMinNormValue) / 2;
+            } else if (value > NORMALIZED_CENTER_POSITION) {
+                value = 1 + (xMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - xMaxNormValue) / 2;
+            }
+
+            if (!normalized0to1) {
+                value = rescaleValue(value);
+            }
+
             task.accept(value);
         });
     }
@@ -89,8 +130,23 @@ public class JoystickAnalog extends Component {
      * @param task Event handler to call or null to disable
      */
     public void yOnMove(Consumer<Double> task) {
-        y.setConsumerSlowReadChan((value)->{
+        y.setConsumerSlowReadChan((value) -> {
             value = value + yOffset;
+
+            //check if min max value are ok
+            if (value < yMinNormValue) yMinNormValue = value;
+            if (value > yMaxNormValue) yMaxNormValue = value;
+            //scale axis from 0 to 1
+            if (value < NORMALIZED_CENTER_POSITION) {
+                value = (value - yMinNormValue) / (NORMALIZED_CENTER_POSITION - yMinNormValue) / 2;
+            } else if (value > NORMALIZED_CENTER_POSITION) {
+                value = 1 + (yMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - yMaxNormValue) / 2;
+            }
+
+            if (!normalized0to1) {
+                value = rescaleValue(value);
+            }
+
             task.accept(value);
         });
     }

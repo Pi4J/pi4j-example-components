@@ -125,7 +125,6 @@ public class ADS1115 extends Component {
     private int CONFIG_REGISTER_TEMPLATE;
 
 
-
     /**
      * Creates a new AD converter component with custom bus, device address
      *
@@ -542,7 +541,7 @@ public class ADS1115 extends Component {
         //check comp que
         debugInfo.append(compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()]);
 
-        logger.config(debugInfo.toString());
+        logDebug(debugInfo.toString());
 
         return result;
     }
@@ -553,7 +552,7 @@ public class ADS1115 extends Component {
      * @param config Configuration for config register
      * @return int conversion register
      */
-    private int readSingleShot(int config) {
+    private synchronized int readSingleShot(int config) {
         //write configuration to device
         int confCheck = writeConfigRegister(config);
         //check if configuration is correct written on device, ignore first bit (os)
@@ -561,7 +560,7 @@ public class ADS1115 extends Component {
             throw new ConfigException("Configuration not correctly written to device.");
         //read actual ad value from device
         int result = i2c.readRegisterWord(CONVERSION_REGISTER);
-        //logInfo("readIn: " + config + ", raw " + result);
+        logDebug("readIn: " + config + ", raw " + result);
         return result;
     }
 
@@ -576,7 +575,7 @@ public class ADS1115 extends Component {
      */
     private void fastReadContiniousValue(int config, double threshold, int readFrequency) {
         if (readFrequency < dr.getSpS()) {
-            logInfo("Start continious reading");
+            logDebug("Start continious reading");
             //set configuration
             writeConfigRegister(config);
             //start new thread for continuous reading
@@ -586,13 +585,13 @@ public class ADS1115 extends Component {
                     long startTime = System.nanoTime();
 
                     int result = readConversionRegister();
-                    //logInfo("Current value: " + result);
+                    logDebug("Current value: " + result);
                     //convert threshold voltage to digits
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
                     if (oldValue[0] - thresholdDigits > result || oldValue[0] + thresholdDigits < result) {
-                        //logInfo("New event triggered on value change, old value: " + oldValue.get() + " , new value: " + result);
+                        logDebug("New event triggered on value change, old value: " + oldValue + " , new value: " + result);
                         oldValue[0] = result;
-                        consumerFastRead.accept(pga.gainPerBit * (double)result);
+                        consumerFastRead.accept(pga.gainPerBit * (double) result);
                     }
                     //stop measuring time
                     long stopTime = System.nanoTime();
@@ -604,7 +603,7 @@ public class ADS1115 extends Component {
                 }
             }).start();
         } else {
-            logError("readFrequency to high");
+            throw new ContiniousMeasuringException("readFrequency to high");
         }
     }
 
@@ -629,28 +628,31 @@ public class ADS1115 extends Component {
                     int[] result = new int[4];
                     //at least on chanel bust be activated
                     result[0] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
-
+                    logDebug("Current value chanel 0: " + result[0]);
                     //if at least two channels are activated
                     if (numberOfChannels > 1) {
                         result[1] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
+                        logDebug("Current value chanel 1: " + result[1]);
                     }
                     //if at least three channels are activated
                     if (numberOfChannels > 2) {
                         result[2] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
+                        logDebug("Current value chanel 2: " + result[2]);
                     }
                     //if all 4 channels are activated
                     if (numberOfChannels > 3) {
                         result[3] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
+                        logDebug("Current value chanel 3: " + result[3]);
                     }
                     //convert threshold voltage to digits
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
 
                     for (int i = 0; i < numberOfChannels; i++) {
                         if (oldValue[i] - thresholdDigits > result[i] || oldValue[i] + thresholdDigits < result[i]) {
-                            //logInfo("New event triggered on value change, old value: " + oldValue[i] + " , new value: " + result[i]);
+                            logDebug("New event triggered on value change, old value: " + oldValue[i] + " , new value: " + result[i]);
                             oldValue[i] = result[i];
-                            if(consumersSlowRead[i] != null){
-                                consumersSlowRead[i].accept(pga.gainPerBit * (double)result[i]);
+                            if (consumersSlowRead[i] != null) {
+                                consumersSlowRead[i].accept(pga.gainPerBit * (double) result[i]);
                             }
                         }
                     }
@@ -665,7 +667,7 @@ public class ADS1115 extends Component {
                 }
             }).start();
         } else {
-            logDebug("readFrequency to high");
+            throw new ContiniousMeasuringException("readFrequency to high");
         }
     }
 

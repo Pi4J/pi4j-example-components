@@ -31,40 +31,22 @@ public class JoystickAnalog_App implements Application {
         joystick.pushOnUp(() -> logInfo("Stopped pressing."));
         joystick.pushWhilePressed(() -> logInfo("Button is still pressed."), 1000);
 
-        joystick.start(0.1,10);
-
-        delay(1000);
-
-        joystick.stop();
-
-        delay(1000);
-
         joystick.calibrateJoystick();
 
-        joystick.start(0.1, 10);
-
-        delay(1000);
-
-        joystick.stop();
-
-        delay(1000);
-
         //start continious reading with single shot in this mode you can connect up to 4 devices to the analog module
-        joystick.start(0.1, 10);
+        joystick.start(0.05, 10);
 
         //wait while handling events before exiting
-        logInfo("Move the joystick to see it in action!");
+        System.out.println("Move the joystick to see it in action!");
 
-        delay(50_000);
+        delay(30_000);
 
         //stop continious reading
         joystick.stop();
 
-        delay(1000);
-
         //deregister all event handlers
         joystick.deregisterAll();
 
-        logInfo("Joystick test done");
+        System.out.println("Joystick test done");
     }
 }
