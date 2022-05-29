@@ -245,6 +245,13 @@ public class Potentiometer extends Component {
     }
 
     /**
+     * returns the maximum value which the potentiometer has reached in voltage
+     *
+     * @return maximal value in voltage
+     */
+    public double getMaxValue(){return maxValue;}
+
+    /**
      * Check if new value is bigger than current max value or lower than min value
      * In this case update min or max value
      *

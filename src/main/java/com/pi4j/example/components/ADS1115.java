@@ -389,6 +389,8 @@ public class ADS1115 extends Component {
         return i2cBus;
     }
 
+    public I2C getI2cObject(){return i2c;}
+
     /**
      * Return device name
      *
@@ -559,7 +561,7 @@ public class ADS1115 extends Component {
         if ((confCheck & OS.CLR_CURRENT_CONF_PARAM.getOs()) != (config & OS.CLR_CURRENT_CONF_PARAM.getOs()))
             throw new ConfigException("Configuration not correctly written to device.");
         //read actual ad value from device
-        int result = i2c.readRegisterWord(CONVERSION_REGISTER);
+        int result = readConversionRegister();
         logDebug("readIn: " + config + ", raw " + result);
         return result;
     }
