@@ -15,7 +15,7 @@ public class LEDStripTest extends ComponentTest {
     private int pixels;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         this.pixels = 10;
         strip = new LEDStrip(pi4j, pixels, 127);
         spi = toMock(strip.spi);
@@ -23,7 +23,7 @@ public class LEDStripTest extends ComponentTest {
 
 
     @Test
-    public void testSetPixelColor(){
+    public void testSetPixelColor() {
         //when
         strip.allOff();
         strip.setPixelColor(1, PixelColor.YELLOW);
@@ -33,7 +33,7 @@ public class LEDStripTest extends ComponentTest {
     }
 
     @Test
-    public void testSetStripColor(){
+    public void testSetStripColor() {
         //when
         strip.allOff();
         strip.setStripColor(PixelColor.YELLOW);
@@ -43,12 +43,12 @@ public class LEDStripTest extends ComponentTest {
     }
 
     @Test
-    public void testGetNumLEDS(){
+    public void testGetNumLEDS() {
         assertEquals(pixels, strip.getNumPixels());
     }
 
     @Test
-    public void testGetPixelChannels(){
+    public void testGetPixelChannels() {
         //when
         int red = PixelColor.RED;
         int blue = PixelColor.BLUE;

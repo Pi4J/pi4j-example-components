@@ -393,6 +393,9 @@ public class Joystick extends Component{
         bWest.deRegisterAll();
         bSouth.deRegisterAll();
         bEast.deRegisterAll();
+        if(pushIsPresent){
+            bPush.deRegisterAll();
+        }
     }
 
     /**

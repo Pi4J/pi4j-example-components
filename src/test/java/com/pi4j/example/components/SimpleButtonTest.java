@@ -24,36 +24,36 @@ public class SimpleButtonTest extends ComponentTest {
         digitalInput = toMock(button.getDigitalInput());
     }
 
-     @Test
-    public void testGetState(){
+    @Test
+    public void testGetState() {
         //when
-         digitalInput.mockState(DigitalState.HIGH);
-         //then
-         assertEquals(DigitalState.HIGH, button.getState());
-         //when
-         digitalInput.mockState(DigitalState.LOW);
-         //the
-         assertEquals(DigitalState.LOW, button.getState());
-         //when
-         digitalInput.mockState(DigitalState.UNKNOWN);
-         //then
-         assertEquals(DigitalState.UNKNOWN, button.getState());
-     }
-
-     @Test
-    public void testIsDown(){
+        digitalInput.mockState(DigitalState.HIGH);
+        //then
+        assertEquals(DigitalState.HIGH, button.getState());
         //when
-         digitalInput.mockState(DigitalState.HIGH);
-         //then
-         assertTrue(button.isDown());
-         //when
-         digitalInput.mockState(DigitalState.LOW);
-         //then
-         assertFalse(button.isDown());
-     }
+        digitalInput.mockState(DigitalState.LOW);
+        //the
+        assertEquals(DigitalState.LOW, button.getState());
+        //when
+        digitalInput.mockState(DigitalState.UNKNOWN);
+        //then
+        assertEquals(DigitalState.UNKNOWN, button.getState());
+    }
 
     @Test
-    public void testIsUp(){
+    public void testIsDown() {
+        //when
+        digitalInput.mockState(DigitalState.HIGH);
+        //then
+        assertTrue(button.isDown());
+        //when
+        digitalInput.mockState(DigitalState.LOW);
+        //then
+        assertFalse(button.isDown());
+    }
+
+    @Test
+    public void testIsUp() {
         //when
         digitalInput.mockState(DigitalState.HIGH);
         //then
@@ -65,12 +65,12 @@ public class SimpleButtonTest extends ComponentTest {
     }
 
     @Test
-    public void testGetDigitalInput(){
+    public void testGetDigitalInput() {
         assertEquals(PinNumber.getPin(), button.getDigitalInput().address());
     }
 
     @Test
-    public void testOnDown(){
+    public void testOnDown() {
         //given
         int[] counter = {0};
         digitalInput.mockState(DigitalState.LOW);
@@ -110,11 +110,11 @@ public class SimpleButtonTest extends ComponentTest {
     }
 
     @Test
-    public void testOnUp(){
+    public void testOnUp() {
         //given
         int[] counter = {0};
         digitalInput.mockState(DigitalState.LOW);
-        button.onUp(()->counter[0]++);
+        button.onUp(() -> counter[0]++);
 
         //when
         digitalInput.mockState(DigitalState.HIGH);
@@ -157,7 +157,7 @@ public class SimpleButtonTest extends ComponentTest {
 
         AtomicInteger counter = new AtomicInteger(0);
 
-        button.whilePressed(()-> counter.getAndIncrement(), samplingTime);
+        button.whilePressed(counter::getAndIncrement, samplingTime);
 
         //when
         digitalInput.mockState(DigitalState.HIGH);

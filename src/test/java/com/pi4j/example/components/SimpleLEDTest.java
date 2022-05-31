@@ -17,13 +17,13 @@ public class SimpleLEDTest extends ComponentTest {
     protected DigitalOutput digitalOutput;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         this.led = new SimpleLED(pi4j, PIN.D26);
         this.digitalOutput = led.getDigitalOutput();
     }
 
     @Test
-    public void testLED_Address(){
+    public void testLED_Address() {
         //when
         digitalOutput = led.getDigitalOutput();
         //then
@@ -32,7 +32,7 @@ public class SimpleLEDTest extends ComponentTest {
     }
 
     @Test
-    public void testSetState_On(){
+    public void testSetState_On() {
         //when
         led.setState(true);
         //then
@@ -40,7 +40,7 @@ public class SimpleLEDTest extends ComponentTest {
     }
 
     @Test
-    public void testSetState_Off(){
+    public void testSetState_Off() {
         //when
         led.setState(false);
         //then
@@ -48,7 +48,7 @@ public class SimpleLEDTest extends ComponentTest {
     }
 
     @Test
-    public void testSetStateOn(){
+    public void testSetStateOn() {
         //when
         led.on();
         //then
@@ -56,7 +56,7 @@ public class SimpleLEDTest extends ComponentTest {
     }
 
     @Test
-    public void testSetStateOff(){
+    public void testSetStateOff() {
         //given
         led.on();
         //when
@@ -66,7 +66,7 @@ public class SimpleLEDTest extends ComponentTest {
     }
 
     @Test
-    public void testToggleState(){
+    public void testToggleState() {
         //when
         led.toggleState();
         //then
