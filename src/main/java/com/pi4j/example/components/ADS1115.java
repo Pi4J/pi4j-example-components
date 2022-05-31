@@ -17,7 +17,7 @@ public class ADS1115 extends Component {
     /**
      * device name
      */
-    private final String deviceId;
+    private final static String DEVICE_ID = "ADS1115";
 
     /**
      * pi4j context
@@ -32,8 +32,12 @@ public class ADS1115 extends Component {
     /**
      * default bus number
      */
-    private final int i2cDefaultBus = 0x01;
+    private final static int DEFAULT_I2C_BUS = 0x01;
 
+    /**
+     * default number of channels
+     */
+    private final static int DEFAULT_NUMBER_OF_CHANNELS = 1;
     /**
      * device address
      */
@@ -124,6 +128,15 @@ public class ADS1115 extends Component {
      */
     private int CONFIG_REGISTER_TEMPLATE;
 
+    /**
+     * Creates a new AD converter component with default bus 0x01, device bus address 0x48 (GND)
+     * and max gain 4.096 V (parameters for raspberry pi)
+     *
+     * @param pi4j Pi4J context
+     */
+    public ADS1115(Context pi4j) {
+        this(pi4j, DEFAULT_I2C_BUS,GAIN.GAIN_4_096V, ADDRESS.GND, DEFAULT_NUMBER_OF_CHANNELS);
+    }
 
     /**
      * Creates a new AD converter component with custom bus, device address
@@ -134,6 +147,19 @@ public class ADS1115 extends Component {
      * @param address Custom device address on I2C
      */
     public ADS1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels) {
+        this(pi4j, bus, gain, address, numberOfChannels, pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), DEVICE_ID)));
+    }
+
+    /**
+     * Creates a new custom AD converter
+     *
+     * @param pi4j    Pi4J context
+     * @param bus     Custom I2C bus address
+     * @param gain    Custom gain amplifier
+     * @param address Custom device address on I2C
+     * @param i2c     Custom I2C bus
+     */
+    public ADS1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels, I2C i2c){
         this.context = pi4j;
         this.numberOfChannels = numberOfChannels;
         this.consumersSlowRead = new Consumer[numberOfChannels];
@@ -152,45 +178,11 @@ public class ADS1115 extends Component {
         createTemplateConfiguration();
 
         //i2c parameter
-        this.deviceId = "ADS1115";
         this.i2cBus = bus;
         this.address = address;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), deviceId));
+        this.i2c = i2c;
 
-        logDebug("Build component " + deviceId);
-    }
-
-    /**
-     * Creates a new AD converter component with default bus 0x01, device bus address 0x48 (GND)
-     * and max gain 4.096 V (parameters for raspberry pi)
-     *
-     * @param pi4j Pi4J context
-     */
-    public ADS1115(Context pi4j) {
-        this.context = pi4j;
-        this.numberOfChannels = 1;
-        this.consumersSlowRead = new Consumer[numberOfChannels];
-        this.continiousReadingActiveChannel = new boolean[numberOfChannels];
-
-        //write default configuration
-        this.os = OS.WRITE_START.getOs();
-        //mux will be set in function
-        this.pga = GAIN.GAIN_4_096V;
-        //mode will be set in function
-        this.dr = DR.SPS_128;
-        this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
-        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
-        this.compLat = COMP_LAT.NON_LATCH.getLatching();
-        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
-        createTemplateConfiguration();
-
-        //i2c parameter
-        this.deviceId = "ADS1115";
-        this.i2cBus = i2cDefaultBus;
-        this.address = ADDRESS.GND;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, i2cDefaultBus, address.getAddress(), deviceId));
-
-        logDebug("Build component " + deviceId);
+        logDebug("Build component " + DEVICE_ID);
     }
 
     /**
@@ -303,6 +295,8 @@ public class ADS1115 extends Component {
             continiousReadingActive = true;
             fastReadContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
             logDebug("Start fast continious reading");
+        }else{
+            throw new ContiniousMeasuringException("Continuous reading already active!");
         }
     }
 
@@ -397,7 +391,7 @@ public class ADS1115 extends Component {
      * @return device name
      */
     public String getDeviceId() {
-        return deviceId;
+        return DEVICE_ID;
     }
 
     /**
@@ -628,7 +622,7 @@ public class ADS1115 extends Component {
                     long startTime = System.nanoTime();
 
                     int[] result = new int[4];
-                    //at least on chanel bust be activated
+                    //at least on chanel must be activated
                     result[0] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
                     logDebug("Current value chanel 0: " + result[0]);
                     //if at least two channels are activated

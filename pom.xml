@@ -101,7 +101,7 @@
             <scope>test</scope>
         </dependency>
 
-    <!-- Plugin for I2C -->
+        <!-- Plugin for I2C -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-linuxfs</artifactId>
@@ -115,6 +115,7 @@
             <version>4.6.0</version>
             <scope>test</scope>
         </dependency>
+
 
     </dependencies>
 
