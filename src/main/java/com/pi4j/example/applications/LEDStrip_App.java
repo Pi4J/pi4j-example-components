@@ -12,25 +12,25 @@ public class LEDStrip_App implements Application {
         final var ledstrip = new LEDStrip(pi4j, pixels, 0.5);
 
         //set them all off, so nothing is shining
-        logInfo("Starting with setting all leds off");
+        System.out.println("Starting with setting all leds off");
         ledstrip.allOff();
 
-        logInfo("setting the leds to RED");
+        System.out.println("setting the leds to RED");
         ledstrip.setStripColor(LEDStrip.PixelColor.RED);
         ledstrip.render();
         delay(3000);
 
-        logInfo("setting the leds to Light Blue");
+        System.out.println("setting the leds to Light Blue");
         ledstrip.setStripColor(LEDStrip.PixelColor.LIGHT_BLUE);
         ledstrip.render();
         delay(3000);
 
-        logInfo("setting the first led to Purple");
+        System.out.println("setting the first led to Purple");
         ledstrip.setPixelColor(0, LEDStrip.PixelColor.PURPLE);
         ledstrip.render();
         delay(3000);
 
-        logInfo("setting the brightness to full and just show the first led as White");
+        System.out.println("setting the brightness to full and just show the first led as White");
         ledstrip.allOff();
         ledstrip.setBrightness(1);
         ledstrip.setPixelColor(0, LEDStrip.PixelColor.WHITE);
@@ -39,7 +39,7 @@ public class LEDStrip_App implements Application {
 
         //finishing and closing
         ledstrip.close();
-        logInfo("closing the app");
-        logInfo("Color "+ ledstrip.getPixelColor(0));
+        System.out.println("closing the app");
+        System.out.println("Color "+ ledstrip.getPixelColor(0));
     }
 }

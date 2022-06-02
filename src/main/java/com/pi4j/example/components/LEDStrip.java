@@ -7,16 +7,20 @@ import com.pi4j.io.spi.SpiMode;
 
 import java.util.Arrays;
 
+/**
+ * Creates an SPI Control for a Neopixel LED Strip
+ */
 public class LEDStrip extends Component {
 
+    /** Default Channel of the SPI Pins */
     protected static final int DEFAULT_CHANNEL = 0;
 
-    /* Minimum time to wait for reset to occur in nanoseconds. */
+    /** Minimum time to wait for reset to occur in nanoseconds. */
     private static final int LED_RESET_WAIT_TIME = 300_000;
 
     protected final Spi spi;
     protected final Context context;
-    private final int numLeds;
+    private final int numLEDs;
     /** Default frequency of a WS2812 Neopixel Strip */
     private final int frequency = 800_000;
     private final int renderWaitTime;
@@ -34,38 +38,38 @@ public class LEDStrip extends Component {
      * Creates a new simpleLed component with a custom BCM pin.
      *
      * @param pi4j    Pi4J context
-     * @param numLeds How many LEDs are on this Strand
+     * @param numLEDs How many LEDs are on this Strand
      * @param brightness How bright the leds can be at max, Range 0 - 255
      */
-    public LEDStrip(Context pi4j, int numLeds, double brightness) {
-        this(pi4j, numLeds, brightness, DEFAULT_CHANNEL);
+    public LEDStrip(Context pi4j, int numLEDs, double brightness) {
+        this(pi4j, numLEDs, brightness, DEFAULT_CHANNEL);
     }
 
     /**
      * Creates a new simpleLed component with a custom BCM pin.
      *
      * @param pi4j    Pi4J context
-     * @param numLeds How many LEDs are on this Strand
+     * @param numLEDs How many LEDs are on this Strand
      * @param brightness How bright the leds can be at max, range 0 - 1
      * @param channel which channel to use
      */
-    public LEDStrip(Context pi4j, int numLeds, double brightness, int channel) {
-        if(numLeds < 1 || brightness < 0 || brightness > 1 || channel < 0 || channel > 1){
+    public LEDStrip(Context pi4j, int numLEDs, double brightness, int channel) {
+        if(numLEDs < 1 || brightness < 0 || brightness > 1 || channel < 0 || channel > 1){
             throw new IllegalArgumentException("Illegal Constructor");
         }
-        logInfo("initialising a ledstrip with " + numLeds + " leds");
-        this.numLeds = numLeds;
-        this.leds = new int[numLeds];
+        logInfo("initialising a ledstrip with " + numLEDs + " leds");
+        this.numLEDs = numLEDs;
+        this.leds = new int[numLEDs];
         this.brightness = brightness;
         this.context = pi4j;
         this.spi = pi4j.create(buildSpiConfig(pi4j, channel, frequency));
 
         // The raw bytes that get sent to the ledstrip
         // 3 Color channels per led, at 8 bytes each, with 2 reset bytes
-        pixelRaw = new byte[(3*numLeds*8)+2];
+        pixelRaw = new byte[(3* numLEDs *8)+2];
 
         // 1.25us per bit (1250ns)
-        renderWaitTime = numLeds * 3 * 8 * 1250 + LED_RESET_WAIT_TIME;
+        renderWaitTime = numLEDs * 3 * 8 * 1250 + LED_RESET_WAIT_TIME;
     }
 
     /**
@@ -105,7 +109,7 @@ public class LEDStrip extends Component {
      * @return int with the amount of pixels
      */
     public int getNumPixels() {
-        return numLeds;
+        return numLEDs;
     }
 
     /**
@@ -150,7 +154,7 @@ public class LEDStrip extends Component {
     public void render() {
         //beginning at 1, because the first byte is a reset
         int counter = 1;
-        for (int i = 0; i < numLeds; i++) {
+        for (int i = 0; i < numLEDs; i++) {
 
             //Scaling the color to the max brightness
             leds[i] = PixelColor.setRedComponent(leds[i], (int) (PixelColor.getRedComponent(leds[i])*brightness));

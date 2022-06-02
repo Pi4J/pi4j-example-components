@@ -2,13 +2,15 @@ package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
 import com.pi4j.io.spi.Spi;
-import com.pi4j.io.spi.SpiConfig;
-import com.pi4j.io.spi.SpiMode;
 
 import java.util.Arrays;
 
+/**
+ * Creates an SPI Control for Neopixel LED Strips
+ */
 public class LEDMatrix extends Component{
 
+    /** Default Channel of the SPI Pins */
     protected static final int DEFAULT_CHANNEL = 0;
 
     protected final Spi spi;
@@ -17,20 +19,20 @@ public class LEDMatrix extends Component{
     /** Brightness value between 0 and 1 */
     private double brightness;
     private final int[][] matrix;
-    private int numLeds;
+    private int numLEDs;
 
     private final LEDStrip ledStrip;
 
     /**
-     * Creates a new LEDMatrix with the defined Matrix.
+     * Create a new LEDMatrix with the defined Matrix.
      * You can give in something like int[3][4] or
      * matrix = {{0, 0, 0},
      * {0, 0, 0, 0},
      * {0}}
      *
-     * @param pi4j    Pi4J context
-     * @param matrix How many LEDs are on this Strand
-     * @param brightness How bright the leds can be at max, Range 0 - 1
+     * @param pi4j       Pi4J context
+     * @param matrix     How many LEDs are on this Strand
+     * @param brightness How bright the LEDs can be at max, Range 0 - 1
      */
     public LEDMatrix(Context pi4j, int[][] matrix, double brightness) {
         this(pi4j, matrix, brightness, DEFAULT_CHANNEL);
@@ -39,22 +41,22 @@ public class LEDMatrix extends Component{
     /**
      * Creates a new LEDMatrix with the defined rows and columns
      *
-     * @param pi4j      Pi4J context
-     * @param Rows      How many Rows of LED
-     * @param Columns   How many columns of LED
-     * @param brightness How bright the leds can be at max, Range 0 - 1
+     * @param pi4j       Pi4J context
+     * @param rows       How many rows of LED
+     * @param columns    How many columns of LED
+     * @param brightness How bright the LEDs can be at max, Range 0 - 1
      */
-    public LEDMatrix(Context pi4j, int Rows, int Columns, double brightness) {
-        this(pi4j, new int[Rows][Columns], brightness, DEFAULT_CHANNEL);
+    public LEDMatrix(Context pi4j, int rows, int columns, double brightness) {
+        this(pi4j, new int[rows][columns], brightness, DEFAULT_CHANNEL);
     }
 
     /**
      * Creates a new simpleLed component with a custom BCM pin.
      *
-     * @param pi4j    Pi4J context
-     * @param matrix How many LEDs are on this Strand
-     * @param brightness How bright the leds can be at max, Range 0 - 255
-     * @param channel which channel to use
+     * @param pi4j       Pi4J context
+     * @param matrix     How many LEDs are on this Strand
+     * @param brightness How bright the LEDs can be at max, Range 0 - 255
+     * @param channel    which channel to use
      */
     public LEDMatrix(Context pi4j, int[][] matrix, double brightness, int channel) {
         this.matrix = matrix;
@@ -62,42 +64,42 @@ public class LEDMatrix extends Component{
         this.context = pi4j;
 
         // Allocate SPI transmit buffer (same size as PCM)
-        this.numLeds = 0;
-        for (int[] ints : matrix) {
-            this.numLeds += ints.length;
+        this.numLEDs = 0;
+        for (int[] strips : matrix) {
+            this.numLEDs += strips.length;
         }
 
-        this.ledStrip = new LEDStrip(pi4j, numLeds, brightness, channel);
+        this.ledStrip = new LEDStrip(pi4j, numLEDs, brightness, channel);
         this.spi = ledStrip.spi;
     }
 
     /**
-     * @return the pi4j context
+     * @return the Pi4J context
      */
     public Context getContext() {
         return this.context;
     }
 
     /**
-     * Setting all LEDS off and closing the strip
+     * Setting all LEDs off and closing the strip
      */
     public void close() {
         ledStrip.close();
     }
 
     /**
-     * function to get the amount of the leds in the matrix
+     * function to get the amount of the LEDs in the matrix
      *
-     * @return int with the amount of leds over all
+     * @return int with the amount of LEDs over all
      */
     public int getNumPixels() {
-        return numLeds;
+        return numLEDs;
     }
 
     /**
-     * function to get the amount of the leds in the specified strip
+     * function to get the amount of the LEDs in the specified strip
      *
-     * @return int with the amount of leds over all
+     * @return int with the amount of LEDs over all
      */
     public int getNumPixels(int strip) {
         if (strip > matrix.length || strip < 0) {
@@ -107,10 +109,10 @@ public class LEDMatrix extends Component{
     }
 
     /**
-     * function to get the color (as an int) of a specified led
+     * function to get the color (as an int) of a specified LED
      *
-     * @param pixel which position on the ledstrip, range 0 - numLEDS-1
-     * @return the color of the specified led on the strip
+     * @param pixel which position on the LED strip, range 0 - numLEDS-1
+     * @return the color of the specified LED on the strip
      */
     public int getPixelColor(int strip, int pixel) {
         if (strip > matrix.length || strip < 0 || pixel > matrix[strip].length || pixel < 0) {
@@ -127,13 +129,63 @@ public class LEDMatrix extends Component{
      */
     public void setPixelColor(int strip, int pixel, int color) {
         if (strip > matrix.length || strip < 0 || pixel > matrix[strip].length || pixel < 0) {
-            throw new IllegalArgumentException("the strip or led specified does not exist");
+            throw new IllegalArgumentException("the strip or LED specified does not exist");
         }
         matrix[strip][pixel] = color;
     }
 
     /**
-     * Setting all leds of a Row to the same color
+     * function to get the color (as an int) of a specified LED on the matrix
+     *
+     * @param pixelNumber which position in the matrix
+     *                    if it was laid out like a single strip
+     * @return the color of the specified led on the strip
+     */
+    public int getMatrixPixelColor(int pixelNumber) {
+        if (pixelNumber > matrix.length || pixelNumber < 0) {
+            throw new IllegalArgumentException("the strip or LED specified does not exist");
+        }
+        int counter = 0;
+        int strip = 0;
+        int LED = 0;
+        while(counter < pixelNumber && strip < matrix.length){
+            LED = 0;
+            while (counter < pixelNumber && LED < matrix[strip].length){
+                counter++;
+                LED++;
+            }
+            if (counter < pixelNumber) strip++;
+        }
+        return matrix[strip][LED];
+    }
+
+    /**
+     * setting the color of a specified LED on the matrix
+     *
+     * @param pixelNumber which position in the matrix,
+     *                    if it was laid out like a single strip
+     * @param color       the color that is set
+     */
+    public void setMatrixPixelColor(int pixelNumber, int color) {
+        if (pixelNumber > matrix.length || pixelNumber < 0) {
+            throw new IllegalArgumentException("the LED specified does not exist");
+        }
+        int counter = 0;
+        int strip = 0;
+        int LED = 0;
+        while(counter < pixelNumber && strip < matrix.length){
+            LED = 0;
+            while (counter < pixelNumber && LED < matrix[strip].length){
+                counter++;
+                LED++;
+            }
+            if (counter < pixelNumber) strip++;
+        }
+        matrix[strip][LED] = color;
+    }
+
+    /**
+     * Setting all LEDs of a row to the same color
      *
      * @param color the color that is set
      */
@@ -145,18 +197,18 @@ public class LEDMatrix extends Component{
     }
 
     /**
-     * Setting all leds to the same color
+     * Setting all LEDs in the matrix to the same color
      *
      * @param color the color that is set
      */
     public void setMatrixColor(int color) {
-        for (int[] ints : matrix) {
-            Arrays.fill(ints, color);
+        for (int[] strips : matrix) {
+            Arrays.fill(strips, color);
         }
     }
 
     /**
-     * Rendering the LEDs by setting the pixels on the ledstrip component
+     * Rendering the LEDs by setting the pixels on the lED strip component
      */
     public void render() {
         int counter = 0;
@@ -170,22 +222,10 @@ public class LEDMatrix extends Component{
     }
 
     /**
-     * setting all leds off
+     * setting all LEDs off
      */
     public void allOff() {
         ledStrip.allOff();
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds. An {@link InterruptedException} will be catched and ignored while setting the
-     * interrupt flag again.
-     */
-    protected void sleep(long millis, int nanos) {
-        try {
-            Thread.sleep(millis, nanos);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     /**

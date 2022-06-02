@@ -12,20 +12,20 @@ public class LEDMatrix_App implements Application {
         int Columns = 3;
         double brightness = 0.5;
 
-        /* Initialising the matrix */
+        System.out.println("Initialising the matrix");
         LEDMatrix ledMatrix = new LEDMatrix(pi4j, Rows, Columns, brightness);
 
-        /* Setting all LEDs to Red. */
+        System.out.println("Setting all LEDs to Red.");
         ledMatrix.setMatrixColor(LEDStrip.PixelColor.RED);
         ledMatrix.render();
         delay(3000);
 
-        /* setting the second strip to green */
+        System.out.println("setting the second strip to green");
         ledMatrix.setStripColor(1, LEDStrip.PixelColor.GREEN);
         ledMatrix.render();
         delay(3000);
 
-        /* Setting the third led of the third strip to Yellow */
+        System.out.println("Setting the third led of the third strip to Yellow");
         ledMatrix.setPixelColor(2, 2, LEDStrip.PixelColor.YELLOW);
         ledMatrix.render();
         delay(3000);
