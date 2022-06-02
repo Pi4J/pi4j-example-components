@@ -9,6 +9,7 @@ import com.pi4j.io.pwm.PwmType;
 public class Buzzer extends Component{
 
     protected final Pwm pwm;
+    protected Thread playingThread;
 
     /**
      * Creates a new buzzer component with a custom BCM pin.
@@ -83,7 +84,10 @@ public class Buzzer extends Component{
      * @param sounds the defined sounds, can be an Array
      */
     public void playMelody(int tempo, Sound... sounds){
-        Thread thread = new Thread(() -> {
+        //stopping the current playing of a melody
+        playingThread.interrupt();
+        //named thread to set it as Daemon and start it
+        playingThread = new Thread(() -> {
             //to begin the melody, we first wait for 8 beats to pass
             playSilence(tempo * 8);
             for (Sound s : sounds) {
@@ -92,8 +96,8 @@ public class Buzzer extends Component{
             //when the melody is finished, we turn it off
             playSilence();
         });
-        thread.setDaemon(true);
-        thread.start();
+        playingThread.setDaemon(true);
+        playingThread.start();
     }
 
     /**
@@ -105,8 +109,10 @@ public class Buzzer extends Component{
      * @param sounds      the defined sounds, can be an Array
      */
     public void playMelody(int tempo, int repetitions, Sound... sounds){
+        //stopping the current playing of a melody
+        playingThread.interrupt();
         //named thread to set it as Daemon and start it
-        Thread thread = new Thread(() -> {
+        playingThread = new Thread(() -> {
             for (int i = 0; i < repetitions; i++) {
                 //to begin the melody, we first wait for 8 beats to pass
                 //we can't just call the other playMelody, as it would always
@@ -119,8 +125,8 @@ public class Buzzer extends Component{
                 playSilence();
             }
         });
-        thread.setDaemon(true);
-        thread.start();
+        playingThread.setDaemon(true);
+        playingThread.start();
     }
 
     /**
