@@ -45,8 +45,8 @@ public class JoystickAnalog extends Component {
      * @param push        additional push button on joystick
      */
     public JoystickAnalog(Context pi4j, ADS1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
-        this.x = new Potentiometer(ads1115, chanelXAxis, maxVoltage);
-        this.y = new Potentiometer(ads1115, chanelYAxis, maxVoltage);
+        this.x    = new Potentiometer(ads1115, chanelXAxis, maxVoltage);
+        this.y    = new Potentiometer(ads1115, chanelYAxis, maxVoltage);
         this.push = new SimpleButton(pi4j, push, false);
         this.normalized0to1 = normalized0to1;
     }
@@ -59,8 +59,8 @@ public class JoystickAnalog extends Component {
      * @param push    additional push button on joystick
      */
     public JoystickAnalog(Context pi4j, ADS1115 ads1115, PIN push) {
-        this.x = new Potentiometer(ads1115, 0, 3.3);
-        this.y = new Potentiometer(ads1115, 1, 3.3);
+        this.x    = new Potentiometer(ads1115, 0, 3.3);
+        this.y    = new Potentiometer(ads1115, 1, 3.3);
         this.push = new SimpleButton(pi4j, push, false);
         normalized0to1 = true;
     }
@@ -126,7 +126,7 @@ public class JoystickAnalog extends Component {
      * @return normalized value
      */
     public double getXValue() {
-        double result = x.continiousReadingGetNormalizedValue() + xOffset;
+        double result = x.continuousReadingGetNormalizedValue() + xOffset;
 
         result = Math.max(result, 0.0);
         result = Math.min(result, 1.0);
@@ -143,7 +143,7 @@ public class JoystickAnalog extends Component {
      * @return normalized value
      */
     public double getYValue() {
-        double result = y.continiousReadingGetNormalizedValue() + yOffset;
+        double result = y.continuousReadingGetNormalizedValue() + yOffset;
 
         result = Math.max(result, 0.0);
         result = Math.min(result, 1.0);
@@ -162,16 +162,16 @@ public class JoystickAnalog extends Component {
      * @param readFrequency update frequency to read new value from ad converter
      */
     public void start(double threshold, int readFrequency) {
-        x.startSlowContiniousReading(threshold, readFrequency);
-        y.startSlowContiniousReading(threshold, readFrequency);
+        x.startSlowContinuousReading(threshold, readFrequency);
+        y.startSlowContinuousReading(threshold, readFrequency);
     }
 
     /**
      * Stop reading of joystick value. If triggered no new value from joystick can be read.
      */
     public void stop() {
-        x.stopSlowContiniousReading();
-        y.stopSlowContiniousReading();
+        x.stopSlowContinuousReading();
+        y.stopSlowContinuousReading();
     }
 
     /**

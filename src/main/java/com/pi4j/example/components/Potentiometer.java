@@ -27,28 +27,28 @@ public class Potentiometer extends Component {
     /**
      * fast continuous reading is active
      */
-    private boolean fastContiniousReadingActive = false;
+    private boolean fastContinuousReadingActive = false;
 
     /**
-     * slow continious reading is active
+     * slow continuous reading is active
      */
-    private boolean slowContiniousReadingActive = false;
+    private boolean slowContinuousReadingActive = false;
 
     /**
      * Create a new potentiometer component with custom chanel and custom maxVoltage
      *
      * @param ads1115    ads instance
-     * @param chanel     custom ad chanel
+     * @param channel     custom ad chanel
      * @param maxVoltage custom maxVoltage
      */
-    public Potentiometer(ADS1115 ads1115, int chanel, double maxVoltage) {
-        this.ads1115 = ads1115;
+    public Potentiometer(ADS1115 ads1115, int channel, double maxVoltage) {
+        this.ads1115  = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = maxVoltage;
-        this.channel = chanel;
+        this.channel  = channel;
 
         //check if chanel is in range of ad converter
-        if (chanel < 0 || chanel > 3) {
+        if (channel < 0 || channel > 3) {
             throw new ConfigException("Channel number for ad converter not possible, choose channel between 0 to 3");
         }
     }
@@ -72,21 +72,13 @@ public class Potentiometer extends Component {
      * @return voltage from potentiometer
      */
     public double singleShotGetVoltage() {
-        double result = 0.0;
-        switch (channel) {
-            case 0:
-                result = ads1115.singleShotAIn0();
-                break;
-            case 1:
-                result = ads1115.singleShotAIn1();
-                break;
-            case 2:
-                result = ads1115.singleShotAIn2();
-                break;
-            case 3:
-                result = ads1115.singleShotAIn3();
-                break;
-        }
+        double result = switch (channel) {
+            case 0  -> ads1115.singleShotAIn0();
+            case 1  -> ads1115.singleShotAIn1();
+            case 2  -> ads1115.singleShotAIn2();
+            case 3  -> ads1115.singleShotAIn3();
+            default -> 0.0;
+        };
         updateMinMaxValue(result);
         return result;
     }
@@ -101,41 +93,34 @@ public class Potentiometer extends Component {
     }
 
     /**
-     * Returns actual voltage value from continious reading
+     * Returns actual voltage value from continuous reading
      *
      * @return actual voltage value
      */
-    public double continiousReadingGetVoltage() {
+    public double continuousReadingGetVoltage() {
         double result = 0.0;
-        if (fastContiniousReadingActive) {
-            result = ads1115.getFastContiniousReadAI();
+        if (fastContinuousReadingActive) {
+            result = ads1115.getFastContinuousReadAI();
         } else {
-            switch (channel) {
-                case 0:
-                    result = ads1115.getSlowContiniousReadAIn0();
-                    break;
-                case 1:
-                    result = ads1115.getSlowContiniousReadAIn1();
-                    break;
-                case 2:
-                    result = ads1115.getSlowContiniousReadAIn2();
-                    break;
-                case 3:
-                    result = ads1115.getSlowContiniousReadAIn3();
-                    break;
-            }
+            result = switch (channel) {
+                case 0  -> ads1115.getSlowContinuousReadAIn0();
+                case 1  -> ads1115.getSlowContinuousReadAIn1();
+                case 2  -> ads1115.getSlowContinuousReadAIn2();
+                case 3  -> ads1115.getSlowContinuousReadAIn3();
+                default -> result;
+            };
         }
         updateMinMaxValue(result);
         return result;
     }
 
     /**
-     * Returns actual normalized value form 0 to 1 from continious reading
+     * Returns actual normalized value form 0 to 1 from continuous reading
      *
      * @return normalized value
      */
-    public double continiousReadingGetNormalizedValue() {
-        return continiousReadingGetVoltage() / maxValue;
+    public double continuousReadingGetNormalizedValue() {
+        return continuousReadingGetVoltage() / maxValue;
     }
 
     /**
@@ -158,18 +143,10 @@ public class Potentiometer extends Component {
      */
     public void setRunnableSlowReadChan(Runnable method) {
         switch (channel) {
-            case 0:
-                ads1115.setRunnableSlowReadChannel0(method);
-                break;
-            case 1:
-                ads1115.setRunnableSlowReadChannel1(method);
-                break;
-            case 2:
-                ads1115.setRunnableSlowReadChannel2(method);
-                break;
-            case 3:
-                ads1115.setRunnableSlowReadChannel3(method);
-                break;
+            case 0 -> ads1115.setRunnableSlowReadChannel0(method);
+            case 1 -> ads1115.setRunnableSlowReadChannel1(method);
+            case 2 -> ads1115.setRunnableSlowReadChannel2(method);
+            case 3 -> ads1115.setRunnableSlowReadChannel3(method);
         }
     }
 
@@ -192,53 +169,53 @@ public class Potentiometer extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
      */
-    public void startSlowContiniousReading(double threshold, int readFrequency) {
-        if (fastContiniousReadingActive) {
-            logDebug("fast continious reading currently active");
+    public void startSlowContinuousReading(double threshold, int readFrequency) {
+        if (fastContinuousReadingActive) {
+            logDebug("fast continuous reading currently active");
         } else {
-            //set slow continuous reading active to lock fast continious reading
-            slowContiniousReadingActive = true;
-            ads1115.startSlowContiniousReading(threshold, readFrequency);
+            //set slow continuous reading active to lock fast continuous reading
+            slowContinuousReadingActive = true;
+            ads1115.startSlowContinuousReading(threshold, readFrequency);
         }
     }
 
     /**
-     * stops slow continious reading
+     * stops slow continuous reading
      */
-    public void stopSlowContiniousReading() {
-        logInfo("Stop continious reading");
-        slowContiniousReadingActive = false;
-        ads1115.stopSlowReadContiniousReading();
+    public void stopSlowContinuousReading() {
+        logDebug("Stop continuous reading");
+        slowContinuousReadingActive = false;
+        ads1115.stopSlowReadContinuousReading();
     }
 
     /**
-     * Starts fast continious reading. In this mode only on device can be connected to the ad converter.
+     * Starts fast continuous reading. In this mode only on device can be connected to the ad converter.
      * The maximum allowed readFrequency ist equal to the sample rate of the ad converter
      *
      * @param threshold     threshold for trigger new value change event (+- voltage)
      * @param readFrequency read frequency to get new value from device, must be lower than the
      *                      sampling rate of the device
      */
-    public void startFastContiniousReading(double threshold, int readFrequency) {
-        if (slowContiniousReadingActive) {
-            logDebug("slow continious reading currently active");
+    public void startFastContinuousReading(double threshold, int readFrequency) {
+        if (slowContinuousReadingActive) {
+            logDebug("slow continuous reading currently active");
         } else {
-            //set fast continuous reading active to lock slow continious reading
-            fastContiniousReadingActive = true;
+            //set fast continuous reading active to lock slow continuous reading
+            fastContinuousReadingActive = true;
 
-            //start continious reading on ads1115
-            ads1115.startFastContiniousReading(channel, threshold, readFrequency);
+            //start continuous reading on ads1115
+            ads1115.startFastContinuousReading(channel, threshold, readFrequency);
         }
     }
 
     /**
-     * stops fast continious reading
+     * stops fast continuous reading
      */
-    public void stopFastContiniousReading() {
-        logInfo("Stop fast continious reading");
-        fastContiniousReadingActive = false;
-        //stop continious reading
-        ads1115.stopFastContiniousReading();
+    public void stopFastContinuousReading() {
+        logDebug("Stop fast continuous reading");
+        fastContinuousReadingActive = false;
+        //stop continuous reading
+        ads1115.stopFastContinuousReading();
     }
 
     /**
@@ -246,18 +223,10 @@ public class Potentiometer extends Component {
      */
     public void deregisterAll() {
         switch (channel) {
-            case 0:
-                ads1115.setRunnableSlowReadChannel0(null);
-                break;
-            case 1:
-                ads1115.setRunnableSlowReadChannel1(null);
-                break;
-            case 2:
-                ads1115.setRunnableSlowReadChannel2(null);
-                break;
-            case 3:
-                ads1115.setRunnableSlowReadChannel3(null);
-                break;
+            case 0 -> ads1115.setRunnableSlowReadChannel0(null);
+            case 1 -> ads1115.setRunnableSlowReadChannel1(null);
+            case 2 -> ads1115.setRunnableSlowReadChannel2(null);
+            case 3 -> ads1115.setRunnableSlowReadChannel3(null);
         }
     }
 

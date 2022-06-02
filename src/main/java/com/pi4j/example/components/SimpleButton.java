@@ -4,16 +4,19 @@ import com.pi4j.context.Context;
 import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.io.gpio.digital.*;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class SimpleButton extends Component {
     /**
      * Default debounce time in microseconds
      */
-    protected static final long DEFAULT_DEBOUNCE = 10000;
+    private static final long DEFAULT_DEBOUNCE = 10_000;
 
     /**
      * Pi4J digital input instance used by this component
      */
-    protected final DigitalInput digitalInput;
+    private final DigitalInput digitalInput;
     /**
      * Specifies if button state is inverted, e.g. HIGH = depressed, LOW = pressed
      * This will also automatically switch the pull resistance to PULL_UP
@@ -35,6 +38,18 @@ public class SimpleButton extends Component {
      * Runnable Code when button is depressed
      */
     private Runnable onUp;
+    /**
+     * what needs to be done while button is pressed (and whilePressed is != null)
+     */
+    private final Runnable whilePressedWorker = () -> {
+        while (isDown()) {
+            delay(whilePressedDelay);
+            if (isDown()) {
+                whilePressed.run();
+            }
+        }
+    };
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Creates a new button component
@@ -67,7 +82,7 @@ public class SimpleButton extends Component {
         this.digitalInput.addListener(digitalStateChangeEvent -> {
             DigitalState state = getState();
 
-            logger.info(() -> "Button switched to '" + state + "'");
+            logDebug("Button switched to '" + state + "'");
 
             switch (state) {
                 case HIGH -> {
@@ -75,14 +90,7 @@ public class SimpleButton extends Component {
                         onDown.run();
                     }
                     if (whilePressed != null) {
-                        new Thread(() -> {
-                            while (isDown()) {
-                                delay(whilePressedDelay);
-                                if (isDown()) {
-                                    whilePressed.run();
-                                }
-                            }
-                        }).start();
+                        executor.submit(whilePressedWorker);
                     }
                 }
                 case LOW -> {
@@ -102,9 +110,9 @@ public class SimpleButton extends Component {
      */
     public DigitalState getState() {
         return switch (digitalInput.state()) {
-            case HIGH -> inverted ? DigitalState.LOW : DigitalState.HIGH;
-            case LOW -> inverted ? DigitalState.HIGH : DigitalState.LOW;
-            default -> DigitalState.UNKNOWN;
+            case HIGH -> inverted ? DigitalState.LOW  : DigitalState.HIGH;
+            case LOW  -> inverted ? DigitalState.HIGH : DigitalState.LOW;
+            default   -> DigitalState.UNKNOWN;
         };
     }
 
@@ -145,7 +153,11 @@ public class SimpleButton extends Component {
      * @return DigitalInput configuration
      */
     private DigitalInputConfig buildDigitalInputConfig(Context pi4j, PIN address, boolean inverted, long debounce) {
-        return DigitalInput.newConfigBuilder(pi4j).id("BCM" + address).name("Button #" + address).address(address.getPin()).debounce(debounce).pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN).build();
+        return DigitalInput.newConfigBuilder(pi4j).id("BCM" + address)
+                .name("Button #" + address)
+                .address(address.getPin())
+                .debounce(debounce).pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN)
+                .build();
     }
 
 
@@ -190,6 +202,7 @@ public class SimpleButton extends Component {
         this.onDown = null;
         this.onUp = null;
         this.whilePressed = null;
+        this.executor.shutdown();
     }
 
     /**

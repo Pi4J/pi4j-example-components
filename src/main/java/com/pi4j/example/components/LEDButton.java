@@ -45,7 +45,7 @@ public class LEDButton extends Component {
      */
     public LEDButton(Context pi4j, PIN buttonaddress, boolean inverted, PIN ledaddress, long debounce) {
         this.button = new SimpleButton(pi4j, buttonaddress, inverted, debounce);
-        this.led = new SimpleLED(pi4j, ledaddress);
+        this.led    = new SimpleLED(pi4j, ledaddress);
     }
 
     /**
@@ -61,14 +61,14 @@ public class LEDButton extends Component {
      * Sets the LED to on.
      */
     public void LEDsetStateOn() {
-        led.setStateOn();
+        led.on();
     }
 
     /**
      * Sets the LED to off
      */
     public void LEDsetStateOff() {
-        led.setStateOff();
+        led.off();
     }
 
     /**

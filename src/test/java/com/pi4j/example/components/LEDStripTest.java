@@ -7,26 +7,22 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LEDStrip_ComponentTest extends ComponentTest {
+public class LEDStripTest extends ComponentTest {
 
     private MockSpi spi;
     private LEDStrip strip;
     private int pixels;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         this.pixels = 10;
         strip = new LEDStrip(pi4j, pixels, 127);
         spi = toMock(strip.spi);
     }
 
-    @Test
-    public void testGetContext(){
-        assertEquals(pi4j, strip.getContext());
-    }
 
     @Test
-    public void testSetPixelColor(){
+    public void testSetPixelColor() {
         //when
         strip.allOff();
         strip.setPixelColor(1, LEDStrip.PixelColor.YELLOW);
@@ -36,7 +32,7 @@ public class LEDStrip_ComponentTest extends ComponentTest {
     }
 
     @Test
-    public void testSetStripColor(){
+    public void testSetStripColor() {
         //when
         strip.allOff();
         strip.setStripColor(LEDStrip.PixelColor.YELLOW);
@@ -46,12 +42,12 @@ public class LEDStrip_ComponentTest extends ComponentTest {
     }
 
     @Test
-    public void testGetNumLEDS(){
+    public void testGetNumLEDS() {
         assertEquals(pixels, strip.getNumPixels());
     }
 
     @Test
-    public void testGetPixelChannels(){
+    public void testGetPixelChannels() {
         //when
         int red = LEDStrip.PixelColor.RED;
         int blue = LEDStrip.PixelColor.BLUE;
