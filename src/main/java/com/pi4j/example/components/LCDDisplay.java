@@ -43,11 +43,13 @@ public class LCDDisplay extends Component {
     private static final byte LCD_5x10DOTS  = (byte) 0x04;
     private static final byte LCD_5x8DOTS   = (byte) 0x00;
     // flags for backlight control
+
     private static final byte LCD_BACKLIGHT     = (byte) 0x08;
     private static final byte LCD_NO_BACKLIGHT  = (byte) 0x00;
     private static final byte En                = (byte) 0b000_00100; // Enable bit
     private static final byte Rw                = (byte) 0b000_00010; // Read/Write bit
     private static final byte Rs                = (byte) 0b000_00001; // Register select bit
+  
     /**
      * Display row offsets. Offset for up to 4 rows.
      */
@@ -89,6 +91,7 @@ public class LCDDisplay extends Component {
         this.rows = rows;
         this.columns = columns;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
+        init();
     }
 
     /**
@@ -104,6 +107,7 @@ public class LCDDisplay extends Component {
         this.rows = rows;
         this.columns = columns;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, device));
+        init();
     }
 
     /**
@@ -179,6 +183,28 @@ public class LCDDisplay extends Component {
         clearLine(line);
         moveCursorHome();
         displayLine(text, LCD_ROW_OFFSETS[line - 1]);
+    }
+
+    /**
+     * Write a Line of Text on the LCD Display
+     *
+     * @param text     Text to display
+     * @param line     Select Line of Display
+     * @param position Select position on line
+     */
+    public void displayText(String text, int line, int position) {
+        if (position > COLUMNS) {
+            throw new IllegalArgumentException("Too long text. Only " + COLUMNS + " characters possible");
+        }
+        if (line > ROWS || line < 1) {
+            throw new IllegalArgumentException("Wrong line id. Only " + ROWS + " lines possible");
+        }
+
+        clearLine(line);
+        setCursorToPosition(position, line);
+        for (char character: text.toCharArray()) {
+            writeCharacter(character);
+        }
     }
 
     /**
@@ -340,7 +366,7 @@ public class LCDDisplay extends Component {
         if (digit < 0 || digit > columns) {
             throw new IllegalArgumentException("Line out of range. Display has only " + rows + "x" + columns + " Characters!");
         }
-        executeCommand(LCD_SET_DDRAM_ADDR, (byte) (digit + LCD_ROW_OFFSETS[line - 1]));
+        writeCommand((byte) (LCD_SET_DDRAM_ADDR | digit + LCD_ROW_OFFSETS[line - 1]));
     }
 
     /**
@@ -411,12 +437,13 @@ public class LCDDisplay extends Component {
         if (location > 7 || location < 1) {
             throw new IllegalArgumentException("Invalid memory location. Range 1-7 allowed. Value: " + location);
         }
-        executeCommand(LCD_SET_CGRAM_ADDR, (byte) (location << 3));
+        writeCommand((byte) (LCD_SET_CGRAM_ADDR | location << 3));
 
         for (int i = 0; i < 8; i++) {
-            executeCommand(character[i]);
+            writeSplitCommand(character[i], (byte) 1);
         }
     }
+
 
     /**
      * Execute Display commands

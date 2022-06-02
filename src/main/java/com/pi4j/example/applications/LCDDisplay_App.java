@@ -11,7 +11,7 @@ public class LCDDisplay_App implements Application {
     @Override
     public void execute(Context pi4j) {
         //Create a Component, with amount of ROWS and COLUMNS of the Device
-        LCDDisplay lcd = new LCDDisplay(pi4j, 4, 20);
+        LCDDisplay lcd = new LCDDisplay(pi4j, 2, 16);
         System.out.println("Here we go.. let's have some fun with that LCD Display!");
 
         // Turn on the backlight makes the display appear turned on
@@ -44,11 +44,20 @@ public class LCDDisplay_App implements Application {
         lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
         delay(3000);
 
-        lcd.displayText("Small text with \nnew line char");
-        delay(3000);
-
         // Clear the display to start next parts
         lcd.clearDisplay();
+
+        // Let's try to draw a house. To keep this method short and clean we create the characters in a separate
+        // method below.
+        createCharacters(lcd);
+
+        // Now all characters are ready. Just draw them on the right place by moving the cursor and writing the
+        // created characters to specific positions
+        lcd.writeCharacter('\1', 1, 1);
+        lcd.writeCharacter('\2', 2, 1);
+        lcd.writeCharacter('\3', 1, 2);
+        lcd.writeCharacter('\4', 2, 2);
+        delay(3000);
 
         // Turn off the backlight makes the display appear turned off
         lcd.setDisplayBacklight(false);
