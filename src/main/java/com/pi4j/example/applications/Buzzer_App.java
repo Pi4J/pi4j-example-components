@@ -12,7 +12,7 @@ public class Buzzer_App implements Application {
         Buzzer buzzer = new Buzzer(pi4j, PIN.PWM18);
 
         //playing a simple note
-        logInfo("playing note b6 for 1 sec");
+        System.out.println("playing note b6 for 1 sec");
         buzzer.playTone(Buzzer.Note.B6.getFrequency(), 1000);
 
         //shutting it down for 1 second
@@ -36,14 +36,15 @@ public class Buzzer_App implements Application {
         };
 
         //playing the melody once, then shutting down for a second
-        logInfo("playing melody once");
+        System.out.println("playing melody once");
         buzzer.playMelody(60, melody);
         buzzer.playSilence(1000);
 
         //playing the melody 5 times repeatedly
-        logInfo("playing melody 5 times");
-        logInfo("playing in a different thread, so the app is moving on");
-        buzzer.setVolume(100);
+        System.out.println("playing melody 5 times");
+        System.out.println("playing in a different thread, so the app is moving on");
         buzzer.playMelody(60, 5, melody);
+        System.out.println("waiting for melody to finish");
+        delay(3000);
     }
 }

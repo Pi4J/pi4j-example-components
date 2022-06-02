@@ -7,23 +7,8 @@ import com.pi4j.io.pwm.PwmConfig;
 import com.pi4j.io.pwm.PwmType;
 
 public class Buzzer extends Component{
-    /**
-     * If no pin is specified by the user, the default BCM pin 18 is used.
-     */
-    protected static final PIN DEFAULT_PIN = PIN.PWM18;
+
     protected final Pwm pwm;
-
-    /** volume between 0 .. 100 % */
-    private int volume = 50;
-
-    /**
-     * Creates a new buzzer component using the default pin.
-     *
-     * @param pi4j Pi4J context
-     */
-    public Buzzer(Context pi4j) {
-        this(pi4j, DEFAULT_PIN);
-    }
 
     /**
      * Creates a new buzzer component with a custom BCM pin.
@@ -33,15 +18,25 @@ public class Buzzer extends Component{
      */
     public Buzzer(Context pi4j, PIN address) {
         this.pwm = pi4j.create(buildPwmConfig(pi4j, address));
+        logDebug("Created new Buzzer Component");
     }
 
     /**
-     * Sets the volume to control it while it is running
+     * Builds a new PWM configuration for the buzzer
      *
-     * @param volume the volume, between 0 and 100
+     * @param pi4j    Pi4J context
+     * @param address BCM pin address
+     * @return PWM    configuration
      */
-    public void setVolume(int volume) {
-        this.volume = volume;
+    protected static PwmConfig buildPwmConfig(Context pi4j, PIN address) {
+        return Pwm.newConfigBuilder(pi4j)
+                .id("BCM" + address)
+                .name("Buzzer")
+                .address(address.getPin())
+                .pwmType(PwmType.HARDWARE)
+                .initial(0)
+                .shutdown(0)
+                .build();
     }
 
     /**
@@ -89,10 +84,12 @@ public class Buzzer extends Component{
      */
     public void playMelody(int tempo, Sound... sounds){
         Thread thread = new Thread(() -> {
+            //to begin the melody, we first wait for 8 beats to pass
             playSilence(tempo * 8);
             for (Sound s : sounds) {
                 playNote(s.note, tempo, s.beats);
             }
+            //when the melody is finished, we turn it off
             playSilence();
         });
         thread.setDaemon(true);
@@ -108,12 +105,17 @@ public class Buzzer extends Component{
      * @param sounds      the defined sounds, can be an Array
      */
     public void playMelody(int tempo, int repetitions, Sound... sounds){
+        //named thread to set it as Daemon and start it
         Thread thread = new Thread(() -> {
             for (int i = 0; i < repetitions; i++) {
+                //to begin the melody, we first wait for 8 beats to pass
+                //we can't just call the other playMelody, as it would always
+                //wait for the 8 beats to finish between each repetition
                 playSilence(tempo * 8);
                 for (Sound s : sounds) {
                     playNote(s.note, tempo, s.beats);
                 }
+                //when the melody is finished, we turn it off
                 playSilence();
             }
         });
@@ -130,6 +132,8 @@ public class Buzzer extends Component{
      */
     public void playNote(Note note, int tempo, int beats) {
         playTone(note.frequency, tempo * beats);
+        //playSilence is used, because if the Note is not long enough,
+        //the component wouldn't have enough time to change frequency
         playSilence(20);
     }
 
@@ -161,23 +165,8 @@ public class Buzzer extends Component{
     }
 
     /**
-     * Builds a new PWM configuration for the buzzer
-     *
-     * @param pi4j    Pi4J context
-     * @param address BCM pin address
-     * @return PWM    configuration
+     * A note you can play. https://en.wikipedia.org/wiki/Musical_note
      */
-    protected static PwmConfig buildPwmConfig(Context pi4j, PIN address) {
-        return Pwm.newConfigBuilder(pi4j)
-                .id("BCM" + address)
-                .name("Buzzer")
-                .address(address.getPin())
-                .pwmType(PwmType.HARDWARE)
-                .initial(0)
-                .shutdown(0)
-                .build();
-    }
-
     public enum Note {
         B0(31),
         C1(33),
@@ -281,6 +270,9 @@ public class Buzzer extends Component{
         }
     }
 
-    public static record Sound(Note note, int beats) {
-    }
+    /**
+     * A Sound is defined trough a frequency, that is played for
+     * for a defined range of beats.
+     */
+    public record Sound(Note note, int beats) {}
 }

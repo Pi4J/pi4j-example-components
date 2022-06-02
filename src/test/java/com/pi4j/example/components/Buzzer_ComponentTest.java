@@ -21,11 +21,57 @@ public class Buzzer_ComponentTest extends ComponentTest {
     }
 
     @Test
-    public void testPwm(){
-        //when
-        buzzer.playSilence(100);
+    public void testPlayTone() {
+        // when
+        this.buzzer.playTone(1000);
 
-        //then
+        // then
+        assertTrue(this.pwm.isOn());
+        assertEquals(1000, this.pwm.frequency());
+    }
+
+    @Test
+    public void testPlayToneWithDuration() {
+        // when
+        this.buzzer.playTone(1000, 10);
+
+        // then
+        assertTrue(this.pwm.isOff());
+        assertEquals(1000, pwm.frequency());
+    }
+
+    @Test
+    public void testPlayToneWithInterrupt() {
+        // when
+        Thread.currentThread().interrupt();
+        buzzer.playTone(1000, 5000);
+
+        // then
+        assertTrue(this.pwm.isOff());
+    }
+
+    @Test
+    public void testPlaySilence() {
+        // given
+        buzzer.playTone(1000);
+
+        // when
+        buzzer.playSilence();
+
+        // then
+        assertTrue(pwm.isOff());
+    }
+
+    @Test
+    public void testPlaySilenceInterrupt() {
+        // given
+        buzzer.playTone(1000);
+
+        // when
+        Thread.currentThread().interrupt();
+        buzzer.playSilence(5000);
+
+        // then
         assertTrue(pwm.isOff());
     }
 }
