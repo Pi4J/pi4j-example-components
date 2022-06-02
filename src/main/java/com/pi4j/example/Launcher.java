@@ -33,7 +33,8 @@ public final class Launcher implements Runnable {
         new Potentiometer_App(),
         new JoystickAnalog_App(),
         new LEDStrip_App(),
-        new Buzzer_App()
+        new Buzzer_App(),
+        new Servo_App()
     ));
 
     /**

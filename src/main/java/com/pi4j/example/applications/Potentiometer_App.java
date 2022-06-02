@@ -25,18 +25,18 @@ public class Potentiometer_App implements Application {
 
         // Register event handlers to print a message when potentiometer is moved
         poti.setRunnableSlowReadChan(() -> {
-            logInfo("The current voltage drop is currently " + String.format("%.3f", poti.continiousReadingGetVoltage()) + " volts");
+            logInfo("The current voltage drop is currently " + String.format("%.3f", poti.continuousReadingGetVoltage()) + " volts");
         });
 
-        //start continious reading with single shot in this mode you can connect up to 4 devices to the analog module
-        poti.startSlowContiniousReading(0.05, 10);
+        //start continuous reading with single shot in this mode you can connect up to 4 devices to the analog module
+        poti.startSlowContinuousReading(0.05, 10);
 
         // Wait while handling events before exiting
         logInfo("Move the potentiometer to see it in action!");
         delay(30_000);
 
-        //stop continious reading
-        poti.stopSlowContiniousReading();
+        //stop continuous reading
+        poti.stopSlowContinuousReading();
 
         logInfo("Potentiometer test done");
     }

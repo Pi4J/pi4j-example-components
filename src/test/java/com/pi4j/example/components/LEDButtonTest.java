@@ -11,15 +11,15 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Thread.sleep;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class LEDButton_ComponentTest extends ComponentTest {
+public class LEDButtonTest extends ComponentTest {
 
     private LEDButton button;
     private MockDigitalInput digitalInput;
     private MockDigitalOutput digitalOutput;
-    private PIN BTNPinNumber = PIN.D26;
-    private PIN LEDPinNumber = PIN.D25;
+    private final PIN BTNPinNumber = PIN.D26;
+    private final PIN LEDPinNumber = PIN.D25;
 
     @BeforeEach
     void setUp() {
@@ -49,11 +49,11 @@ public class LEDButton_ComponentTest extends ComponentTest {
         //when
         digitalInput.mockState(DigitalState.HIGH);
         //then
-        assertEquals(true, button.btnisDown());
+        assertTrue(button.btnisDown());
         //when
         digitalInput.mockState(DigitalState.LOW);
         //then
-        assertEquals(false, button.btnisDown());
+        assertFalse(button.btnisDown());
     }
 
     @Test
@@ -61,11 +61,11 @@ public class LEDButton_ComponentTest extends ComponentTest {
         //when
         digitalInput.mockState(DigitalState.HIGH);
         //then
-        assertEquals(false, button.btnisUp());
+        assertFalse(button.btnisUp());
         //when
         digitalInput.mockState(DigitalState.LOW);
         //then
-        assertEquals(true, button.btnisUp());
+        assertTrue(button.btnisUp());
     }
 
     @Test
@@ -108,9 +108,9 @@ public class LEDButton_ComponentTest extends ComponentTest {
         button.btndeRegisterAll();
 
         //then
-        assertEquals(null, button.btnGetOnUp());
-        assertEquals(null, button.btnGetOnDown());
-        assertEquals(null, button.btnGetWhilePressed());
+        assertNull(button.btnGetOnUp());
+        assertNull(button.btnGetOnDown());
+        assertNull(button.btnGetWhilePressed());
     }
 
     @Test
@@ -148,9 +148,9 @@ public class LEDButton_ComponentTest extends ComponentTest {
         button.btndeRegisterAll();
 
         //then
-        assertEquals(null, button.btnGetOnUp());
-        assertEquals(null, button.btnGetOnDown());
-        assertEquals(null, button.btnGetWhilePressed());
+        assertNull(button.btnGetOnUp());
+        assertNull(button.btnGetOnDown());
+        assertNull(button.btnGetWhilePressed());
 
     }
 
@@ -161,7 +161,7 @@ public class LEDButton_ComponentTest extends ComponentTest {
 
         AtomicInteger counter = new AtomicInteger(0);
 
-        button.btnwhilePressed(() -> counter.getAndIncrement(), samplingTime);
+        button.btnwhilePressed(counter::getAndIncrement, samplingTime);
 
         //when
         digitalInput.mockState(DigitalState.HIGH);
@@ -187,9 +187,9 @@ public class LEDButton_ComponentTest extends ComponentTest {
 
         //then
         assertEquals(2, counter.get());
-        assertEquals(null, button.btnGetOnUp());
-        assertEquals(null, button.btnGetOnDown());
-        assertEquals(null, button.btnGetWhilePressed());
+        assertNull(button.btnGetOnUp());
+        assertNull(button.btnGetOnDown());
+        assertNull(button.btnGetWhilePressed());
 
         //cleanup
         digitalInput.mockState(DigitalState.LOW);

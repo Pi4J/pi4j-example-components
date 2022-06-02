@@ -33,6 +33,6 @@ public class ADS1115_Test extends ComponentTest {
 
     @Test
     public void testGetGain(){
-        assertEquals(ADS1115.GAIN.GAIN_4_096V, ads1115.getSamplingRate());
+        assertEquals(ADS1115.GAIN.GAIN_4_096V, ads1115.getPga());
     }
 }

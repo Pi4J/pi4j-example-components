@@ -10,13 +10,11 @@ import java.util.Arrays;
 
 public class LEDStrip extends Component {
 
-    protected static final int DEFAULT_CHANNEL = 0;
-
+    protected static final int DEFAULT_CHANNEL   = 0;
     /* Minimum time to wait for reset to occur in nanoseconds. */
     private static final int LED_RESET_WAIT_TIME = 300_000;
 
     protected final Spi spi;
-    protected final Context context;
     private final int numLeds;
     private final int frequency;
     private final int renderWaitTime;
@@ -26,8 +24,8 @@ public class LEDStrip extends Component {
     private final byte[] pixelRaw;
     private long lastRenderTime;
 
-    private final byte Bit_0 = (byte) 0b11000000;// 192 in Decimal
-    private final byte Bit_1 = (byte) 0b11111000;// 248 in Decimal
+    private final byte Bit_0     = (byte) 0b11000000;// 192 in Decimal
+    private final byte Bit_1     = (byte) 0b11111000;// 248 in Decimal
     private final byte Bit_Reset = (byte) 0b00000000;// 0 in Decimal
 
     /**
@@ -50,12 +48,11 @@ public class LEDStrip extends Component {
      * @param channel which channel to use
      */
     public LEDStrip(Context pi4j, int numLeds, int brightness, int channel) {
-        logger.info("initialising a ledstrip with " + numLeds + " leds");
-        this.numLeds = numLeds;
-        this.leds = new int[numLeds];
+        logDebug("initialising a ledstrip with " + numLeds + " leds");
+        this.numLeds    = numLeds;
+        this.leds       = new int[numLeds];
         this.brightness = brightness;
-        this.frequency = 800_000;
-        this.context = pi4j;
+        this.frequency  = 800_000;
         this.spi = pi4j.create(buildSpiConfig(pi4j, channel, frequency));
 
         // Allocate SPI transmit buffer (same size as PCM)
@@ -81,18 +78,12 @@ public class LEDStrip extends Component {
                 .build();
     }
 
-    /**
-     * @return the pi4j context
-     */
-    public Context getContext() {
-        return this.context;
-    }
 
     /**
      * Setting all LEDS off and closing the strip
      */
     public void close() {
-        logInfo("Turning all leds off before close");
+        logDebug("Turning all leds off before close");
         allOff();
     }
 
@@ -179,9 +170,7 @@ public class LEDStrip extends Component {
 
         // While bitbanging, the first and last byte have to be a reset
         byte[] bytes = new byte[pixelRaw.length + 2];
-        for (int i = 0; i < pixelRaw.length; i++) {
-            bytes[i+1] = pixelRaw[i];
-        }
+        System.arraycopy(pixelRaw, 0, bytes, 1, pixelRaw.length);
         bytes[0] = Bit_Reset;
         bytes[bytes.length-1] = Bit_Reset;
 
@@ -198,7 +187,7 @@ public class LEDStrip extends Component {
         //writing on the PIN
         spi.write(bytes);
 
-        logger.info("finished rendering");
+        logDebug("finished rendering");
         lastRenderTime = System.nanoTime();
     }
 
