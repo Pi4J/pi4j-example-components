@@ -30,7 +30,7 @@ public class LEDStrip extends Component {
      */
     private final int frequency = 800_000;
     private final int renderWaitTime;
-    private final int[] leds;
+    private final int[] LEDs;
     private final byte[] pixelRaw;
     private final byte Bit_0 = (byte) 0b11000000;// 192 in Decimal
     private final byte Bit_1 = (byte) 0b11111000;// 248 in Decimal
@@ -64,9 +64,9 @@ public class LEDStrip extends Component {
         if (numLEDs < 1 || brightness < 0 || brightness > 1 || channel < 0 || channel > 1) {
             throw new IllegalArgumentException("Illegal Constructor");
         }
-        logInfo("initialising a ledstrip with " + numLEDs + " leds");
+        logDebug("initialising a ledstrip with " + numLEDs + " leds");
         this.numLEDs = numLEDs;
-        this.leds = new int[numLEDs];
+        this.LEDs = new int[numLEDs];
         this.brightness = brightness;
         this.context = pi4j;
         this.spi = pi4j.create(buildSpiConfig(pi4j, channel, frequency));
@@ -126,7 +126,7 @@ public class LEDStrip extends Component {
      * @return the color of the specified led on the strip
      */
     public int getPixelColor(int pixel) {
-        return leds[pixel];
+        return LEDs[pixel];
     }
 
     /**
@@ -136,7 +136,7 @@ public class LEDStrip extends Component {
      * @param color the color that is set
      */
     public void setPixelColor(int pixel, int color) {
-        leds[pixel] = color;
+        LEDs[pixel] = color;
     }
 
     /**
@@ -145,7 +145,7 @@ public class LEDStrip extends Component {
      * @param color the color that is set
      */
     public void setStripColor(int color) {
-        Arrays.fill(leds, color);
+        Arrays.fill(LEDs, color);
     }
 
     /**
@@ -163,27 +163,27 @@ public class LEDStrip extends Component {
         for (int i = 0; i < numLEDs; i++) {
 
             //Scaling the color to the max brightness
-            leds[i] = PixelColor.setRedComponent(leds[i], (int) (PixelColor.getRedComponent(leds[i]) * brightness));
-            leds[i] = PixelColor.setGreenComponent(leds[i], (int) (PixelColor.getGreenComponent(leds[i]) * brightness));
-            leds[i] = PixelColor.setBlueComponent(leds[i], (int) (PixelColor.getBlueComponent(leds[i]) * brightness));
+            LEDs[i] = PixelColor.setRedComponent(LEDs[i], (int) (PixelColor.getRedComponent(LEDs[i]) * brightness));
+            LEDs[i] = PixelColor.setGreenComponent(LEDs[i], (int) (PixelColor.getGreenComponent(LEDs[i]) * brightness));
+            LEDs[i] = PixelColor.setBlueComponent(LEDs[i], (int) (PixelColor.getBlueComponent(LEDs[i]) * brightness));
 
             /* Calculatin GRB from RGB */
             for (int j = 15; j >= 8; j--) {
-                if (((leds[i] >> j) & 1) == 1) {
+                if (((LEDs[i] >> j) & 1) == 1) {
                     pixelRaw[counter++] = Bit_1;
                 } else {
                     pixelRaw[counter++] = Bit_0;
                 }
             }
             for (int j = 23; j >= 16; j--) {
-                if (((leds[i] >> j) & 1) == 1) {
+                if (((LEDs[i] >> j) & 1) == 1) {
                     pixelRaw[counter++] = Bit_1;
                 } else {
                     pixelRaw[counter++] = Bit_0;
                 }
             }
             for (int j = 7; j >= 0; j--) {
-                if (((leds[i] >> j) & 1) == 1) {
+                if (((LEDs[i] >> j) & 1) == 1) {
                     pixelRaw[counter++] = Bit_1;
                 } else {
                     pixelRaw[counter++] = Bit_0;
@@ -208,7 +208,7 @@ public class LEDStrip extends Component {
         //writing on the PIN
         spi.write(pixelRaw);
 
-        logger.info("finished rendering");
+        logDebug("finished rendering");
         lastRenderTime = System.nanoTime();
     }
 
@@ -216,7 +216,7 @@ public class LEDStrip extends Component {
      * setting all leds off
      */
     public void allOff() {
-        Arrays.fill(leds, 0);
+        Arrays.fill(LEDs, 0);
         render();
     }
 
