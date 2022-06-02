@@ -12,49 +12,56 @@ import java.util.Arrays;
  */
 public class LEDStrip extends Component {
 
-    /** Default Channel of the SPI Pins */
-    protected static final int DEFAULT_CHANNEL = 0;
+    /**
+     * Default Channel of the SPI Pins
+     */
+    protected static final int DEFAULT_SPI_CHANNEL = 0;
 
-    /** Minimum time to wait for reset to occur in nanoseconds. */
+    /**
+     * Minimum time to wait for reset to occur in nanoseconds.
+     */
     private static final int LED_RESET_WAIT_TIME = 300_000;
 
     protected final Spi spi;
     protected final Context context;
     private final int numLEDs;
-    /** Default frequency of a WS2812 Neopixel Strip */
+    /**
+     * Default frequency of a WS2812 Neopixel Strip
+     */
     private final int frequency = 800_000;
     private final int renderWaitTime;
-    /** Brightness value between 0 and 1 */
-    private double brightness;
     private final int[] leds;
     private final byte[] pixelRaw;
-    private long lastRenderTime;
-
     private final byte Bit_0 = (byte) 0b11000000;// 192 in Decimal
     private final byte Bit_1 = (byte) 0b11111000;// 248 in Decimal
     private final byte Bit_Reset = (byte) 0b00000000;// 0 in Decimal
+    /**
+     * Brightness value between 0 and 1
+     */
+    private double brightness;
+    private long lastRenderTime;
 
     /**
      * Creates a new simpleLed component with a custom BCM pin.
      *
-     * @param pi4j    Pi4J context
-     * @param numLEDs How many LEDs are on this Strand
+     * @param pi4j       Pi4J context
+     * @param numLEDs    How many LEDs are on this Strand
      * @param brightness How bright the leds can be at max, Range 0 - 255
      */
     public LEDStrip(Context pi4j, int numLEDs, double brightness) {
-        this(pi4j, numLEDs, brightness, DEFAULT_CHANNEL);
+        this(pi4j, numLEDs, brightness, DEFAULT_SPI_CHANNEL);
     }
 
     /**
      * Creates a new simpleLed component with a custom BCM pin.
      *
-     * @param pi4j    Pi4J context
-     * @param numLEDs How many LEDs are on this Strand
+     * @param pi4j       Pi4J context
+     * @param numLEDs    How many LEDs are on this Strand
      * @param brightness How bright the leds can be at max, range 0 - 1
-     * @param channel which channel to use
+     * @param channel    which channel to use
      */
     public LEDStrip(Context pi4j, int numLEDs, double brightness, int channel) {
-        if(numLEDs < 1 || brightness < 0 || brightness > 1 || channel < 0 || channel > 1){
+        if (numLEDs < 1 || brightness < 0 || brightness > 1 || channel < 0 || channel > 1) {
             throw new IllegalArgumentException("Illegal Constructor");
         }
         logInfo("initialising a ledstrip with " + numLEDs + " leds");
@@ -66,7 +73,7 @@ public class LEDStrip extends Component {
 
         // The raw bytes that get sent to the ledstrip
         // 3 Color channels per led, at 8 bytes each, with 2 reset bytes
-        pixelRaw = new byte[(3* numLEDs *8)+2];
+        pixelRaw = new byte[(3 * numLEDs * 8) + 2];
 
         // 1.25us per bit (1250ns)
         renderWaitTime = numLEDs * 3 * 8 * 1250 + LED_RESET_WAIT_TIME;
@@ -84,7 +91,7 @@ public class LEDStrip extends Component {
                 .name("LED Matrix")
                 .address(channel)
                 .mode(SpiMode.MODE_0)
-                .baud(8*frequency) //bitbanging from Bit to SPI-Byte
+                .baud(8 * frequency) //bitbanging from Bit to SPI-Byte
                 .build();
     }
 
@@ -149,7 +156,6 @@ public class LEDStrip extends Component {
      * \_____________________________________________________________________/ |
      * _________________... | / __________________... | / / ___________________... |
      * / / / GRB,GRB,GRB,GRB,...
-     *
      */
     public void render() {
         //beginning at 1, because the first byte is a reset
@@ -157,29 +163,29 @@ public class LEDStrip extends Component {
         for (int i = 0; i < numLEDs; i++) {
 
             //Scaling the color to the max brightness
-            leds[i] = PixelColor.setRedComponent(leds[i], (int) (PixelColor.getRedComponent(leds[i])*brightness));
-            leds[i] = PixelColor.setGreenComponent(leds[i], (int) (PixelColor.getGreenComponent(leds[i])*brightness));
-            leds[i] = PixelColor.setBlueComponent(leds[i], (int) (PixelColor.getBlueComponent(leds[i])*brightness));
+            leds[i] = PixelColor.setRedComponent(leds[i], (int) (PixelColor.getRedComponent(leds[i]) * brightness));
+            leds[i] = PixelColor.setGreenComponent(leds[i], (int) (PixelColor.getGreenComponent(leds[i]) * brightness));
+            leds[i] = PixelColor.setBlueComponent(leds[i], (int) (PixelColor.getBlueComponent(leds[i]) * brightness));
 
             /* Calculatin GRB from RGB */
             for (int j = 15; j >= 8; j--) {
-                if(((leds[i] >> j) & 1) == 1){
+                if (((leds[i] >> j) & 1) == 1) {
                     pixelRaw[counter++] = Bit_1;
-                }else{
+                } else {
                     pixelRaw[counter++] = Bit_0;
                 }
             }
             for (int j = 23; j >= 16; j--) {
-                if(((leds[i] >> j) & 1) == 1){
+                if (((leds[i] >> j) & 1) == 1) {
                     pixelRaw[counter++] = Bit_1;
-                }else{
+                } else {
                     pixelRaw[counter++] = Bit_0;
                 }
             }
             for (int j = 7; j >= 0; j--) {
-                if(((leds[i] >> j) & 1) == 1){
+                if (((leds[i] >> j) & 1) == 1) {
                     pixelRaw[counter++] = Bit_1;
-                }else{
+                } else {
                     pixelRaw[counter++] = Bit_0;
                 }
             }
@@ -187,12 +193,12 @@ public class LEDStrip extends Component {
 
         // While bitbanging, the first and last byte have to be a reset
         pixelRaw[0] = Bit_Reset;
-        pixelRaw[pixelRaw.length-1] = Bit_Reset;
+        pixelRaw[pixelRaw.length - 1] = Bit_Reset;
 
         // waiting since last render time
         if (lastRenderTime != 0) {
             int diff = (int) (System.nanoTime() - lastRenderTime);
-            if(renderWaitTime - diff > 0) {
+            if (renderWaitTime - diff > 0) {
                 int millis = (renderWaitTime - diff) / 1_000_000;
                 int nanos = (renderWaitTime - diff) % 1_000_000;
                 sleep(millis, nanos);
@@ -229,52 +235,52 @@ public class LEDStrip extends Component {
     /**
      * @return the current brightness
      */
-    public double getBrightness(){return this.brightness;}
+    public double getBrightness() {
+        return this.brightness;
+    }
 
     /**
      * Set the brightness of all LED's
      *
      * @param brightness new max. brightness, range 0 - 1
      */
-    public void setBrightness(double brightness){
-        if(brightness < 0 || brightness > 1){
+    public void setBrightness(double brightness) {
+        if (brightness < 0 || brightness > 1) {
             throw new IllegalArgumentException("Illegal Brightness Value. Must be between 0 and 1");
         }
         this.brightness = brightness;
     }
 
     public class PixelColor {
-        public static final int WHITE			= 0xFFFFFF;
-        public static final int RED				= 0xFF0000;
-        public static final int ORANGE			= 0xFFA500;
-        public static final int YELLOW			= 0xFFFF00;
-        public static final int GREEN			= 0x00FF00;
-        public static final int LIGHT_BLUE		= 0xadd8e6;
-        public static final int BLUE			= 0x0000FF;
-        public static final int PURPLE			= 0x800080;
-        public static final int PINK			= 0xFFC0CB;
-
-        private static final int WHITE_MASK		= 0xffffff;
-        private static final int RED_MASK		= 0xff0000;
-        private static final int GREEN_MASK		= 0x00ff00;
-        private static final int BLUE_MASK		= 0x0000ff;
-
-        private static final int RED_OFF_MASK	= 0x00ffff;
-        private static final int GREEN_OFF_MASK	= 0xff00ff;
-        private static final int BLUE_OFF_MASK	= 0xffff00;
-
+        public static final int WHITE = 0xFFFFFF;
+        public static final int RED = 0xFF0000;
+        public static final int ORANGE = 0xFFA500;
+        public static final int YELLOW = 0xFFFF00;
+        public static final int GREEN = 0x00FF00;
+        public static final int LIGHT_BLUE = 0xadd8e6;
+        public static final int BLUE = 0x0000FF;
+        public static final int PURPLE = 0x800080;
+        public static final int PINK = 0xFFC0CB;
         public static final int Color_COMPONENT_MAX = 0xff;
+        private static final int WHITE_MASK = 0xffffff;
+        private static final int RED_MASK = 0xff0000;
+        private static final int GREEN_MASK = 0x00ff00;
+        private static final int BLUE_MASK = 0x0000ff;
+        private static final int RED_OFF_MASK = 0x00ffff;
+        private static final int GREEN_OFF_MASK = 0xff00ff;
+        private static final int BLUE_OFF_MASK = 0xffff00;
 
         /**
          * Input a value 0 to 255 to get a Color value.
          * The Colors are a transition r - g - b - back to r.
+         *
          * @param wheelPos Position on the Color wheel (range 0..255).
          * @return 24-bit RGB Color value
          */
         public static int wheel(int wheelPos) {
             int max = Color_COMPONENT_MAX;
-            int one_third = Color_COMPONENT_MAX/3;
-            int two_thirds = Color_COMPONENT_MAX*2/3;
+            int one_third = Color_COMPONENT_MAX / 3;
+            int two_thirds = Color_COMPONENT_MAX * 2 / 3;
 
             int wheel_pos = max - wheelPos;
             if (wheel_pos < one_third) {
@@ -290,36 +296,38 @@ public class LEDStrip extends Component {
 
         /**
          * Create a Color from relative RGB values
-         * @param red Red %, {@code 0 to 1}
+         *
+         * @param red   Red %, {@code 0 to 1}
          * @param green Green %, {@code 0 to 1}
-         * @param blue Blue %, {@code 0 to 1}
+         * @param blue  Blue %, {@code 0 to 1}
          * @return RGB Color integer value
          */
         public static int createColorRGB(float red, float green, float blue) {
-            return createColorRGB(Math.round(Color_COMPONENT_MAX*red),
-                    Math.round(Color_COMPONENT_MAX*green), Math.round(Color_COMPONENT_MAX*blue));
+            return createColorRGB(Math.round(Color_COMPONENT_MAX * red),
+                    Math.round(Color_COMPONENT_MAX * green), Math.round(Color_COMPONENT_MAX * blue));
         }
 
         /**
          * Create a Color from int RGB values
-         * @param red Red component {@code 0 to 255}
+         *
+         * @param red   Red component {@code 0 to 255}
          * @param green Green component {@code 0 to 255}
-         * @param blue Blue component {@code 0 to 255}
+         * @param blue  Blue component {@code 0 to 255}
          * @return RGB Color integer value
          */
         public static int createColorRGB(int red, int green, int blue) {
             validateColorComponent("Red", red);
             validateColorComponent("Green", green);
             validateColorComponent("Blue", blue);
-            return red<<16 | green << 8 | blue;
+            return red << 16 | green << 8 | blue;
         }
 
         /**
          * Creates a Color based on the specified values in the HSL Color model.
          *
-         * @param hue The hue, in degrees, {@code 0.0 to 360.0}
+         * @param hue        The hue, in degrees, {@code 0.0 to 360.0}
          * @param saturation The saturation %, {@code 0.0 to 1.0}
-         * @param luminance The luminance %, {@code 0.0 to 1.0}
+         * @param luminance  The luminance %, {@code 0.0 to 1.0}
          * @return RGB Color integer value
          * @throws IllegalArgumentException if {@code hue}, {@code saturation}, {@code brightness} are out of range
          */
@@ -394,6 +402,7 @@ public class LEDStrip extends Component {
 
         /**
          * validate if the color channel is in a valid range
+         *
          * @param color the color which is to check
          * @param value the color channel value
          */
@@ -406,6 +415,7 @@ public class LEDStrip extends Component {
 
         /**
          * Get the red value of a color
+         *
          * @param color provide the color
          * @return the red value
          */
@@ -415,8 +425,9 @@ public class LEDStrip extends Component {
 
         /**
          * Set the red value of a color
+         *
          * @param color provide the color
-         * @param red provide the desired red value
+         * @param red   provide the desired red value
          * @return the new color
          */
         public static int setRedComponent(final int color, int red) {
@@ -428,6 +439,7 @@ public class LEDStrip extends Component {
 
         /**
          * Get the green value of a color
+         *
          * @param color provide the color
          * @return the green value
          */
@@ -437,6 +449,7 @@ public class LEDStrip extends Component {
 
         /**
          * Set the green value of a color
+         *
          * @param color provide the color
          * @param green provide the desired red value
          * @return the new color
@@ -450,6 +463,7 @@ public class LEDStrip extends Component {
 
         /**
          * Get the blue value of a color
+         *
          * @param color provide the color
          * @return the blue value
          */
@@ -459,8 +473,9 @@ public class LEDStrip extends Component {
 
         /**
          * Set the blue value of a color
+         *
          * @param color provide the color
-         * @param blue provide the desired red value
+         * @param blue  provide the desired red value
          * @return the new color
          */
         public static int setBlueComponent(final int color, int blue) {

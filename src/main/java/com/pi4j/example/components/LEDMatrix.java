@@ -8,20 +8,22 @@ import java.util.Arrays;
 /**
  * Creates an SPI Control for Neopixel LED Strips
  */
-public class LEDMatrix extends Component{
+public class LEDMatrix extends Component {
 
-    /** Default Channel of the SPI Pins */
-    protected static final int DEFAULT_CHANNEL = 0;
+    /**
+     * Default Channel of the SPI Pins
+     */
+    protected static final int DEFAULT_SPI_CHANNEL = 0;
 
     protected final Spi spi;
     protected final Context context;
-
-    /** Brightness value between 0 and 1 */
-    private double brightness;
     private final int[][] matrix;
-    private int numLEDs;
-
     private final LEDStrip ledStrip;
+    /**
+     * Brightness value between 0 and 1
+     */
+    private double brightness;
+    private int numLEDs;
 
     /**
      * Create a new LEDMatrix with the defined Matrix.
@@ -35,7 +37,7 @@ public class LEDMatrix extends Component{
      * @param brightness How bright the LEDs can be at max, Range 0 - 1
      */
     public LEDMatrix(Context pi4j, int[][] matrix, double brightness) {
-        this(pi4j, matrix, brightness, DEFAULT_CHANNEL);
+        this(pi4j, matrix, brightness, DEFAULT_SPI_CHANNEL);
     }
 
     /**
@@ -47,11 +49,11 @@ public class LEDMatrix extends Component{
      * @param brightness How bright the LEDs can be at max, Range 0 - 1
      */
     public LEDMatrix(Context pi4j, int rows, int columns, double brightness) {
-        this(pi4j, new int[rows][columns], brightness, DEFAULT_CHANNEL);
+        this(pi4j, new int[rows][columns], brightness, DEFAULT_SPI_CHANNEL);
     }
 
     /**
-     * Creates a new simpleLed component with a custom BCM pin.
+     * Creates a new LEDMatrix component with a custom BCM pin.
      *
      * @param pi4j       Pi4J context
      * @param matrix     How many LEDs are on this Strand
@@ -148,9 +150,9 @@ public class LEDMatrix extends Component{
         int counter = 0;
         int strip = 0;
         int LED = 0;
-        while(counter < pixelNumber && strip < matrix.length){
+        while (counter < pixelNumber && strip < matrix.length) {
             LED = 0;
-            while (counter < pixelNumber && LED < matrix[strip].length){
+            while (counter < pixelNumber && LED < matrix[strip].length) {
                 counter++;
                 LED++;
             }
@@ -173,9 +175,9 @@ public class LEDMatrix extends Component{
         int counter = 0;
         int strip = 0;
         int LED = 0;
-        while(counter < pixelNumber && strip < matrix.length){
+        while (counter < pixelNumber && strip < matrix.length) {
             LED = 0;
-            while (counter < pixelNumber && LED < matrix[strip].length){
+            while (counter < pixelNumber && LED < matrix[strip].length) {
                 counter++;
                 LED++;
             }
@@ -231,12 +233,16 @@ public class LEDMatrix extends Component{
     /**
      * @return the current brightness
      */
-    public double getBrightness(){return this.brightness;}
+    public double getBrightness() {
+        return this.brightness;
+    }
 
     /**
      * Set the brightness of all LED's
      *
      * @param brightness new max. brightness, range 0 - 1
      */
-    public void setBrightness(double brightness){this.brightness = brightness;}
+    public void setBrightness(double brightness) {
+        this.brightness = brightness;
+    }
 }
