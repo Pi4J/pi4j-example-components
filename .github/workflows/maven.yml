@@ -21,7 +21,7 @@ jobs:
       with:
         java-version: 17
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file pom.xml -DskipTests
     - name: Make staging directory
       run: mkdir staging
     - name: Copy JAR to staging
