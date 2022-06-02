@@ -13,7 +13,7 @@ package com.pi4j.example.applications;
 public class LEDButton_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        logInfo("LED button app started ...");
+        System.out.println("LED button app started ...");
 
         // Initialize the button component
         final var ledbutton = new LEDButton(pi4j, PIN.D26, Boolean.FALSE, PIN.PWM19);
@@ -41,6 +41,6 @@ public class LEDButton_App implements Application {
         ledbutton.btndeRegisterAll();
         ledbutton.LEDsetStateOff();
 
-        logInfo("LED button app done.");
+        System.out.println("LED button app done.");
     }
 }

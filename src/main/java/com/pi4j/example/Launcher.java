@@ -16,6 +16,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Command(name = "Raspberry Pi Example Launcher", version = "1.0.0", mixinStandardHelpOptions = true)
 public final class Launcher implements Runnable {
@@ -23,7 +24,7 @@ public final class Launcher implements Runnable {
      * This list must contain all applications which should be executable through the launcher.
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
-    public static final List<Application> APPLICATIONS = new ArrayList<Application>(Arrays.asList(
+    public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
         new SimpleButton_App(),
         new SimpleLED_App(),
         new LEDButton_App(),
@@ -33,6 +34,7 @@ public final class Launcher implements Runnable {
         new Potentiometer_App(),
         new JoystickAnalog_App(),
         new LEDStrip_App(),
+        new LEDMatrix_App(),
         new Buzzer_App(),
         new Servo_App()
     ));
