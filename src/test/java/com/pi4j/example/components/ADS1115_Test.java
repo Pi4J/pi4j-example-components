@@ -13,7 +13,7 @@ public class ADS1115_Test extends ComponentTest {
 
     @BeforeEach
     public void setUp(){
-        ads1115 = new ADS1115(pi4j, i2cBus, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND);
+        ads1115 = new ADS1115(pi4j, i2cBus, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND,1);
     }
 
     @Test
@@ -33,6 +33,6 @@ public class ADS1115_Test extends ComponentTest {
 
     @Test
     public void testGetGain(){
-        assertEquals(ADS1115.GAIN.GAIN_4_096V, ads1115.getSamplingRate());
+        assertEquals(ADS1115.GAIN.GAIN_4_096V, ads1115.getPga());
     }
 }

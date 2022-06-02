@@ -6,7 +6,7 @@ public abstract class Component {
     /**
      * Logger instance
      */
-    protected final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
     protected void logInfo(String msg) {
         logger.info(() -> msg);
@@ -20,7 +20,7 @@ public abstract class Component {
         logger.config(() -> msg);
     }
 
-    private void logDebug(String msg) {
+    protected void logDebug(String msg) {
         logger.fine(() -> msg);
     }
 

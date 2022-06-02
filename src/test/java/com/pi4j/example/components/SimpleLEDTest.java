@@ -10,20 +10,20 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class SimpleLED_ComponentTest extends ComponentTest {
+public class SimpleLEDTest extends ComponentTest {
 
     protected SimpleLED led;
 
     protected DigitalOutput digitalOutput;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         this.led = new SimpleLED(pi4j, PIN.D26);
         this.digitalOutput = led.getDigitalOutput();
     }
 
     @Test
-    public void testLED_Address(){
+    public void testLED_Address() {
         //when
         digitalOutput = led.getDigitalOutput();
         //then
@@ -32,7 +32,7 @@ public class SimpleLED_ComponentTest extends ComponentTest {
     }
 
     @Test
-    public void testSetState_On(){
+    public void testSetState_On() {
         //when
         led.setState(true);
         //then
@@ -40,7 +40,7 @@ public class SimpleLED_ComponentTest extends ComponentTest {
     }
 
     @Test
-    public void testSetState_Off(){
+    public void testSetState_Off() {
         //when
         led.setState(false);
         //then
@@ -48,25 +48,25 @@ public class SimpleLED_ComponentTest extends ComponentTest {
     }
 
     @Test
-    public void testSetStateOn(){
+    public void testSetStateOn() {
         //when
-        led.setStateOn();
+        led.on();
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
     }
 
     @Test
-    public void testSetStateOff(){
+    public void testSetStateOff() {
         //given
-        led.setStateOn();
+        led.on();
         //when
-        led.setStateOff();
+        led.off();
         //then
         assertEquals(DigitalState.LOW, digitalOutput.state());
     }
 
     @Test
-    public void testToggleState(){
+    public void testToggleState() {
         //when
         led.toggleState();
         //then

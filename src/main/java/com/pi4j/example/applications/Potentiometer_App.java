@@ -13,31 +13,30 @@ public class Potentiometer_App implements Application {
     public void execute(Context pi4j) {
         logInfo("Potentiometer test started ...");
 
-        ADS1115 ads1115 = new ADS1115(pi4j);
+        ADS1115 ads1115 = new ADS1115(pi4j, 0x01, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND,4);
 
-        Potentiometer poti = new Potentiometer(ads1115, ADS1115.MUX.AIN0_GND, 3.3);
+        Potentiometer poti = new Potentiometer(ads1115, 0, 3.3);
 
         //read current value from poti one time
-        logInfo("Current value of the poti is " + poti.getVoltage() + " voltage.");
+        logInfo("Current value of the poti is " + String.format("%.3f",poti.singleShotGetVoltage()) + " voltage.");
 
         //read current value from the poti in percent one time
-        logInfo("The potentiometer slider is currently at " + poti.getPercent() + " % of its full travel.");
+        logInfo("The potentiometer slider is currently at " + String.format("%.3f", poti.singleShotGetNormalizedValue()) + " % of its full travel.");
 
-        // Register event handlers to print a message when poti is moved
-        poti.setRunnable(() -> {
-            logInfo("The current voltage drop is currently " + poti.getActualValue() + " volts");
+        // Register event handlers to print a message when potentiometer is moved
+        poti.setRunnableSlowReadChan(() -> {
+            logInfo("The current voltage drop is currently " + String.format("%.3f", poti.continuousReadingGetVoltage()) + " volts");
         });
 
-        //start continious reading with single shot in this mode you can connect up to 4 devices to the analog module
-        poti.startSlowContiniousReading(0.1, 1);
+        //start continuous reading with single shot in this mode you can connect up to 4 devices to the analog module
+        poti.startSlowContinuousReading(0.05, 10);
 
         // Wait while handling events before exiting
         logInfo("Move the potentiometer to see it in action!");
         delay(30_000);
 
-        //stop continious reading
-        poti.stopSlowContiniousReading();
-
+        //stop continuous reading
+        poti.stopSlowContinuousReading();
 
         logInfo("Potentiometer test done");
     }

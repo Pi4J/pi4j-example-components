@@ -23,14 +23,18 @@ public final class Launcher implements Runnable {
      * This list must contain all applications which should be executable through the launcher.
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
-    public static final List<Application> APPLICATIONS = new ArrayList<>(Arrays.asList(
+    public static final List<Application> APPLICATIONS = new ArrayList<Application>(Arrays.asList(
         new SimpleButton_App(),
         new SimpleLED_App(),
         new LEDButton_App(),
         new Joystick_App(),
         new ADS1115_App(),
         new LCDDisplay_App(),
-        new Potentiometer_App()
+        new Potentiometer_App(),
+        new JoystickAnalog_App(),
+        new LEDStrip_App(),
+        new Buzzer_App(),
+        new Servo_App()
     ));
 
     /**

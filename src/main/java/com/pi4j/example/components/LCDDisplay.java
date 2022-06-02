@@ -3,51 +3,53 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
-import com.pi4j.io.i2c.I2CProvider;
 
 /**
  * Implementation of a LCDDisplay using GPIO with Pi4J
  * For now, only works with the PCF8574T Backpack
  */
 public class LCDDisplay extends Component {
-    private static final byte LCD_CLEAR_DISPLAY = (byte) 0x01;
-    private static final byte LCD_RETURN_HOME = (byte) 0x02;
-    private static final byte LCD_ENTRY_MODE_SET = (byte) 0x04;
+    /** Flags for display commands */
+    private static final byte LCD_CLEAR_DISPLAY   = (byte) 0x01;
+    private static final byte LCD_RETURN_HOME     = (byte) 0x02;
+    private static final byte LCD_ENTRY_MODE_SET  = (byte) 0x04;
     private static final byte LCD_DISPLAY_CONTROL = (byte) 0x08;
-    private static final byte LCD_CURSOR_SHIFT = (byte) 0x10;
-    private static final byte LCD_FUNCTION_SET = (byte) 0x20;
-    private static final byte LCD_SET_CGRAM_ADDR = (byte) 0x40;
-    private static final byte LCD_SET_DDRAM_ADDR = (byte) 0x80;
+    private static final byte LCD_CURSOR_SHIFT    = (byte) 0x10;
+    private static final byte LCD_FUNCTION_SET    = (byte) 0x20;
+    private static final byte LCD_SET_CGRAM_ADDR  = (byte) 0x40;
+    private static final byte LCD_SET_DDRAM_ADDR  = (byte) 0x80;
     // flags for display entry mode
-    private static final byte LCD_ENTRY_RIGHT = (byte) 0x00;
-    private static final byte LCD_ENTRY_LEFT = (byte) 0x02;
+    private static final byte LCD_ENTRY_RIGHT           = (byte) 0x00;
+    private static final byte LCD_ENTRY_LEFT            = (byte) 0x02;
     private static final byte LCD_ENTRY_SHIFT_INCREMENT = (byte) 0x01;
     private static final byte LCD_ENTRY_SHIFT_DECREMENT = (byte) 0x00;
     // flags for display on/off control
-    private static final byte LCD_DISPLAY_ON = (byte) 0x04;
+    private static final byte LCD_DISPLAY_ON  = (byte) 0x04;
     private static final byte LCD_DISPLAY_OFF = (byte) 0x00;
-    private static final byte LCD_CURSOR_ON = (byte) 0x02;
-    private static final byte LCD_CURSOR_OFF = (byte) 0x00;
-    private static final byte LCD_BLINK_ON = (byte) 0x01;
-    private static final byte LCD_BLINK_OFF = (byte) 0x00;
+    private static final byte LCD_CURSOR_ON   = (byte) 0x02;
+    private static final byte LCD_CURSOR_OFF  = (byte) 0x00;
+    private static final byte LCD_BLINK_ON    = (byte) 0x01;
+    private static final byte LCD_BLINK_OFF   = (byte) 0x00;
     // flags for display/cursor shift
     private static final byte LCD_DISPLAY_MOVE = (byte) 0x08;
-    private static final byte LCD_CURSOR_MOVE = (byte) 0x00;
-    private static final byte LCD_MOVE_RIGHT = (byte) 0x04;
-    private static final byte LCD_MOVE_LEFT = (byte) 0x00;
+    private static final byte LCD_CURSOR_MOVE  = (byte) 0x00;
+    private static final byte LCD_MOVE_RIGHT   = (byte) 0x04;
+    private static final byte LCD_MOVE_LEFT    = (byte) 0x00;
     // flags for function set
     private static final byte LCD_8BIT_MODE = (byte) 0x10;
     private static final byte LCD_4BIT_MODE = (byte) 0x00;
-    private static final byte LCD_2LINE = (byte) 0x08;
-    private static final byte LCD_1LINE = (byte) 0x00;
-    private static final byte LCD_5x10DOTS = (byte) 0x04;
-    private static final byte LCD_5x8DOTS = (byte) 0x00;
+    private static final byte LCD_2LINE     = (byte) 0x08;
+    private static final byte LCD_1LINE     = (byte) 0x00;
+    private static final byte LCD_5x10DOTS  = (byte) 0x04;
+    private static final byte LCD_5x8DOTS   = (byte) 0x00;
     // flags for backlight control
-    private static final byte LCD_BACKLIGHT = (byte) 0x08;
-    private static final byte LCD_NO_BACKLIGHT = (byte) 0x00;
-    private static final byte En = (byte) 0b0000_0100; // Enable bit
-    private static final byte Rw = (byte) 0b0000_0010; // Read/Write bit
-    private static final byte Rs = (byte) 0b0000_00001; // Register select bit
+
+    private static final byte LCD_BACKLIGHT     = (byte) 0x08;
+    private static final byte LCD_NO_BACKLIGHT  = (byte) 0x00;
+    private static final byte En                = (byte) 0b000_00100; // Enable bit
+    private static final byte Rw                = (byte) 0b000_00010; // Read/Write bit
+    private static final byte Rs                = (byte) 0b000_00001; // Register select bit
+  
     /**
      * Display row offsets. Offset for up to 4 rows.
      */
@@ -56,12 +58,13 @@ public class LCDDisplay extends Component {
      * The Default BUS and Device Address.
      * On the PI, you can look it up with the Command 'sudo i2cdetect -y 1'
      */
-    private static final int DEFAULT_BUS = 0x1;
+    private static final int DEFAULT_BUS    = 0x1;
     private static final int DEFAULT_DEVICE = 0x27;
+
     private final I2C i2c;
-    private int ROWS = 2;
-    private int COLUMNS = 16;
-    private Context CONTEXT;
+    private final int rows;
+    private final int columns;
+
     /**
      * With this Byte cursor visibility is controlled
      */
@@ -71,25 +74,22 @@ public class LCDDisplay extends Component {
     /**
      * Creates a new LCDDisplay component with default values
      *
-     * @param pi4j
+     * @param pi4j Pi4J context
      */
     public LCDDisplay(Context pi4j){
-        this.CONTEXT = pi4j;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
-        init();
+        this(pi4j, 2, 16);
     }
 
     /**
      * Creates a new LCDDisplay component with custom rows and columns
      *
      * @param pi4j      Pi4J context
-     * @param ROWS      Custom amount of display lines
-     * @param COLUMNS   Custom amount of chars on line
+     * @param rows      Custom amount of display lines
+     * @param columns   Custom amount of chars on line
      */
-    public LCDDisplay(Context pi4j, int ROWS, int COLUMNS) {
-        this.ROWS = ROWS;
-        this.COLUMNS = COLUMNS;
-        this.CONTEXT = pi4j;
+    public LCDDisplay(Context pi4j, int rows, int columns) {
+        this.rows = rows;
+        this.columns = columns;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
         init();
     }
@@ -98,15 +98,14 @@ public class LCDDisplay extends Component {
      * Creates a new LCDDisplay component with custom rows and columns
      *
      * @param pi4j      Pi4J context
-     * @param ROWS      Custom amount of display lines
-     * @param COLUMNS   Custom amount of chars on line
+     * @param rows      Custom amount of display lines
+     * @param columns   Custom amount of chars on line
      * @param bus       Custom I2C bus address
      * @param device    Custom I2C device Address
      */
-    public LCDDisplay(Context pi4j, int ROWS, int COLUMNS, int bus, int device) {
-        this.ROWS = ROWS;
-        this.COLUMNS = COLUMNS;
-        this.CONTEXT = pi4j;
+    public LCDDisplay(Context pi4j, int rows, int columns, int bus, int device) {
+        this.rows = rows;
+        this.columns = columns;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, device));
         init();
     }
@@ -128,12 +127,6 @@ public class LCDDisplay extends Component {
                 .build();
     }
 
-    /**
-     * @return The current running Context
-     */
-    public Context getContext(){
-        return this.CONTEXT;
-    }
 
     /**
      * @return The current running Context
@@ -180,11 +173,11 @@ public class LCDDisplay extends Component {
      * @param line Select Line of Display
      */
     public void displayText(String text, int line) {
-        if (text.length() > COLUMNS) {
-            throw new IllegalArgumentException("Too long text. Only " + COLUMNS + " characters possible");
+        if (text.length() > columns) {
+            throw new IllegalArgumentException("Too long text. Only " + columns + " characters possible");
         }
-        if (line > ROWS || line < 1) {
-            throw new IllegalArgumentException("Wrong line id. Only " + ROWS + " lines possible");
+        if (line > rows || line < 1) {
+            throw new IllegalArgumentException("Wrong line id. Only " + rows + " lines possible");
         }
 
         clearLine(line);
@@ -220,14 +213,14 @@ public class LCDDisplay extends Component {
      * @param text Text to display
      */
     public void displayText(String text) {
-        if (text.length() > (ROWS * COLUMNS)) {
-            throw new IllegalArgumentException("Too long text. Only " + ROWS * COLUMNS + " characters allowed");
+        if (text.length() > (rows * columns)) {
+            throw new IllegalArgumentException("Too long text. Only " + rows * columns + " characters allowed");
         }
 
         // Clean and prepare to write some text
         var currentLine = 0;
-        String[] lines = new String[ROWS];
-        for (int j = 0; j < ROWS; j++) {
+        String[] lines = new String[rows];
+        for (int j = 0; j < rows; j++) {
             lines[j] = "";
         }
         clearDisplay();
@@ -235,7 +228,7 @@ public class LCDDisplay extends Component {
         // Iterate through lines and characters and write them to the display
         for (int i = 0; i < text.length(); i++) {
             // line break in text found
-            if (text.charAt(i) == '\n' && currentLine < ROWS) {
+            if (text.charAt(i) == '\n' && currentLine < rows) {
                 currentLine++;
                 //When after newLine a space, it is omitted
                 if (text.charAt(i + 1) == ' ') i++;
@@ -245,7 +238,7 @@ public class LCDDisplay extends Component {
             // Write character to array
             lines[currentLine] += (char) text.charAt(i);
 
-            if (lines[currentLine].length() == COLUMNS && currentLine < ROWS) {
+            if (lines[currentLine].length() == columns && currentLine < rows) {
                 currentLine++;
                 //if a space comes after newLine, it is omitted
                 if (text.charAt(i + 1) == ' ') i++;
@@ -253,7 +246,7 @@ public class LCDDisplay extends Component {
         }
 
         //display the created Rows
-        for (int j = 0; j < ROWS; j++) {
+        for (int j = 0; j < rows; j++) {
             displayLine(lines[j], LCD_ROW_OFFSETS[j]);
         }
     }
@@ -300,14 +293,10 @@ public class LCDDisplay extends Component {
      * @param line Select line to clear
      */
     public void clearLine(int line) {
-        if (line > ROWS || line < 1) {
-            throw new IllegalArgumentException("Wrong line id. Only " + ROWS + " lines possible");
+        if (line > rows || line < 1) {
+            throw new IllegalArgumentException("Wrong line id. Only " + rows + " lines possible");
         }
-        String remover = "";
-        for (int i = 0; i < COLUMNS; i++) {
-            remover += ' ';
-        }
-        displayLine(remover, LCD_ROW_OFFSETS[line - 1]);
+        displayLine(" ".repeat(columns), LCD_ROW_OFFSETS[line - 1]);
     }
 
     /**
@@ -370,12 +359,12 @@ public class LCDDisplay extends Component {
      * @param line  Selects the line of the display. Range: 1 - ROWS
      */
     public void setCursorToPosition(int digit, int line) {
-        if (line > ROWS || line < 1) {
-            throw new IllegalArgumentException("Line out of range. Display has only " + ROWS + "x" + COLUMNS + " Characters!");
+        if (line > rows || line < 1) {
+            throw new IllegalArgumentException("Line out of range. Display has only " + rows + "x" + columns + " Characters!");
         }
 
-        if (digit < 0 || digit > COLUMNS) {
-            throw new IllegalArgumentException("Line out of range. Display has only " + ROWS + "x" + COLUMNS + " Characters!");
+        if (digit < 0 || digit > columns) {
+            throw new IllegalArgumentException("Line out of range. Display has only " + rows + "x" + columns + " Characters!");
         }
         writeCommand((byte) (LCD_SET_DDRAM_ADDR | digit + LCD_ROW_OFFSETS[line - 1]));
     }
@@ -492,7 +481,7 @@ public class LCDDisplay extends Component {
 
         // Enable backlight
         setDisplayBacklight(true);
-        //logInfo("LCD Display initialized");
+        logDebug("LCD Display initialized");
     }
 
     /**
