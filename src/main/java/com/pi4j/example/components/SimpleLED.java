@@ -9,7 +9,7 @@ public class SimpleLED extends Component {
     /**
      * Pi4J digital output instance used by this component
      */
-    protected final DigitalOutput digitalOutput;
+    private final DigitalOutput digitalOutput;
 
     /**
      * Creates a new simpleLed component with a custom BCM pin.
@@ -33,14 +33,14 @@ public class SimpleLED extends Component {
     /**
      * Sets the LED to on.
      */
-    public void setStateOn() {
+    public void on() {
         digitalOutput.on();
     }
 
     /**
      * Sets the LED to off
      */
-    public void setStateOff() {
+    public void off() {
         digitalOutput.off();
     }
 

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Joystick_ComponentTest5_Inputs extends ComponentTest {
 
@@ -199,11 +199,11 @@ public class Joystick_ComponentTest5_Inputs extends ComponentTest {
         //when
         diPush.mockState(DigitalState.HIGH);
         //then
-        assertEquals(true, joysitck.buttonPushIsDown());
+        assertTrue(joysitck.buttonPushIsDown());
         //when
         diPush.mockState(DigitalState.LOW);
         //then
-        assertEquals(false, joysitck.buttonPushIsDown());
+        assertFalse(joysitck.buttonPushIsDown());
     }
 
     @Test
@@ -211,13 +211,14 @@ public class Joystick_ComponentTest5_Inputs extends ComponentTest {
         //when
         diPush.mockState(DigitalState.HIGH);
         //then
-        assertEquals(false, joysitck.buttonPushIsUp());
+        assertFalse(joysitck.buttonPushIsUp());
         //when
         diPush.mockState(DigitalState.LOW);
         //then
-        assertEquals(true, joysitck.buttonPushIsUp());
+        assertTrue(joysitck.buttonPushIsUp());
     }
 
+    @Test
     public void testOnPushDown(){
         //given
         int[] counter = {0};
@@ -252,11 +253,11 @@ public class Joystick_ComponentTest5_Inputs extends ComponentTest {
         joysitck.deRegisterAll();
 
         //then
-        assertEquals(null, joysitck.getOnNorth());
-        assertEquals(null, joysitck.getOnEast());
-        assertEquals(null, joysitck.getOnSouth());
-        assertEquals(null, joysitck.getOnEast());
-        assertEquals(null, joysitck.getOnPush());
+        assertNull(joysitck.getOnNorth());
+        assertNull(joysitck.getOnEast());
+        assertNull(joysitck.getOnSouth());
+        assertNull(joysitck.getOnEast());
+        assertNull(joysitck.getOnPush());
     }
 
     @Test
@@ -294,11 +295,11 @@ public class Joystick_ComponentTest5_Inputs extends ComponentTest {
         joysitck.deRegisterAll();
 
         //then
-        assertEquals(null, joysitck.getOnNorth());
-        assertEquals(null, joysitck.getOnEast());
-        assertEquals(null, joysitck.getOnSouth());
-        assertEquals(null, joysitck.getOnEast());
-        assertEquals(null, joysitck.getOnPush());
+        assertNull(joysitck.getOnNorth());
+        assertNull(joysitck.getOnEast());
+        assertNull(joysitck.getOnSouth());
+        assertNull(joysitck.getOnEast());
+        assertNull(joysitck.getOnPush());
 
     }
 
@@ -334,12 +335,11 @@ public class Joystick_ComponentTest5_Inputs extends ComponentTest {
         sleep(100);
 
         //then
-        assertEquals(null, joysitck.getOnNorth());
-        assertEquals(null, joysitck.getOnEast());
-        assertEquals(null, joysitck.getOnSouth());
-        assertEquals(null, joysitck.getOnEast());
-        assertEquals(null, joysitck.getOnPush());
-
+        assertNull(joysitck.getOnNorth());
+        assertNull(joysitck.getOnEast());
+        assertNull(joysitck.getOnSouth());
+        assertNull(joysitck.getOnEast());
+        assertNull(joysitck.getOnPush());
     }
 
     @Test

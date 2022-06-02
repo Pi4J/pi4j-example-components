@@ -19,7 +19,7 @@ public class SimpleLED_App implements Application {
 
         // Turn on the LED to have a defined state
         logInfo("Turn on LED.");
-        led.setStateOn();
+        led.on();
         delay(1000);
 
         // Make a flashing light by toggling the LED every second
@@ -29,7 +29,7 @@ public class SimpleLED_App implements Application {
         }
 
         // That's all so turn off the relay and quit
-        led.setStateOff();
+        led.off();
         logInfo("Turn off LED.");
         delay(2000);
 
