@@ -193,11 +193,11 @@ public class LCDDisplay extends Component {
      * @param position Select position on line
      */
     public void displayText(String text, int line, int position) {
-        if (position > COLUMNS) {
-            throw new IllegalArgumentException("Too long text. Only " + COLUMNS + " characters possible");
+        if (position > columns) {
+            throw new IllegalArgumentException("Too long text. Only " + columns + " characters possible");
         }
-        if (line > ROWS || line < 1) {
-            throw new IllegalArgumentException("Wrong line id. Only " + ROWS + " lines possible");
+        if (line > rows || line < 1) {
+            throw new IllegalArgumentException("Wrong line id. Only " + rows + " lines possible");
         }
 
         clearLine(line);
