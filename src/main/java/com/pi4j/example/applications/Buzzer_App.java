@@ -38,7 +38,7 @@ public class Buzzer_App implements Application {
         //playing the melody once, then shutting down for a second
         System.out.println("playing melody once");
         buzzer.playMelody(60, melody);
-        buzzer.playSilence(1000);
+        delay(1000);
 
         //playing the melody 5 times repeatedly
         System.out.println("playing melody 5 times");
