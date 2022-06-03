@@ -36,6 +36,7 @@ module com.pi4j.example {
     requires com.pi4j.plugin.pigpio;
     requires com.pi4j.plugin.raspberrypi;
     requires com.pi4j.library.pigpio;
+    //for LCD Display
     requires com.pi4j.plugin.linuxfs;
 
     uses com.pi4j.extension.Extension;
@@ -43,6 +44,8 @@ module com.pi4j.example {
 
     requires java.logging;
     requires info.picocli;
+    //for Camera
+    requires picam;
 
     // allow access to classes in the following namespaces for Pi4J annotation processing
     opens com.pi4j.example.util to com.pi4j;
