@@ -19,6 +19,23 @@ public class JoystickAnalog extends Component {
      */
     private final SimpleButton push;
     /**
+     * default channel for potentiometer x-axis
+     */
+    private static final int DEFAULT_CHANNEL_POTENTIOMETER_X = 0;
+    /**
+     * default channel for potentiometer x-axis
+     */
+    private static final int DEFAULT_CHANNEL_POTENTIOMETER_Y = 1;
+    /**
+     * default max voltage for raspberry pi
+     */
+    private static final double DEFAULT_MAX_VOLTAGE = 3.3;
+    /**
+     * default normalization if true -> normalization from 0 to 1
+     * if false -> normalization from -1 to 1
+     */
+    private static final boolean DEFAULT_NORMALIZATION = true;
+    /**
      * normalized center position
      */
     private final double NORMALIZED_CENTER_POSITION = 0.5;
@@ -52,6 +69,17 @@ public class JoystickAnalog extends Component {
     private double yMaxNormValue;
 
     /**
+     * Builds a new JoystickAnalog component with default configuration for raspberry pi with ads1115 object
+     *
+     * @param pi4j    Pi4J context
+     * @param ads1115 ads object
+     * @param push    additional push button on joystick
+     */
+    public JoystickAnalog(Context pi4j, ADS1115 ads1115, PIN push) {
+        this(pi4j, ads1115, DEFAULT_CHANNEL_POTENTIOMETER_X, DEFAULT_CHANNEL_POTENTIOMETER_Y, DEFAULT_MAX_VOLTAGE, DEFAULT_NORMALIZATION, push);
+    }
+
+    /**
      * Builds a new JoystickAnalog component with custom input for x-, y-axis, custom pin for push button.
      * ads component needs to be created outside this clas, other channels may be used for other components.
      *
@@ -60,32 +88,24 @@ public class JoystickAnalog extends Component {
      * @param chanelXAxis analog potentiometer x-axis
      * @param chanelYAxis analog potentiometer y-axis
      * @param maxVoltage  max voltage expects on analog input x- and y-axis
+     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization form -1 to 1
      * @param push        additional push button on joystick
      */
     public JoystickAnalog(Context pi4j, ADS1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
-        this.x = new Potentiometer(ads1115, chanelXAxis, maxVoltage);
-        this.y = new Potentiometer(ads1115, chanelYAxis, maxVoltage);
-        this.push = new SimpleButton(pi4j, push, true);
-        this.normalized0to1 = normalized0to1;
-
-        xMinNormValue = 0.1;
-        xMaxNormValue = 0.9;
-        yMinNormValue = 0.1;
-        yMaxNormValue = 0.9;
+        this(new Potentiometer(ads1115, chanelXAxis, maxVoltage), new Potentiometer(ads1115, chanelYAxis, maxVoltage), normalized0to1, new SimpleButton(pi4j, push, true));
     }
 
     /**
-     * Builds a new JoystickAnalog component with default configuration for raspberry pi with ads1115 object
-     *
-     * @param pi4j    Pi4J context
-     * @param ads1115 ads object
-     * @param push    additional push button on joystick
+     * @param potentiometerX potentiometer object for x-axis
+     * @param potentiometerY potentiometer object for y-axis
+     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization form -1 to 1
+     * @param push           simpleButton object for push button on joystick
      */
-    public JoystickAnalog(Context pi4j, ADS1115 ads1115, PIN push) {
-        this.x = new Potentiometer(ads1115, 0, 3.3);
-        this.y = new Potentiometer(ads1115, 1, 3.3);
-        this.push = new SimpleButton(pi4j, push, true);
-        normalized0to1 = true;
+    public JoystickAnalog(Potentiometer potentiometerX, Potentiometer potentiometerY, boolean normalized0to1, SimpleButton push) {
+        this.x = potentiometerX;
+        this.y = potentiometerY;
+        this.push = push;
+        this.normalized0to1 = normalized0to1;
 
         xMinNormValue = 0.1;
         xMaxNormValue = 0.9;
