@@ -2,7 +2,7 @@ package com.pi4j.example.components;
 
 import com.pi4j.config.exception.ConfigException;
 import com.pi4j.example.ComponentTest;
-import com.pi4j.example.helpers.ContiniousMeasuringException;
+import com.pi4j.example.helpers.ContinuousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -108,9 +108,9 @@ public class ADS1115_Test extends ComponentTest {
     @Test
     public void testSingleShotAIn0Exception(){
         //when
-        ads1115.startFastContiniousReading(0,0.05,10);
+        ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContiniousMeasuringException.class, () -> ads1115.singleShotAIn1());
+        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn1());
     }
 
     @Test
@@ -139,9 +139,9 @@ public class ADS1115_Test extends ComponentTest {
     @Test
     public void testSingleShotAIn1Exception(){
         //when
-        ads1115.startFastContiniousReading(0,0.05,10);
+        ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContiniousMeasuringException.class, () -> ads1115.singleShotAIn1());
+        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn1());
     }
 
     @Test
@@ -158,9 +158,9 @@ public class ADS1115_Test extends ComponentTest {
     @Test
     public void testSingleShotAIn2Exception(){
         //when
-        ads1115.startFastContiniousReading(0,0.05,10);
+        ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContiniousMeasuringException.class, () -> ads1115.singleShotAIn2());
+        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn2());
     }
 
     @Test
@@ -177,13 +177,13 @@ public class ADS1115_Test extends ComponentTest {
     @Test
     public void testSingleShotAIn3Exception(){
         //when
-        ads1115.startFastContiniousReading(0,0.05,10);
+        ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContiniousMeasuringException.class, () -> ads1115.singleShotAIn3());
+        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn3());
     }
 
     @Test
-    public void testFastContiniousReading(){
+    public void testFastContinuousReading(){
         //given
         int conversionRegisterValue =16000;
         answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN3_GND.getMux() | ADS1115.MODE.CONTINUOUS.getMode();
@@ -198,7 +198,7 @@ public class ADS1115_Test extends ComponentTest {
         });
 
         //when
-        ads1115.startFastContiniousReading(0,0.05,10);
+        ads1115.startFastContinuousReading(0,0.05,10);
 
         //then
         assertEquals(0, counter.get());
@@ -252,21 +252,21 @@ public class ADS1115_Test extends ComponentTest {
     @Test
     public void testFastContinuousReadingExceptionFrequency(){
         //then
-        assertThrows(ContiniousMeasuringException.class, () -> ads1115.startFastContiniousReading(0,0.05, 200));
+        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startFastContinuousReading(0,0.05, 200));
     }
 
     @Test
     public void testFastContinuousReadingExceptionReadingAlreadyRunning(){
         //when
-        ads1115.startFastContiniousReading(0,0.05,10);
+        ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        ads1115.stopFastContiniousReading();
-        ads1115.startFastContiniousReading(0,0.05,10);
-        assertThrows(ContiniousMeasuringException.class, () -> ads1115.startFastContiniousReading(0,0.05, 10));
+        ads1115.stopFastContinuousReading();
+        ads1115.startFastContinuousReading(0,0.05,10);
+        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startFastContinuousReading(0,0.05, 10));
     }
 
     @Test
-    public void testSlowContiniousReading(){
+    public void testSlowContinuousReading(){
         //given
         int conversionRegisterValue =16000;
         answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN0_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
@@ -281,7 +281,7 @@ public class ADS1115_Test extends ComponentTest {
         });
 
         //when
-        ads1115.startSlowContiniousReading(0,0.05,10);
+        ads1115.startSlowContinuousReading(0,0.05,10);
 
         //then
         assertEquals(0, counter.get());
@@ -335,6 +335,6 @@ public class ADS1115_Test extends ComponentTest {
     @Test
     public void testSlowContinuousReadingExceptionFrequency(){
         //then
-        assertThrows(ContiniousMeasuringException.class, () -> ads1115.startSlowContiniousReading(0,0.05, 200));
+        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startSlowContinuousReading(0,0.05, 200));
     }
 }

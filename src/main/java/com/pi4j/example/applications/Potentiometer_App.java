@@ -28,15 +28,15 @@ public class Potentiometer_App implements Application {
             System.out.println("The potentiometer slider is currently at " + String.format("%.3f", value) + " % of its full travel.");
         });
 
-        //start continious reading with single shot in this mode you can connect up to 4 devices to the analog module
-        poti.startSlowContiniousReading(0.05, 10);
+        //start continuous reading with single shot in this mode you can connect up to 4 devices to the analog module
+        poti.startSlowContinuousReading(0.05, 10);
 
         // Wait while handling events before exiting
         System.out.println("Move the potentiometer to see it in action!");
         delay(30_000);
 
-        //stop continious reading
-        poti.stopSlowContiniousReading();
+        //stop continuous reading
+        poti.stopSlowContinuousReading();
 
         System.out.println("Potentiometer test done");
     }

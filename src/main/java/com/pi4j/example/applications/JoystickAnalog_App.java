@@ -33,7 +33,7 @@ public class JoystickAnalog_App implements Application {
 
         joystick.calibrateJoystick();
 
-        //start continious reading with single shot in this mode you can connect up to 4 devices to the analog module
+        //start continuous reading with single shot in this mode you can connect up to 4 devices to the analog module
         joystick.start(0.05, 10);
 
         //wait while handling events before exiting
@@ -41,7 +41,7 @@ public class JoystickAnalog_App implements Application {
 
         delay(30_000);
 
-        //stop continious reading
+        //stop continuous reading
         joystick.stop();
 
         //deregister all event handlers

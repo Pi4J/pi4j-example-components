@@ -1,7 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.config.exception.ConfigException;
-import com.pi4j.example.helpers.ContiniousMeasuringException;
+import com.pi4j.example.helpers.ContinuousMeasuringException;
 
 import java.util.function.Consumer;
 
@@ -28,12 +28,12 @@ public class Potentiometer extends Component {
     /**
      * fast continuous reading is active
      */
-    private boolean fastContiniousReadingActive = false;
+    private boolean fastContinuousReadingActive = false;
 
     /**
-     * slow continious reading is active
+     * slow continuous reading is active
      */
-    private boolean slowContiniousReadingActive = false;
+    private boolean slowContinuousReadingActive = false;
 
     /**
      * Create a new potentiometer component with custom chanel and custom maxVoltage
@@ -177,51 +177,51 @@ public class Potentiometer extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
      */
-    public void startSlowContiniousReading(double threshold, int readFrequency) {
-        if (fastContiniousReadingActive) {
-            throw new ContiniousMeasuringException("fast continious reading currently active");
+    public void startSlowContinuousReading(double threshold, int readFrequency) {
+        if (fastContinuousReadingActive) {
+            throw new ContinuousMeasuringException("fast continuous reading currently active");
         } else {
-            //set slow continuous reading active to lock fast continious reading
-            slowContiniousReadingActive = true;
-            ads1115.startSlowContiniousReading(channel, threshold, readFrequency);
+            //set slow continuous reading active to lock fast continuous reading
+            slowContinuousReadingActive = true;
+            ads1115.startSlowContinuousReading(channel, threshold, readFrequency);
         }
     }
 
     /**
-     * stops slow continious reading
+     * stops slow continuous reading
      */
-    public void stopSlowContiniousReading() {
-        slowContiniousReadingActive = false;
-        ads1115.stopSlowReadContiniousReading(channel);
+    public void stopSlowContinuousReading() {
+        slowContinuousReadingActive = false;
+        ads1115.stopSlowReadContinuousReading(channel);
     }
 
     /**
-     * Starts fast continious reading. In this mode only on device can be connected to the ad converter.
+     * Starts fast continuous reading. In this mode only on device can be connected to the ad converter.
      * The maximum allowed readFrequency ist equal to the sample rate of the ad converter
      *
      * @param threshold     threshold for trigger new value change event (+- voltage)
      * @param readFrequency read frequency to get new value from device, must be lower than the
      *                      sampling rate of the device
      */
-    public void startFastContiniousReading(double threshold, int readFrequency) {
-        if (slowContiniousReadingActive) {
-            throw new ContiniousMeasuringException("slow continious reading currently active");
+    public void startFastContinuousReading(double threshold, int readFrequency) {
+        if (slowContinuousReadingActive) {
+            throw new ContinuousMeasuringException("slow continuous reading currently active");
         } else {
-            //set fast continuous reading active to lock slow continious reading
-            fastContiniousReadingActive = true;
+            //set fast continuous reading active to lock slow continuous reading
+            fastContinuousReadingActive = true;
 
-            //start continious reading on ads1115
-            ads1115.startFastContiniousReading(channel, threshold, readFrequency);
+            //start continuous reading on ads1115
+            ads1115.startFastContinuousReading(channel, threshold, readFrequency);
         }
     }
 
     /**
-     * stops fast continious reading
+     * stops fast continuous reading
      */
-    public void stopFastContiniousReading() {
-        fastContiniousReadingActive = false;
-        //stop continious reading
-        ads1115.stopFastContiniousReading();
+    public void stopFastContinuousReading() {
+        fastContinuousReadingActive = false;
+        //stop continuous reading
+        ads1115.stopFastContinuousReading();
     }
 
     /**

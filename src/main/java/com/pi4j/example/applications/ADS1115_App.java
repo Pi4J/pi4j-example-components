@@ -4,8 +4,6 @@ import com.pi4j.context.Context;
 import com.pi4j.example.Application;
 import com.pi4j.example.components.ADS1115;
 
-import static java.lang.Thread.sleep;
-
 public class ADS1115_App implements Application {
 
     @Override
@@ -14,11 +12,11 @@ public class ADS1115_App implements Application {
         //read all chanel in single mode
         //singleRead(pi4j);
 
-        //read all chanel in continious mode
-        continiousSlowRead(pi4j);
+        //read all chanel in continuous mode
+        continuousSlowRead(pi4j);
 
-        //read one chanel in fast continious mode
-        //continiousFastRead(pi4j);
+        //read one chanel in fast continuous mode
+        //continuousFastRead(pi4j);
 
         System.out.println("ADS1115 test done");
     }
@@ -46,9 +44,9 @@ public class ADS1115_App implements Application {
         System.out.println("Single read done.");
     }
 
-    private void continiousSlowRead(Context pi4j) {
+    private void continuousSlowRead(Context pi4j) {
         //start test
-        System.out.println("Continious slow read test started ...");
+        System.out.println("Continuous slow read test started ...");
 
         ADS1115 ads1115 = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
 
@@ -66,14 +64,14 @@ public class ADS1115_App implements Application {
             System.out.println("The actual value from channel 3 is: " + String.format("%.3f", value) + "voltage.");
         });
 
-        //start continious measuring
-        ads1115.startSlowContiniousReadingAllChannels(0.1, 10);
+        //start continuous measuring
+        ads1115.startSlowContinuousReadingAllChannels(0.1, 10);
 
         // Wait while handling events before exiting
         delay(30000);
 
-        //stop continious measuring
-        ads1115.stopSlowReadContiniousReadingAllChannels();
+        //stop continuous measuring
+        ads1115.stopSlowReadContinuousReadingAllChannels();
 
         //deregister all handlers
         ads1115.deregisterAll();
@@ -81,12 +79,12 @@ public class ADS1115_App implements Application {
         pi4j.shutdown();
 
         //end test
-        logInfo("Continious slow read test done.");
+        logInfo("Continuous slow read test done.");
     }
 
-    private void continiousFastRead(Context pi4j) {
+    private void continuousFastRead(Context pi4j) {
         //start test
-        System.out.println("Continious fast read test started ...");
+        System.out.println("Continuous fast read test started ...");
 
         ADS1115 ads1115 = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
 
@@ -96,14 +94,14 @@ public class ADS1115_App implements Application {
         });
 
         for (int i = 0; i < 4; i++) {
-            //start continious measuring
-            ads1115.startFastContiniousReading(i, 0.1, 10);
+            //start continuous measuring
+            ads1115.startFastContinuousReading(i, 0.1, 10);
 
             // Wait while handling events before exiting
             delay(20000);
 
-            //stop continious measuring
-            ads1115.stopFastContiniousReading();
+            //stop continuous measuring
+            ads1115.stopFastContinuousReading();
         }
 
 
@@ -113,6 +111,6 @@ public class ADS1115_App implements Application {
         pi4j.shutdown();
 
         //end test
-        logInfo("Continious fast read test done.");
+        logInfo("Continuous fast read test done.");
     }
 }

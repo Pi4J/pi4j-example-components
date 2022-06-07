@@ -2,7 +2,7 @@ package com.pi4j.example.components;
 
 import com.pi4j.config.exception.ConfigException;
 import com.pi4j.context.Context;
-import com.pi4j.example.helpers.ContiniousMeasuringException;
+import com.pi4j.example.helpers.ContinuousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 
@@ -88,13 +88,13 @@ public class ADS1115 extends Component {
      */
     private final int numberOfChannels;
     /**
-     * continious reading active
+     * continuous reading active
      */
-    protected boolean continiousReadingActive;
+    protected boolean continuousReadingActive;
     /**
      * flag which channel is continuous reading active
      */
-    private boolean[] continiousReadingActiveChannel;
+    private boolean[] continuousReadingActiveChannel;
 
     /**
      * The Conversion register contains the result of the last conversion.
@@ -163,7 +163,7 @@ public class ADS1115 extends Component {
         this.context = pi4j;
         this.numberOfChannels = numberOfChannels;
         this.consumersSlowRead = new Consumer[numberOfChannels];
-        this.continiousReadingActiveChannel = new boolean[numberOfChannels];
+        this.continuousReadingActiveChannel = new boolean[numberOfChannels];
 
         //write default configuration
         this.os = OS.WRITE_START.getOs();
@@ -234,7 +234,7 @@ public class ADS1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn0() {
-        if (continiousReadingActive) throw new ContiniousMeasuringException("Continious measuring active");
+        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -244,7 +244,7 @@ public class ADS1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn1() {
-        if (continiousReadingActive) throw new ContiniousMeasuringException("Continious measuring active");
+        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -254,7 +254,7 @@ public class ADS1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn2() {
-        if (continiousReadingActive) throw new ContiniousMeasuringException("Continious measuring active");
+        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -264,7 +264,7 @@ public class ADS1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn3() {
-        if (continiousReadingActive) throw new ContiniousMeasuringException("Continious measuring active");
+        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -276,9 +276,9 @@ public class ADS1115 extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
      */
-    public void startFastContiniousReading(int channel, double threshold, int readFrequency) {
-        //only if continious reading is not set to true by other component
-        if (!continiousReadingActive) {
+    public void startFastContinuousReading(int channel, double threshold, int readFrequency) {
+        //only if continuous reading is not set to true by other component
+        if (!continuousReadingActive) {
             //get mux from channel
             MUX mux = MUX.AIN0_GND;
             switch (channel) {
@@ -292,22 +292,22 @@ public class ADS1115 extends Component {
                     mux = MUX.AIN3_GND;
                     break;
             }
-            continiousReadingActive = true;
-            fastReadContiniousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
-            logDebug("Start fast continious reading");
+            continuousReadingActive = true;
+            fastReadContinuousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
+            logDebug("Start fast continuous reading");
         }else{
-            throw new ContiniousMeasuringException("Continuous reading already active!");
+            throw new ContinuousMeasuringException("Continuous reading already active!");
         }
     }
 
     /**
-     * stops continious reading
+     * stops continuous reading
      */
-    public void stopFastContiniousReading() {
-        logDebug("Stop continious reading");
+    public void stopFastContinuousReading() {
+        logDebug("Stop continuous reading");
         // write single shot configuration to stop reading process in device
         writeConfigRegister(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
-        continiousReadingActive = false;
+        continuousReadingActive = false;
     }
 
     /**
@@ -317,14 +317,14 @@ public class ADS1115 extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
      */
-    public void startSlowContiniousReading(int channel, double threshold, int readFrequency) {
-        logDebug("Start slow continious reading chanel " + channel);
-        //only start continious Reading if it is not already running because of other component
-        if (!continiousReadingActive) {
-            continiousReadingActive = true;
-            slowReadContiniousValue(threshold, readFrequency);
+    public void startSlowContinuousReading(int channel, double threshold, int readFrequency) {
+        logDebug("Start slow continuous reading chanel " + channel);
+        //only start continuous Reading if it is not already running because of other component
+        if (!continuousReadingActive) {
+            continuousReadingActive = true;
+            slowReadContinuousValue(threshold, readFrequency);
         }
-        continiousReadingActiveChannel[channel] = true;
+        continuousReadingActiveChannel[channel] = true;
     }
 
     /**
@@ -334,34 +334,34 @@ public class ADS1115 extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
      */
-    public void startSlowContiniousReadingAllChannels(double threshold, int readFrequency) {
+    public void startSlowContinuousReadingAllChannels(double threshold, int readFrequency) {
         for (int i = 0; i < numberOfChannels; i++) {
-            startSlowContiniousReading(i, threshold, readFrequency);
+            startSlowContinuousReading(i, threshold, readFrequency);
         }
     }
 
     /**
-     * stops slow continious reading on custom channel
+     * stops slow continuous reading on custom channel
      *
-     * @param channel chanel to stop continious reading
+     * @param channel chanel to stop continuous reading
      */
-    public void stopSlowReadContiniousReading(int channel) {
-        logDebug("Stop continious reading channel " + channel);
-        continiousReadingActiveChannel[channel] = false;
-        for (int i = 0; i < continiousReadingActiveChannel.length; i++) {
-            if (continiousReadingActiveChannel[i]) {
+    public void stopSlowReadContinuousReading(int channel) {
+        logDebug("Stop continuous reading channel " + channel);
+        continuousReadingActiveChannel[channel] = false;
+        for (int i = 0; i < continuousReadingActiveChannel.length; i++) {
+            if (continuousReadingActiveChannel[i]) {
                 return;
             }
         }
-        continiousReadingActive = false;
+        continuousReadingActive = false;
     }
 
     /**
-     * stops slow continious reading on all channels
+     * stops slow continuous reading on all channels
      */
-    public void stopSlowReadContiniousReadingAllChannels() {
+    public void stopSlowReadContinuousReadingAllChannels() {
         for (int i = 0; i < numberOfChannels; i++) {
-            stopSlowReadContiniousReading(i);
+            stopSlowReadContinuousReading(i);
         }
     }
 
@@ -404,9 +404,9 @@ public class ADS1115 extends Component {
     }
 
     /**
-     * Retrun sampling rate from device
+     * Return sampling rate from device
      *
-     * @return samplingrate
+     * @return sampling rate
      */
     public int getSamplingRate() {
         return dr.getSpS();
@@ -425,7 +425,7 @@ public class ADS1115 extends Component {
     }
 
     /**
-     * Sets or disables the handler for the onValueChange event from continious slow read.
+     * Sets or disables the handler for the onValueChange event from continuous slow read.
      * This event gets triggered whenever the analog value
      * from the device changes.
      * Only a single event handler can be registered at once.
@@ -437,7 +437,7 @@ public class ADS1115 extends Component {
     }
 
     /**
-     * Sets or disables the handler for the onValueChange event from continious slow read.
+     * Sets or disables the handler for the onValueChange event from continuous slow read.
      * This event gets triggered whenever the analog value
      * from the device changes.
      * Only a single event handler can be registered at once.
@@ -449,7 +449,7 @@ public class ADS1115 extends Component {
     }
 
     /**
-     * Sets or disables the handler for the onValueChange event from continious slow read.
+     * Sets or disables the handler for the onValueChange event from continuous slow read.
      * This event gets triggered whenever the analog value
      * from the device changes.
      * Only a single event handler can be registered at once.
@@ -461,7 +461,7 @@ public class ADS1115 extends Component {
     }
 
     /**
-     * Sets or disables the handler for the onValueChange event from continious slow read.
+     * Sets or disables the handler for the onValueChange event from continuous slow read.
      * This event gets triggered whenever the analog value
      * from the device changes.
      * Only a single event handler can be registered at once.
@@ -561,7 +561,7 @@ public class ADS1115 extends Component {
     }
 
     /**
-     * Sends configuration for continious reading to device, updates actual value from analog input
+     * Sends configuration for continuous reading to device, updates actual value from analog input
      * and triggers valueChange event
      *
      * @param config        Configuration for config register
@@ -569,14 +569,14 @@ public class ADS1115 extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than
      *                      the sampling rate of the device
      */
-    private void fastReadContiniousValue(int config, double threshold, int readFrequency) {
+    private void fastReadContinuousValue(int config, double threshold, int readFrequency) {
         if (readFrequency < dr.getSpS()) {
-            logDebug("Start continious reading");
+            logDebug("Start continuous reading");
             //set configuration
             writeConfigRegister(config);
             //start new thread for continuous reading
             new Thread(() -> {
-                while (continiousReadingActive) {
+                while (continuousReadingActive) {
                     //start measuring time
                     long startTime = System.nanoTime();
 
@@ -599,7 +599,7 @@ public class ADS1115 extends Component {
                 }
             }).start();
         } else {
-            throw new ContiniousMeasuringException("readFrequency to high");
+            throw new ContinuousMeasuringException("readFrequency to high");
         }
     }
 
@@ -611,13 +611,13 @@ public class ADS1115 extends Component {
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      the sampling rate of the device
      */
-    private void slowReadContiniousValue(double threshold, int readFrequency) {
+    private void slowReadContinuousValue(double threshold, int readFrequency) {
         //sum of readFrequency of all channels must be lower than 1/2 sampling rate
         if (readFrequency * numberOfChannels * 2 < dr.getSpS()) {
-            logDebug("Start continious reading");
+            logDebug("Start continuous reading");
             //start new thread for continuous reading
             new Thread(() -> {
-                while (continiousReadingActive) {
+                while (continuousReadingActive) {
                     //start measuring time
                     long startTime = System.nanoTime();
 
@@ -663,7 +663,7 @@ public class ADS1115 extends Component {
                 }
             }).start();
         } else {
-            throw new ContiniousMeasuringException("readFrequency to high");
+            throw new ContinuousMeasuringException("readFrequency to high");
         }
     }
 

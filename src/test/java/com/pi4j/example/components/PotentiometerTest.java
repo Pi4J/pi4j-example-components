@@ -1,7 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.example.ComponentTest;
-import com.pi4j.example.helpers.ContiniousMeasuringException;
+import com.pi4j.example.helpers.ContinuousMeasuringException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,30 +47,30 @@ public class PotentiometerTest extends ComponentTest {
     }
 
     @Test
-    public void testStartSlowContiniousReading(){
-        potentiometer.startFastContiniousReading(0.05, 10);
+    public void testStartSlowContinuousReading(){
+        potentiometer.startFastContinuousReading(0.05, 10);
 
-        Assertions.assertThrows(ContiniousMeasuringException.class, ()->{potentiometer.startSlowContiniousReading(0.05, 10);});
+        Assertions.assertThrows(ContinuousMeasuringException.class, ()->{potentiometer.startSlowContinuousReading(0.05, 10);});
 
-        potentiometer.stopFastContiniousReading();
+        potentiometer.stopFastContinuousReading();
 
-        potentiometer.startSlowContiniousReading(0.05,10);
+        potentiometer.startSlowContinuousReading(0.05,10);
 
-        potentiometer.stopSlowContiniousReading();
+        potentiometer.stopSlowContinuousReading();
 
     }
 
     @Test
-    public void testStartFastContiniousReading(){
-        potentiometer.startSlowContiniousReading(0.05, 10);
+    public void testStartFastContinuousReading(){
+        potentiometer.startSlowContinuousReading(0.05, 10);
 
-        Assertions.assertThrows(ContiniousMeasuringException.class, ()->{potentiometer.startFastContiniousReading(0.05, 10);});
+        Assertions.assertThrows(ContinuousMeasuringException.class, ()->{potentiometer.startFastContinuousReading(0.05, 10);});
 
-        potentiometer.stopSlowContiniousReading();
+        potentiometer.stopSlowContinuousReading();
 
-        potentiometer.startFastContiniousReading(0.05,10);
+        potentiometer.startFastContinuousReading(0.05,10);
 
-        potentiometer.stopFastContiniousReading();
+        potentiometer.stopFastContinuousReading();
 
     }
 

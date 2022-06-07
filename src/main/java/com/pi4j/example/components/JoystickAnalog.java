@@ -211,16 +211,16 @@ public class JoystickAnalog extends Component {
      * @param readFrequency update frequency to read new value from ad converter
      */
     public void start(double threshold, int readFrequency) {
-        x.startSlowContiniousReading(threshold, readFrequency);
-        y.startSlowContiniousReading(threshold, readFrequency);
+        x.startSlowContinuousReading(threshold, readFrequency);
+        y.startSlowContinuousReading(threshold, readFrequency);
     }
 
     /**
      * Stop reading of joystick value. If triggered no new value from joystick can be read.
      */
     public void stop() {
-        x.stopSlowContiniousReading();
-        y.stopSlowContiniousReading();
+        x.stopSlowContinuousReading();
+        y.stopSlowContinuousReading();
     }
 
     /**
