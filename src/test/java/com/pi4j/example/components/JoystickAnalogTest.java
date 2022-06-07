@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.awt.image.SinglePixelPackedSampleModel;
-
 import static org.mockito.Mockito.mock;
 
 public class JoystickAnalogTest extends ComponentTest {
