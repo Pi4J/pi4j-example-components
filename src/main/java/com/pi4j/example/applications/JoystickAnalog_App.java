@@ -44,6 +44,9 @@ public class JoystickAnalog_App implements Application {
         //stop continuous reading
         joystick.stop();
 
+        delay(1000
+        );
+
         //deregister all event handlers
         joystick.deregisterAll();
 

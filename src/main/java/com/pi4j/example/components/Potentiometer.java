@@ -39,17 +39,17 @@ public class Potentiometer extends Component {
      * Create a new potentiometer component with custom chanel and custom maxVoltage
      *
      * @param ads1115    ads instance
-     * @param chanel     custom ad chanel
+     * @param channel     custom ad chanel
      * @param maxVoltage custom maxVoltage
      */
-    public Potentiometer(ADS1115 ads1115, int chanel, double maxVoltage) {
-        this.ads1115 = ads1115;
+    public Potentiometer(ADS1115 ads1115, int channel, double maxVoltage) {
+        this.ads1115  = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = maxVoltage;
-        this.channel = chanel;
+        this.channel  = channel;
 
         //check if chanel is in range of ad converter
-        if (chanel < 0 || chanel > 3) {
+        if (channel < 0 || channel > 3) {
             throw new ConfigException("Channel number for ad converter not possible, choose channel between 0 to 3");
         }
         logDebug("Build component potentiometer");
@@ -75,21 +75,13 @@ public class Potentiometer extends Component {
      * @return voltage from potentiometer
      */
     public double singleShotGetVoltage() {
-        double result = 0.0;
-        switch (channel) {
-            case 0:
-                result = ads1115.singleShotAIn0();
-                break;
-            case 1:
-                result = ads1115.singleShotAIn1();
-                break;
-            case 2:
-                result = ads1115.singleShotAIn2();
-                break;
-            case 3:
-                result = ads1115.singleShotAIn3();
-                break;
-        }
+        double result = switch (channel) {
+            case 0  -> ads1115.singleShotAIn0();
+            case 1  -> ads1115.singleShotAIn1();
+            case 2  -> ads1115.singleShotAIn2();
+            case 3  -> ads1115.singleShotAIn3();
+            default -> 0.0;
+        };
         updateMinMaxValue(result);
         return result;
     }

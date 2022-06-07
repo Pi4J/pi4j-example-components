@@ -75,10 +75,10 @@ public class Joystick extends Component{
      */
     public Joystick (Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest){
         bNorth = new SimpleButton(pi4j, addrNorth, false, DEFAULT_DEBOUNCE);
-        bWest = new SimpleButton(pi4j,  addrWest,  false, DEFAULT_DEBOUNCE);
+        bWest  = new SimpleButton(pi4j,  addrWest,  false, DEFAULT_DEBOUNCE);
         bSouth = new SimpleButton(pi4j, addrSouth, false, DEFAULT_DEBOUNCE);
-        bEast = new SimpleButton(pi4j,  addrEast,  false, DEFAULT_DEBOUNCE);
-        bPush = null;
+        bEast  = new SimpleButton(pi4j,  addrEast,  false, DEFAULT_DEBOUNCE);
+        bPush  = null;
         //joystick without push button
         pushIsPresent = false;
     }
@@ -217,8 +217,6 @@ public class Joystick extends Component{
         return pushIsPresent && bPush.isUp();}
 
 
-
-
     /**
      * Sets or disables the handler for the onDown event.
      * This event gets triggered whenever the button is pressed.
@@ -343,6 +341,7 @@ public class Joystick extends Component{
         if(pushIsPresent){
             bPush.whilePressed(method, millis);
         }else{
+            //throw error
             logError("No runnable on buttonPushWhilePressed.");
         }
 
@@ -394,6 +393,9 @@ public class Joystick extends Component{
         bWest.deRegisterAll();
         bSouth.deRegisterAll();
         bEast.deRegisterAll();
+        if(pushIsPresent){
+            bPush.deRegisterAll();
+        }
     }
 
     /**

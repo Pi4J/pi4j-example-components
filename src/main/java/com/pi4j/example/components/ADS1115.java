@@ -46,7 +46,7 @@ public class ADS1115 extends Component {
     /**
      * Operational status or single-shot conversion start
      */
-    private int os;
+    private final int os;
 
     /**
      * programmable gain amplifier
@@ -56,6 +56,7 @@ public class ADS1115 extends Component {
     /**
      * sampling rate of device
      */
+
     private final DR dr;
 
     /**
@@ -170,11 +171,11 @@ public class ADS1115 extends Component {
         //mux will be set in function
         this.pga = gain;
         //mode will be set in function
-        this.dr = DR.SPS_128;
+        this.dr       = DR.SPS_128;
         this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
-        this.compPol = COMP_POL.ACTIVE_LOW.getCompPol();
-        this.compLat = COMP_LAT.NON_LATCH.getLatching();
-        this.compQue = COMP_QUE.DISABLE_COMP.getCompQue();
+        this.compPol  = COMP_POL.ACTIVE_LOW.getCompPol();
+        this.compLat  = COMP_LAT.NON_LATCH.getLatching();
+        this.compQue  = COMP_QUE.DISABLE_COMP.getCompQue();
         createTemplateConfiguration();
 
         //i2c parameter
@@ -325,6 +326,14 @@ public class ADS1115 extends Component {
             slowReadContinuousValue(threshold, readFrequency);
         }
         continuousReadingActiveChannel[channel] = true;
+    }
+
+    /**
+     * stops continious reading
+     */
+    public void stopSlowReadContiniousReading() {
+        logInfo("Stop continious reading");
+        continiousReadingActive = false;
     }
 
     /**
@@ -495,23 +504,23 @@ public class ADS1115 extends Component {
      * @return configuration from device
      */
     private int readConfigRegister() {
-        String[] osInfo = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
+        String[] osInfo   = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
 
-        String[] muxInfo = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
+        String[] muxInfo  = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
 
-        String[] pgaInfo = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
+        String[] pgaInfo  = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
 
         String[] modeInfo = {"0 : Continuous-conversion mode\n", "1 : Single-shot mode or power-down state\n"};
 
-        String[] drInfo = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
+        String[] drInfo   = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
 
         String[] compModeInfo = {"0 : Traditional comparator (default)\n", "1 : Window comparator\n"};
 
-        String[] compPolInfo = {"0 : Active low (default)\n", "1 : Active high\n"};
+        String[] compPolInfo  = {"0 : Active low (default)\n", "1 : Active high\n"};
 
-        String[] compLatInfo = {"0 : Nonlatching comparator\n", "1 : Latching comparator\n"};
+        String[] compLatInfo  = {"0 : Nonlatching comparator\n", "1 : Latching comparator\n"};
 
-        String[] compQueInfo = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
+        String[] compQueInfo  = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
 
         //get configuration from device
         int result = i2c.readRegisterWord(CONFIG_REGISTER);
@@ -899,9 +908,6 @@ public class ADS1115 extends Component {
          */
         DO_LATCH(0b0000_0000_0000_0100),
         /**
-         * latching
-         */
-        /**
          * With an AND operation all other parameters will be set to 0
          */
         CLR_OTHER_CONF_PARAM(0b0000_0000_0000_0100),
@@ -1078,20 +1084,24 @@ public class ADS1115 extends Component {
         /**
          * 860 sampling per second
          */
+
         SPS_860(0b0000_0000_1110_0000, 860),
         /**
          * With an AND operation all other parameters will be set to 0
          */
         CLR_OTHER_CONF_PARAM(0b0000_0000_1110_0000, 0),
+
         /**
          * With an AND operation the current parameters will be set to 0
          * all other parameters remain unchanged
          */
+
         CLR_CURRENT_CONF_PARAM(0b1111_1111_0001_1111, 0);
         /**
          * configuration
          */
         private final int conf;
+
         /**
          * sampling per second
          */
@@ -1115,8 +1125,6 @@ public class ADS1115 extends Component {
         public int getSpS() {
             return this.sps;
         }
-
-        ;
 
         /**
          * Returns samplingrate for configuration
