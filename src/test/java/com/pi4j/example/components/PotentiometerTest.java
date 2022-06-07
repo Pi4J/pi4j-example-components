@@ -61,7 +61,7 @@ public class PotentiometerTest extends ComponentTest {
     }
 
     @Test
-    public void testStartFastContinuousReading(){
+    public void testStartFastContiniousReading(){
         potentiometer.startSlowContinuousReading(0.05, 10);
 
         Assertions.assertThrows(ContinuousMeasuringException.class, ()->{potentiometer.startFastContinuousReading(0.05, 10);});

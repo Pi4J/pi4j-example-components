@@ -333,7 +333,7 @@ public class ADS1115 extends Component {
      */
     public void stopSlowReadContiniousReading() {
         logInfo("Stop continious reading");
-        continiousReadingActive = false;
+        continuousReadingActive = false;
     }
 
     /**
