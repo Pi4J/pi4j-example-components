@@ -35,7 +35,7 @@ public class ADS1115_Test extends ComponentTest {
     public void setUp() {
         mockI2C = mock(I2C.class);
 
-        //setup moks
+        //setup mocks
         defaultConfigRegister = ADS1115.OS.WRITE_START.getOs()
                 | ADS1115.GAIN.GAIN_4_096V.gain()
                 | ADS1115.DR.SPS_128.getConf()

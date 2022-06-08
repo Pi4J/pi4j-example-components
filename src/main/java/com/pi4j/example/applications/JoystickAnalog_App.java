@@ -16,7 +16,7 @@ public class JoystickAnalog_App implements Application {
         //joystick with normalized axis from 0 to 1
         JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, true, PIN.D26);
 
-        //joystick with normalized axis form -1 to 1
+        //joystick with normalized axis from -1 to 1
         //JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, false, PIN.D26);
 
         //register event handlers
@@ -27,9 +27,9 @@ public class JoystickAnalog_App implements Application {
             System.out.println("Current value of joystick y axis is: " + String.format("%.3f", value));
         });
 
-        joystick.pushOnDown(() -> logInfo("Pressing the Button"));
-        joystick.pushOnUp(() -> logInfo("Stopped pressing."));
-        joystick.pushWhilePressed(() -> logInfo("Button is still pressed."), 1000);
+        joystick.pushOnDown(() -> System.out.println("Pressing the Button"));
+        joystick.pushOnUp(() -> System.out.println("Stopped pressing."));
+        joystick.pushWhilePressed(() -> System.out.println("Button is still pressed."), 1000);
 
         joystick.calibrateJoystick();
 

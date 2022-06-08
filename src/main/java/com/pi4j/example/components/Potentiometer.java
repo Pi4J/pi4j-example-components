@@ -36,10 +36,10 @@ public class Potentiometer extends Component {
     private boolean slowContinuousReadingActive = false;
 
     /**
-     * Create a new potentiometer component with custom chanel and custom maxVoltage
+     * Create a new potentiometer component with custom channel and custom maxVoltage
      *
      * @param ads1115    ads instance
-     * @param channel     custom ad chanel
+     * @param channel     custom ad channel
      * @param maxVoltage custom maxVoltage
      */
     public Potentiometer(ADS1115 ads1115, int channel, double maxVoltage) {
@@ -48,7 +48,7 @@ public class Potentiometer extends Component {
         this.maxValue = maxVoltage;
         this.channel  = channel;
 
-        //check if chanel is in range of ad converter
+        //check if channel is in range of ad converter
         if (channel < 0 || channel > 3) {
             throw new ConfigException("Channel number for ad converter not possible, choose channel between 0 to 3");
         }
@@ -56,7 +56,7 @@ public class Potentiometer extends Component {
     }
 
     /**
-     * Create a new potentiometer component with default chanel and maxVoltage for Raspberry pi
+     * Create a new potentiometer component with default channel and maxVoltage for Raspberry pi
      *
      * @param ads1115 ads instance
      */
@@ -160,10 +160,10 @@ public class Potentiometer extends Component {
      * (the delay of the bus is not included).
      * <p>
      * This leads to the following table for the maximum allowed readFrequency by a sampling rate of 128 sps:
-     * 1 chanel in use -> readFrequency max 64Hz (min. response time = 16ms)
-     * 2 chanel in use -> readFrequency max 32Hz (min. response time = 32ms)
-     * 3 chanel in use -> readFrequency max 21Hz (min. response time = 48ms)
-     * 4 chanel in use -> readFrequency max 16Hz (min. response time = 63ms)
+     * 1 channel in use -> readFrequency max 64Hz (min. response time = 16ms)
+     * 2 channel in use -> readFrequency max 32Hz (min. response time = 32ms)
+     * 3 channel in use -> readFrequency max 21Hz (min. response time = 48ms)
+     * 4 channel in use -> readFrequency max 16Hz (min. response time = 63ms)
      *
      * @param threshold     threshold for trigger new value change event (+- voltage)
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2

@@ -88,7 +88,7 @@ public class JoystickAnalog extends Component {
      * @param chanelXAxis analog potentiometer x-axis
      * @param chanelYAxis analog potentiometer y-axis
      * @param maxVoltage  max voltage expects on analog input x- and y-axis
-     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization form -1 to 1
+     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push        additional push button on joystick
      */
     public JoystickAnalog(Context pi4j, ADS1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
@@ -98,7 +98,7 @@ public class JoystickAnalog extends Component {
     /**
      * @param potentiometerX potentiometer object for x-axis
      * @param potentiometerY potentiometer object for y-axis
-     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization form -1 to 1
+     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push           simpleButton object for push button on joystick
      */
     public JoystickAnalog(Potentiometer potentiometerX, Potentiometer potentiometerY, boolean normalized0to1, SimpleButton push) {
