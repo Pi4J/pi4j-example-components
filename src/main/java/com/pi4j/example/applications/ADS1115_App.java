@@ -3,9 +3,6 @@ package com.pi4j.example.applications;
 import com.pi4j.context.Context;
 import com.pi4j.example.Application;
 import com.pi4j.example.components.ADS1115;
-import static java.lang.Thread.sleep;
-
-import static java.lang.Thread.sleep;
 
 public class ADS1115_App implements Application {
 
@@ -16,10 +13,10 @@ public class ADS1115_App implements Application {
         //singleRead(pi4j);
 
         //read all chanel in continuous mode
-        //continuousSlowRead(pi4j);
+        continuousSlowRead(pi4j);
 
         //read one chanel in fast continuous mode
-        continuousFastRead(pi4j);
+        //continuousFastRead(pi4j);
 
         System.out.println("ADS1115 test done");
     }
@@ -54,27 +51,27 @@ public class ADS1115_App implements Application {
         ADS1115 ads1115 = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
 
         // Register event handlers to print a message on value change
-        ads1115.setRunnableSlowReadChannel0(() -> {
-            System.out.println("The actual value from channel 0 is: " + String.format("%.3f", ads1115.getSlowContinuousReadAIn0()) + "voltage.");
+        ads1115.setConsumerSlowReadChannel0((value) -> {
+            System.out.println("The actual value from channel 0 is: " + String.format("%.3f", value) + "voltage.");
         });
-        ads1115.setRunnableSlowReadChannel1(() -> {
-            System.out.println("The actual value from channel 1 is: " + String.format("%.3f", ads1115.getSlowContinuousReadAIn1()) + "voltage.");
+        ads1115.setConsumerSlowReadChannel1((value) -> {
+            System.out.println("The actual value from channel 1 is: " + String.format("%.3f", value) + "voltage.");
         });
-        ads1115.setRunnableSlowReadChannel2(() -> {
-            System.out.println("The actual value from channel 2 is: " + String.format("%.3f", ads1115.getSlowContinuousReadAIn2()) + "voltage.");
+        ads1115.setConsumerSlowReadChannel2((value) -> {
+            System.out.println("The actual value from channel 2 is: " + String.format("%.3f", value) + "voltage.");
         });
-        ads1115.setRunnableSlowReadChannel3(() -> {
-            System.out.println("The actual value from channel 3 is: " + String.format("%.3f", ads1115.getSlowContinuousReadAIn3()) + "voltage.");
+        ads1115.setConsumerSlowReadChannel3((value) -> {
+            System.out.println("The actual value from channel 3 is: " + String.format("%.3f", value) + "voltage.");
         });
 
         //start continuous measuring
-        ads1115.startSlowContinuousReading(0.1, 10);
+        ads1115.startSlowContinuousReadingAllChannels(0.1, 10);
 
         // Wait while handling events before exiting
         delay(30000);
 
         //stop continuous measuring
-        ads1115.stopSlowReadContinuousReading();
+        ads1115.stopSlowReadContinuousReadingAllChannels();
 
         //deregister all handlers
         ads1115.deregisterAll();
@@ -92,8 +89,8 @@ public class ADS1115_App implements Application {
         ADS1115 ads1115 = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
 
         // Register event handlers to print a message on value change
-        ads1115.setRunnableFastRead(() -> {
-            System.out.println("The actual value from fast read channel is: " + String.format("%.3f", ads1115.getSlowContinuousReadAIn0()) + "voltage.");
+        ads1115.setConsumerFastRead((value) -> {
+            System.out.println("The actual value from fast read channel is: " + String.format("%.3f", value) + "voltage.");
         });
 
         for (int i = 0; i < 4; i++) {

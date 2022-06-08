@@ -3,6 +3,8 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.example.components.helpers.PIN;
 
+import java.util.function.Consumer;
+
 public class JoystickAnalog extends Component {
     /**
      * potentiometer x axis
@@ -16,6 +18,23 @@ public class JoystickAnalog extends Component {
      * button push
      */
     private final SimpleButton push;
+    /**
+     * default channel for potentiometer x-axis
+     */
+    private static final int DEFAULT_CHANNEL_POTENTIOMETER_X = 0;
+    /**
+     * default channel for potentiometer x-axis
+     */
+    private static final int DEFAULT_CHANNEL_POTENTIOMETER_Y = 1;
+    /**
+     * default max voltage for raspberry pi
+     */
+    private static final double DEFAULT_MAX_VOLTAGE = 3.3;
+    /**
+     * default normalization if true -> normalization from 0 to 1
+     * if false -> normalization from -1 to 1
+     */
+    private static final boolean DEFAULT_NORMALIZATION = true;
     /**
      * normalized center position
      */
@@ -32,6 +51,33 @@ public class JoystickAnalog extends Component {
      * if true normalized axis from 0 to 1 center is 0.5, if false normalized axis from -1 to 1 center is 0
      */
     private final boolean normalized0to1;
+    /**
+     * minimal normalized value on x axis
+     */
+    private double xMinNormValue;
+    /**
+     * maximal normalized value on x axis
+     */
+    private double xMaxNormValue;
+    /**
+     * minimal normalized value on y axis
+     */
+    private double yMinNormValue;
+    /**
+     * maximal normalized value on y axis
+     */
+    private double yMaxNormValue;
+
+    /**
+     * Builds a new JoystickAnalog component with default configuration for raspberry pi with ads1115 object
+     *
+     * @param pi4j    Pi4J context
+     * @param ads1115 ads object
+     * @param push    additional push button on joystick
+     */
+    public JoystickAnalog(Context pi4j, ADS1115 ads1115, PIN push) {
+        this(pi4j, ads1115, DEFAULT_CHANNEL_POTENTIOMETER_X, DEFAULT_CHANNEL_POTENTIOMETER_Y, DEFAULT_MAX_VOLTAGE, DEFAULT_NORMALIZATION, push);
+    }
 
     /**
      * Builds a new JoystickAnalog component with custom input for x-, y-axis, custom pin for push button.
@@ -42,27 +88,29 @@ public class JoystickAnalog extends Component {
      * @param chanelXAxis analog potentiometer x-axis
      * @param chanelYAxis analog potentiometer y-axis
      * @param maxVoltage  max voltage expects on analog input x- and y-axis
+     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push        additional push button on joystick
      */
     public JoystickAnalog(Context pi4j, ADS1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
-        this.x    = new Potentiometer(ads1115, chanelXAxis, maxVoltage);
-        this.y    = new Potentiometer(ads1115, chanelYAxis, maxVoltage);
-        this.push = new SimpleButton(pi4j, push, false);
-        this.normalized0to1 = normalized0to1;
+        this(new Potentiometer(ads1115, chanelXAxis, maxVoltage), new Potentiometer(ads1115, chanelYAxis, maxVoltage), normalized0to1, new SimpleButton(pi4j, push, true));
     }
 
     /**
-     * Builds a new JoystickAnalog component with default configuration for raspberry pi with ads1115 object
-     *
-     * @param pi4j    Pi4J context
-     * @param ads1115 ads object
-     * @param push    additional push button on joystick
+     * @param potentiometerX potentiometer object for x-axis
+     * @param potentiometerY potentiometer object for y-axis
+     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
+     * @param push           simpleButton object for push button on joystick
      */
-    public JoystickAnalog(Context pi4j, ADS1115 ads1115, PIN push) {
-        this.x    = new Potentiometer(ads1115, 0, 3.3);
-        this.y    = new Potentiometer(ads1115, 1, 3.3);
-        this.push = new SimpleButton(pi4j, push, false);
-        normalized0to1 = true;
+    public JoystickAnalog(Potentiometer potentiometerX, Potentiometer potentiometerY, boolean normalized0to1, SimpleButton push) {
+        this.x = potentiometerX;
+        this.y = potentiometerY;
+        this.push = push;
+        this.normalized0to1 = normalized0to1;
+
+        xMinNormValue = 0.1;
+        xMaxNormValue = 0.9;
+        yMinNormValue = 0.1;
+        yMaxNormValue = 0.9;
     }
 
     /**
@@ -72,8 +120,26 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void xOnMove(Runnable task) {
-        x.setRunnableSlowReadChan(task);
+    public void xOnMove(Consumer<Double> task) {
+        x.setConsumerSlowReadChan((value) -> {
+
+            value = value + xOffset;
+            //check if min max value are ok
+            if (value < xMinNormValue) xMinNormValue = value;
+            if (value > xMaxNormValue) xMaxNormValue = value;
+            //scale axis from 0 to 1
+            if (value < NORMALIZED_CENTER_POSITION) {
+                value = (value - xMinNormValue) / (NORMALIZED_CENTER_POSITION - xMinNormValue) / 2;
+            } else if (value > NORMALIZED_CENTER_POSITION) {
+                value = 1 + (xMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - xMaxNormValue) / 2;
+            }
+
+            if (!normalized0to1) {
+                value = rescaleValue(value);
+            }
+
+            task.accept(value);
+        });
     }
 
     /**
@@ -83,8 +149,26 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void yOnMove(Runnable task) {
-        y.setRunnableSlowReadChan(task);
+    public void yOnMove(Consumer<Double> task) {
+        y.setConsumerSlowReadChan((value) -> {
+            value = value + yOffset;
+
+            //check if min max value are ok
+            if (value < yMinNormValue) yMinNormValue = value;
+            if (value > yMaxNormValue) yMaxNormValue = value;
+            //scale axis from 0 to 1
+            if (value < NORMALIZED_CENTER_POSITION) {
+                value = (value - yMinNormValue) / (NORMALIZED_CENTER_POSITION - yMinNormValue) / 2;
+            } else if (value > NORMALIZED_CENTER_POSITION) {
+                value = 1 + (yMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - yMaxNormValue) / 2;
+            }
+
+            if (!normalized0to1) {
+                value = rescaleValue(value);
+            }
+
+            task.accept(value);
+        });
     }
 
     /**
@@ -118,41 +202,6 @@ public class JoystickAnalog extends Component {
      */
     public void pushWhilePressed(Runnable task, long whilePressedDelay) {
         push.whilePressed(task, whilePressedDelay);
-    }
-
-    /**
-     * Returns the normalized value form 0 to 1 for x direction.
-     *
-     * @return normalized value
-     */
-    public double getXValue() {
-        double result = x.continuousReadingGetNormalizedValue() + xOffset;
-
-        result = Math.max(result, 0.0);
-        result = Math.min(result, 1.0);
-
-        if (!normalized0to1) {
-            result = rescaleValue(result);
-        }
-        return result;
-    }
-
-    /**
-     * Returns the normalized value form 0 to 1 for y direction.
-     *
-     * @return normalized value
-     */
-    public double getYValue() {
-        double result = y.continuousReadingGetNormalizedValue() + yOffset;
-
-        result = Math.max(result, 0.0);
-        result = Math.min(result, 1.0);
-
-        if (!normalized0to1) {
-            result = rescaleValue(result);
-        }
-
-        return result;
     }
 
     /**

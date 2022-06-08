@@ -2,6 +2,7 @@ package com.pi4j.example;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
+import com.pi4j.example.components.Component;
 import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.i2c.I2C;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Arrays;
 
-public abstract class ComponentTest {
+public abstract class ComponentTest extends Component {
     protected Context pi4j;
 
     @SuppressWarnings("RedundantThrows")
