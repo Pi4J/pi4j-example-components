@@ -272,7 +272,7 @@ public class ADS1115 extends Component {
     /**
      * start continuous reading
      *
-     * @param channel       ad converter chanel
+     * @param channel       ad converter channel
      * @param threshold     threshold for trigger new value change event (+- voltage)
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
      *                      sampling rate of device
@@ -319,7 +319,7 @@ public class ADS1115 extends Component {
      *                      sampling rate of device
      */
     public void startSlowContinuousReading(int channel, double threshold, int readFrequency) {
-        logDebug("Start slow continuous reading chanel " + channel);
+        logDebug("Start slow continuous reading channel " + channel);
         //only start continuous Reading if it is not already running because of other component
         if (!continuousReadingActive) {
             continuousReadingActive = true;
@@ -329,10 +329,10 @@ public class ADS1115 extends Component {
     }
 
     /**
-     * stops continious reading
+     * stops continuous reading
      */
-    public void stopSlowReadContiniousReading() {
-        logInfo("Stop continious reading");
+    public void stopSlowReadContinuousReading() {
+        logDebug("Stop continuous reading");
         continuousReadingActive = false;
     }
 
@@ -352,7 +352,7 @@ public class ADS1115 extends Component {
     /**
      * stops slow continuous reading on custom channel
      *
-     * @param channel chanel to stop continuous reading
+     * @param channel channel to stop continuous reading
      */
     public void stopSlowReadContinuousReading(int channel) {
         logDebug("Stop continuous reading channel " + channel);
@@ -392,6 +392,10 @@ public class ADS1115 extends Component {
         return i2cBus;
     }
 
+    /**
+     * Return I2C object
+     * @return I2C object
+     */
     public I2C getI2cObject(){return i2c;}
 
     /**
@@ -526,27 +530,27 @@ public class ADS1115 extends Component {
         int result = i2c.readRegisterWord(CONFIG_REGISTER);
 
         //create logger message
-        StringBuilder debugInfo = new StringBuilder();
+        StringBuilder loggerMessage = new StringBuilder();
         //check os
-        debugInfo.append((osInfo[result >> 15]));
+        loggerMessage.append((osInfo[result >> 15]));
         //check mux
-        debugInfo.append(muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12]);
+        loggerMessage.append(muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12]);
         //check pga
-        debugInfo.append(pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9]);
+        loggerMessage.append(pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9]);
         //check mode
-        debugInfo.append(modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8]);
+        loggerMessage.append(modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8]);
         //check dr
-        debugInfo.append(drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5]);
+        loggerMessage.append(drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5]);
         //check comp mode
-        debugInfo.append(compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4]);
+        loggerMessage.append(compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4]);
         //check comp pol
-        debugInfo.append(compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3]);
+        loggerMessage.append(compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3]);
         //check comp lat
-        debugInfo.append(compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2]);
+        loggerMessage.append(compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2]);
         //check comp que
-        debugInfo.append(compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()]);
+        loggerMessage.append(compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()]);
 
-        logDebug(debugInfo.toString());
+        logDebug(loggerMessage.toString());
 
         return result;
     }
@@ -631,23 +635,23 @@ public class ADS1115 extends Component {
                     long startTime = System.nanoTime();
 
                     int[] result = new int[4];
-                    //at least on chanel must be activated
+                    //at least on channel must be activated
                     result[0] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
-                    logDebug("Current value chanel 0: " + result[0]);
+                    logDebug("Current value channel 0: " + result[0]);
                     //if at least two channels are activated
                     if (numberOfChannels > 1) {
                         result[1] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
-                        logDebug("Current value chanel 1: " + result[1]);
+                        logDebug("Current value channel 1: " + result[1]);
                     }
                     //if at least three channels are activated
                     if (numberOfChannels > 2) {
                         result[2] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
-                        logDebug("Current value chanel 2: " + result[2]);
+                        logDebug("Current value channel 2: " + result[2]);
                     }
                     //if all 4 channels are activated
                     if (numberOfChannels > 3) {
                         result[3] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
-                        logDebug("Current value chanel 3: " + result[3]);
+                        logDebug("Current value channel 3: " + result[3]);
                     }
                     //convert threshold voltage to digits
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
@@ -672,7 +676,7 @@ public class ADS1115 extends Component {
                 }
             }).start();
         } else {
-            throw new ContinuousMeasuringException("readFrequency to high");
+            throw new ContinuousMeasuringException("readFrequency too high");
         }
     }
 
