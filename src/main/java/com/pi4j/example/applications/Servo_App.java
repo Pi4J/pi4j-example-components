@@ -5,6 +5,9 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.ServoMotor;
 import com.pi4j.example.components.helpers.PIN;
 
+/**
+ * This example shows how to use the servo component by turning the servo to different positions
+ */
 public class Servo_App implements Application {
     @Override
     public void execute(Context pi4j) {

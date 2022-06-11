@@ -5,6 +5,9 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.Buzzer;
 import com.pi4j.example.components.helpers.PIN;
 
+/**
+ * This example shows how to use the buzzer component by playing different tunes on it
+ */
 public class Buzzer_App implements Application {
     @Override
     public void execute(Context pi4j) {

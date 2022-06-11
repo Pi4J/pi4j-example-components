@@ -7,8 +7,10 @@ import com.pi4j.example.components.Potentiometer;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * This example shows how to use the potentiometer component displaying the values of the hooked potentiometer
+ */
 public class Potentiometer_App implements Application {
-
     @Override
     public void execute(Context pi4j) {
         System.out.println("Potentiometer test started ...");

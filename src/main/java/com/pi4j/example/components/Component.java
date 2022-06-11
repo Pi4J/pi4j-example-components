@@ -30,7 +30,6 @@ public abstract class Component {
      *
      * @param milliseconds Time in milliseconds to sleep
      */
-
     void delay(long milliseconds) {
         try {
             Thread.sleep(milliseconds);

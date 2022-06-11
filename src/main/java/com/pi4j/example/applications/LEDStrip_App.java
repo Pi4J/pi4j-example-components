@@ -4,6 +4,9 @@ import com.pi4j.context.Context;
 import com.pi4j.example.Application;
 import com.pi4j.example.components.LEDStrip;
 
+/**
+ * This example shows how to use the LEDStrip component by setting the LEDs on the strip to different colors
+ */
 public class LEDStrip_App implements Application {
     @Override
     public void execute(Context pi4j) {

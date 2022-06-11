@@ -5,6 +5,9 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.LEDMatrix;
 import com.pi4j.example.components.LEDStrip;
 
+/**
+ * This example shows how to use the LEDMatrix component by setting the LEDs on the strips to different colors
+ */
 public class LEDMatrix_App implements Application {
     @Override
     public void execute(Context pi4j) {

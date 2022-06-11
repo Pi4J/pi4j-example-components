@@ -1,7 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.example.ComponentTest;
-import com.pi4j.example.helpers.ContinuousMeasuringException;
+import com.pi4j.example.components.helpers.ContinuousMeasuringException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ public class PotentiometerTest extends ComponentTest {
     @Mock
     ADS1115 mockAds1115;
 
-    private double voltageFromAdConverter = 2.3;
+    private final double voltageFromAdConverter = 2.3;
 
     @BeforeEach
     public void setUp(){
@@ -47,7 +47,7 @@ public class PotentiometerTest extends ComponentTest {
     }
 
     @Test
-    public void testStartSlowContinuousReading(){
+    public void testStartFastContinuousReading(){
         potentiometer.startFastContinuousReading(0.05, 10);
 
         Assertions.assertThrows(ContinuousMeasuringException.class, ()->{potentiometer.startSlowContinuousReading(0.05, 10);});
@@ -61,7 +61,7 @@ public class PotentiometerTest extends ComponentTest {
     }
 
     @Test
-    public void testStartFastContiniousReading(){
+    public void testStartSlowContiniousReading(){
         potentiometer.startSlowContinuousReading(0.05, 10);
 
         Assertions.assertThrows(ContinuousMeasuringException.class, ()->{potentiometer.startFastContinuousReading(0.05, 10);});

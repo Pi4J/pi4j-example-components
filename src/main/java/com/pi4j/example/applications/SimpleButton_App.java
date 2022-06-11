@@ -6,12 +6,9 @@ import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.example.components.SimpleButton;
 
 /**
- * This example app initializes all four directional buttons and registers event handlers for every button. While this example itself does
- * not do much, it showcases how it could be used for controlling a player character in a game. Before the application exits it will cleanly
- * unregister all previously configured event handlers.
+ * This example shows how to use the simpleButton component by registering events for different interactions with the button
  */
 public class SimpleButton_App implements Application {
-
     @Override
     public void execute(Context pi4j) {
         logInfo("Simple button  app started ...");

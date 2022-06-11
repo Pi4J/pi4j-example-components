@@ -11,27 +11,45 @@ import java.util.Arrays;
  * Creates an SPI Control for a Neopixel LED Strip
  */
 public class LEDStrip extends Component {
-
     /**
      * Default Channel of the SPI Pins
      */
     protected static final int DEFAULT_SPI_CHANNEL = 0;
-
     /**
      * Minimum time to wait for reset to occur in nanoseconds.
      */
     private static final int LED_RESET_WAIT_TIME = 300_000;
-
+    /**
+     * The PI4J SPI
+     */
     protected final Spi spi;
+    /**
+     * The PI4J context
+     */
     protected final Context context;
+    /**
+     * The amount of all LEDs
+     */
     private final int numLEDs;
     /**
      * Default frequency of a WS2812 Neopixel Strip
      */
     private final int frequency = 800_000;
+    /**
+     * between each rendering of the strip, there has to be a reset-time where nothing is written to the SPI
+     */
     private final int renderWaitTime;
+    /**
+     * The array of all pixels
+     */
     private final int[] LEDs;
+    /**
+     * The raw-data of all pixels, each int of LEDs is split into bits and converted to bytes to write
+     */
     private final byte[] pixelRaw;
+    /**
+     * the conversion from bit's of an integer to a byte we can write on the SPI
+     */
     private final byte Bit_0 = (byte) 0b11000000;// 192 in Decimal
     private final byte Bit_1 = (byte) 0b11111000;// 248 in Decimal
     private final byte Bit_Reset = (byte) 0b00000000;// 0 in Decimal
@@ -39,6 +57,9 @@ public class LEDStrip extends Component {
      * Brightness value between 0 and 1
      */
     private double brightness;
+    /**
+     * The time, when the last rendering happened
+     */
     private long lastRenderTime;
 
     /**
@@ -167,7 +188,7 @@ public class LEDStrip extends Component {
             LEDs[i] = PixelColor.setGreenComponent(LEDs[i], (int) (PixelColor.getGreenComponent(LEDs[i]) * brightness));
             LEDs[i] = PixelColor.setBlueComponent(LEDs[i], (int) (PixelColor.getBlueComponent(LEDs[i]) * brightness));
 
-            /* Calculatin GRB from RGB */
+            // Calculating GRB from RGB
             for (int j = 15; j >= 8; j--) {
                 if (((LEDs[i] >> j) & 1) == 1) {
                     pixelRaw[counter++] = Bit_1;
@@ -213,7 +234,7 @@ public class LEDStrip extends Component {
     }
 
     /**
-     * setting all leds off
+     * setting all LEDs off
      */
     public void allOff() {
         Arrays.fill(LEDs, 0);
@@ -221,7 +242,7 @@ public class LEDStrip extends Component {
     }
 
     /**
-     * Utility function to sleep for the specified amount of milliseconds. An {@link InterruptedException} will be catched and ignored while setting the
+     * Utility function to sleep for the specified amount of milliseconds. An {@link InterruptedException} will be caught and ignored while setting the
      * interrupt flag again.
      */
     protected void sleep(long millis, int nanos) {
@@ -240,7 +261,7 @@ public class LEDStrip extends Component {
     }
 
     /**
-     * Set the brightness of all LED's
+     * Set the brightness of all LEDs
      *
      * @param brightness new max. brightness, range 0 - 1
      */
@@ -251,6 +272,10 @@ public class LEDStrip extends Component {
         this.brightness = brightness;
     }
 
+    /**
+     * Helper Class specific for only LEDStrips and matrices
+     * can calculate different colors, and gets the individual color channels
+     */
     public class PixelColor {
         public static final int WHITE = 0xFFFFFF;
         public static final int RED = 0xFF0000;
@@ -376,7 +401,7 @@ public class LEDStrip extends Component {
          * @param p
          * @param q
          * @param h
-         * @return
+         * @return the corresponding RGB color
          */
         private static float HueToRGB(float p, float q, float h) {
             if (h < 0)

@@ -5,17 +5,16 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.ADS1115;
 
 public class ADS1115_App implements Application {
-
     @Override
     public void execute(Context pi4j) {
         System.out.println("ADS1115 test started ...");
-        //read all chanel in single mode
+        //System.out.println("read all channels in single mode");
         //singleRead(pi4j);
 
-        //read all chanel in continuous mode
+        System.out.println("read all channels in continuous mode");
         continuousSlowRead(pi4j);
 
-        //read one chanel in fast continuous mode
+        //System.out.println("read one channel in fast continuous mode");
         //continuousFastRead(pi4j);
 
         System.out.println("ADS1115 test done");
@@ -79,7 +78,7 @@ public class ADS1115_App implements Application {
         pi4j.shutdown();
 
         //end test
-        logInfo("Continuous slow read test done.");
+        System.out.println("Continuous slow read test done.");
     }
 
     private void continuousFastRead(Context pi4j) {
@@ -111,6 +110,6 @@ public class ADS1115_App implements Application {
         pi4j.shutdown();
 
         //end test
-        logInfo("Continuous fast read test done.");
+        System.out.println("Continuous fast read test done.");
     }
 }

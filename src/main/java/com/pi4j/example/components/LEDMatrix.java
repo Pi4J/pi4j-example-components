@@ -15,9 +15,22 @@ public class LEDMatrix extends Component {
      */
     protected static final int DEFAULT_SPI_CHANNEL = 0;
 
+    /**
+     * The PI4J SPI
+     */
     protected final Spi spi;
+    /**
+     * The PI4J context
+     */
     protected final Context context;
+    /**
+     * The matrix, that includes all pixels of all LEDStrips
+     */
     private final int[][] matrix;
+    /**
+     * The corresponding LEDStrip to the matrix. The matrix is nothing more than just an array from LEDStrips, that
+     * can be calculated to a single LEDStrip
+     */
     private final LEDStrip ledStrip;
     /**
      * Brightness value between 0 and 1

@@ -8,7 +8,13 @@ import com.pi4j.io.pwm.PwmType;
 
 public class Buzzer extends Component{
 
+    /**
+     * PI4J PWM used by this buzzer
+     */
     protected final Pwm pwm;
+    /**
+     * the Thread, under which the melodies are played.
+     */
     protected Thread playingThread;
 
     /**
@@ -277,8 +283,8 @@ public class Buzzer extends Component{
     }
 
     /**
-     * A Sound is defined trough a frequency, that is played for
-     * for a defined range of beats.
+     * A Sound is defined through a frequency, that is played for
+     * a defined range of beats.
      */
     public record Sound(Note note, int beats) {}
 }

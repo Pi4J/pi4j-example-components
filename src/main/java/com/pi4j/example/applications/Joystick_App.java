@@ -5,6 +5,9 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.example.components.Joystick;
 
+/**
+ * This example shows how to use the Joystick by registering actions for each position of the joystick
+ */
 public class Joystick_App implements Application {
     @Override
     public void execute(Context pi4j) {
@@ -30,7 +33,7 @@ public class Joystick_App implements Application {
 
         // Wait for 15 seconds while handling events before exiting
         logInfo("Press the button to see it in action!");
-        delay(15000);
+        delay(15_000);
 
         // Unregister all event handlers to exit this application in a clean way
         joystick.deRegisterAll();

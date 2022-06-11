@@ -4,11 +4,6 @@ import com.pi4j.context.Context;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
 
-/**
- * FHNW implementation for controlling servo motors. This class allows its user to control a wide range of 50 hertz
- * servo motors. The position of the motor can either be moved to a specific angle by providing the desired degree
- * or it can be set to an exact pulse length.
- */
 public class ServoMotor extends Component {
     /**
      * Default PWM frequency of the servo, based on values for the CrowPi servo

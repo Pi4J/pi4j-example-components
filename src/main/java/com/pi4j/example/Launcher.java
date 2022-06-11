@@ -3,7 +3,7 @@ package com.pi4j.example;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.example.applications.*;
-import com.pi4j.example.helpers.SingletonAppHelper;
+import com.pi4j.example.components.helpers.SingletonAppHelper;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.linuxfs.provider.i2c.LinuxFsI2CProvider;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
@@ -16,7 +16,6 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Command(name = "Raspberry Pi Example Launcher", version = "1.0.0", mixinStandardHelpOptions = true)
 public final class Launcher implements Runnable {
