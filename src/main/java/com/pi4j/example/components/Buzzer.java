@@ -6,6 +6,9 @@ import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
 import com.pi4j.io.pwm.PwmType;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Buzzer extends Component{
 
     /**
@@ -15,7 +18,8 @@ public class Buzzer extends Component{
     /**
      * the Thread, under which the melodies are played.
      */
-    protected Thread playingThread;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private Runnable playWorker = () -> {};
 
     /**
      * Creates a new buzzer component with a custom BCM pin.
@@ -90,10 +94,8 @@ public class Buzzer extends Component{
      * @param sounds the defined sounds, can be an Array
      */
     public void playMelody(int tempo, Sound... sounds){
-        //stopping the current playing of a melody
-        playingThread.interrupt();
         //named thread to set it as Daemon and start it
-        playingThread = new Thread(() -> {
+        playWorker = () -> {
             //to begin the melody, we first wait for 8 beats to pass
             playSilence(tempo * 8);
             for (Sound s : sounds) {
@@ -101,9 +103,8 @@ public class Buzzer extends Component{
             }
             //when the melody is finished, we turn it off
             playSilence();
-        });
-        playingThread.setDaemon(true);
-        playingThread.start();
+        };
+        executor.submit(playWorker);
     }
 
     /**
@@ -115,10 +116,8 @@ public class Buzzer extends Component{
      * @param sounds      the defined sounds, can be an Array
      */
     public void playMelody(int tempo, int repetitions, Sound... sounds){
-        //stopping the current playing of a melody
-        playingThread.interrupt();
         //named thread to set it as Daemon and start it
-        playingThread = new Thread(() -> {
+        playWorker = () -> {
             for (int i = 0; i < repetitions; i++) {
                 //to begin the melody, we first wait for 8 beats to pass
                 //we can't just call the other playMelody, as it would always
@@ -130,9 +129,8 @@ public class Buzzer extends Component{
                 //when the melody is finished, we turn it off
                 playSilence();
             }
-        });
-        playingThread.setDaemon(true);
-        playingThread.start();
+        };
+        executor.submit(playWorker);
     }
 
     /**
