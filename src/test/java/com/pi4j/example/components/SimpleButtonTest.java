@@ -19,7 +19,7 @@ public class SimpleButtonTest extends ComponentTest {
     private final PIN PinNumber = PIN.D26;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         button = new SimpleButton(pi4j, PinNumber, false);
         digitalInput = toMock(button.getDigitalInput());
     }
@@ -189,6 +189,5 @@ public class SimpleButtonTest extends ComponentTest {
 
         //cleanup
         digitalInput.mockState(DigitalState.LOW);
-
     }
 }

@@ -44,5 +44,5 @@ module com.pi4j.example {
     requires info.picocli;
 
     // allow access to classes in the following namespaces for Pi4J annotation processing
-    opens com.pi4j.example to info.picocli, com.pi4j, com.pi4j.plugin.mock;
+    opens com.pi4j.example to info.picocli, com.pi4j;
 }

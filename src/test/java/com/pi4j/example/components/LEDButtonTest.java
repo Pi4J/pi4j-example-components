@@ -22,7 +22,7 @@ public class LEDButtonTest extends ComponentTest {
     private final PIN LEDPinNumber = PIN.D25;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         button = new LEDButton(pi4j, BTNPinNumber, false, LEDPinNumber);
         digitalInput = toMock(button.btngetDigitalInput());
         digitalOutput = toMock(button.LEDgetDigitalOutput());

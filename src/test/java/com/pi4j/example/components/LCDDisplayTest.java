@@ -20,7 +20,7 @@ public class LCDDisplayTest extends ComponentTest {
     }
 
     @Test
-    void testWriteTooLongText() {
+    public void testWriteTooLongText() {
         // when
         String text = "too long text to write the 2x16 display";
 
@@ -38,7 +38,7 @@ public class LCDDisplayTest extends ComponentTest {
     }
 
     @Test
-    void testWriteTextWithAllowedLength() {
+    public void testWriteTextWithAllowedLength() {
         // when
         String text = "This is ok";
 
@@ -52,7 +52,7 @@ public class LCDDisplayTest extends ComponentTest {
     }
 
     @Test
-    void testClearInvalidLine() {
+    public void testClearInvalidLine() {
         // then
         assertThrows(IllegalArgumentException.class, () -> lcd216Display.clearLine(3));
     }
