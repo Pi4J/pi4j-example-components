@@ -37,11 +37,11 @@ public class LCDDisplay_App implements Application {
         // Delay again
         delay(3000);
 
-        // Of course it is also possible to write with newLine Chars
+        // Of course, it is also possible to write with newLine Chars
         lcd.displayText("Some big text \nwith some new Lines \n just for testing");
         delay(3000);
 
-        // Of course it is also possible to write long text
+        // Of course, it is also possible to write long text
         lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
         delay(3000);
 

@@ -18,12 +18,12 @@ public class LEDStrip_App implements Application {
         System.out.println("Starting with setting all leds off");
         ledstrip.allOff();
 
-        System.out.println("setting the leds to RED");
+        System.out.println("setting the LEDs to RED");
         ledstrip.setStripColor(LEDStrip.PixelColor.RED);
         ledstrip.render();
         delay(3000);
 
-        System.out.println("setting the leds to Light Blue");
+        System.out.println("setting the LEDs to Light Blue");
         ledstrip.setStripColor(LEDStrip.PixelColor.LIGHT_BLUE);
         ledstrip.render();
         delay(3000);
