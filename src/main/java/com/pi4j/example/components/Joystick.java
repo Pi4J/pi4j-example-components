@@ -43,7 +43,6 @@ public class Joystick extends Component{
      */
     private final boolean pushIsPresent;
 
-
     /**
      * Creates a new joystick component with 5 custom GPIO address, a joystick with push button.
      *
