@@ -5,12 +5,15 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.ServoMotor;
 import com.pi4j.example.components.helpers.PIN;
 
+/**
+ * This example shows how to use the servo component by turning the servo to different positions
+ */
 public class Servo_App implements Application {
     @Override
     public void execute(Context pi4j) {
 
         // Initialize servo motor component
-        final var servoMotor = new ServoMotor(pi4j, PIN.PWM18.getPin());
+        final var servoMotor = new ServoMotor(pi4j, PIN.PWM18);
 
         // Demonstrate the percentage mapping on the servo
         System.out.println("In 2 seconds, the servo motor will move to the left-most position which is 0%");

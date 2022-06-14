@@ -1,7 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.example.ComponentTest;
-import com.pi4j.example.helpers.ContinuousMeasuringException;
+import com.pi4j.example.components.helpers.ContinuousMeasuringException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ public class PotentiometerTest extends ComponentTest {
     @Mock
     ADS1115 mockAds1115;
 
-    private double voltageFromAdConverter = 2.3;
+    private final double voltageFromAdConverter = 2.3;
 
     @BeforeEach
     public void setUp(){

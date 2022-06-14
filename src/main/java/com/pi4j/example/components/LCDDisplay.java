@@ -43,7 +43,6 @@ public class LCDDisplay extends Component {
     private static final byte LCD_5x10DOTS  = (byte) 0x04;
     private static final byte LCD_5x8DOTS   = (byte) 0x00;
     // flags for backlight control
-
     private static final byte LCD_BACKLIGHT     = (byte) 0x08;
     private static final byte LCD_NO_BACKLIGHT  = (byte) 0x00;
     private static final byte En                = (byte) 0b000_00100; // Enable bit
@@ -61,14 +60,26 @@ public class LCDDisplay extends Component {
     private static final int DEFAULT_BUS    = 0x1;
     private static final int DEFAULT_DEVICE = 0x27;
 
+    /**
+     * The PI4J I2C component
+     */
     private final I2C i2c;
+    /**
+     * The amount of rows on the display
+     */
     private final int rows;
+    /**
+     * The amount of columns on the display
+     */
     private final int columns;
 
     /**
      * With this Byte cursor visibility is controlled
      */
     private byte displayControl;
+    /**
+     * This boolean checks if the backlight is on or not
+     */
     private boolean backlight;
 
     /**

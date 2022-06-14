@@ -5,13 +5,13 @@ import com.pi4j.example.Application;
 import com.pi4j.example.components.LCDDisplay;
 
 /**
- * Example Application of using the LCD Display
+ * This example shows how to use the LCDDisplay component by writing different things to the display
  */
 public class LCDDisplay_App implements Application {
     @Override
     public void execute(Context pi4j) {
         //Create a Component, with amount of ROWS and COLUMNS of the Device
-        LCDDisplay lcd = new LCDDisplay(pi4j, 2, 16);
+        LCDDisplay lcd = new LCDDisplay(pi4j, 4, 20);
         System.out.println("Here we go.. let's have some fun with that LCD Display!");
 
         // Turn on the backlight makes the display appear turned on
@@ -20,6 +20,7 @@ public class LCDDisplay_App implements Application {
         // Write text to the lines separate
         lcd.displayText("Hello", 1);
         lcd.displayText("   World!", 2);
+        //A display with just 2 lines would fail by here
         lcd.displayText("Line 3", 3);
         lcd.displayText("   Line 4", 4);
 
@@ -36,11 +37,11 @@ public class LCDDisplay_App implements Application {
         // Delay again
         delay(3000);
 
-        // Of course it is also possible to write with newLine Chars
+        // Of course, it is also possible to write with newLine Chars
         lcd.displayText("Some big text \nwith some new Lines \n just for testing");
         delay(3000);
 
-        // Of course it is also possible to write long text
+        // Of course, it is also possible to write long text
         lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
         delay(3000);
 

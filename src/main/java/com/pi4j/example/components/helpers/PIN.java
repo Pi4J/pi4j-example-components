@@ -1,5 +1,8 @@
 package com.pi4j.example.components.helpers;
 
+/**
+ * Helper Class, used as Raspberry-Pi pin-numbering. Is helpful to see, which pin can act as what I/O provider
+ */
 public enum PIN {
     SDA1(2),
     SCL1(2),

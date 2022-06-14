@@ -1,26 +1,22 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
+import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
 
-/**
- * FHNW implementation for controlling servo motors. This class allows its user to control a wide range of 50 hertz
- * servo motors. The position of the motor can either be moved to a specific angle by providing the desired degree
- * or it can be set to an exact pulse length.
- */
 public class ServoMotor extends Component {
     /**
-     * Default PWM frequency of the servo, based on values for the CrowPi servo
+     * Default PWM frequency of the servo, based on values for SG92R
      */
     protected final static int DEFAULT_FREQUENCY = 50;
 
     /**
-     * Default minimum angle of the servo motor, based on values for the CrowPi servo
+     * Default minimum angle of the servo motor, based on values for SG92R
      */
     protected final static float DEFAULT_MIN_ANGLE = -90;
     /**
-     * Default maximum angle of the servo motor, based on values for the CrowPi servo
+     * Default maximum angle of the servo motor, based on values for SG92R
      */
     protected static final float DEFAULT_MAX_ANGLE = 90;
 
@@ -70,13 +66,12 @@ public class ServoMotor extends Component {
      * @param pi4j Pi4J context
      * @param address      Custom BCM pin address
      */
-    public ServoMotor(Context pi4j, int address) {
+    public ServoMotor(Context pi4j, PIN address) {
         this(pi4j, address, DEFAULT_MIN_ANGLE, DEFAULT_MAX_ANGLE, DEFAULT_MIN_DUTY_CYCLE, DEFAULT_MAX_DUTY_CYCLE);
     }
 
     /**
      * Creates a new step motor component with the default pin and frequency but customized angle and duty cycle values.
-     * This can be used if the servo bundled with the CrowPi should for some reason have values which are totally off.
      *
      * @param pi4j         Pi4J context
      * @param address      Custom BCM pin address
@@ -85,7 +80,7 @@ public class ServoMotor extends Component {
      * @param minDutyCycle Minimum duty cycle as float, between 0 and 100
      * @param maxDutyCycle Maximum duty cycle as float, between 0 and 100
      */
-    public ServoMotor(Context pi4j, int address, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
+    public ServoMotor(Context pi4j, PIN address, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
         this(pi4j, address, DEFAULT_FREQUENCY, minAngle, maxAngle, minDutyCycle, maxDutyCycle);
     }
 
@@ -100,7 +95,7 @@ public class ServoMotor extends Component {
      * @param minDutyCycle Minimum duty cycle as float, between 0 and 100
      * @param maxDutyCycle Maximum duty cycle as float, between 0 and 100
      */
-    public ServoMotor(Context pi4j, int address, int frequency, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
+    public ServoMotor(Context pi4j, PIN address, int frequency, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
         this.pwm = pi4j.create(buildPwmConfig(pi4j, address, frequency));
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
@@ -111,7 +106,7 @@ public class ServoMotor extends Component {
     /**
      * Rotates the servo motor to the specified angle in degrees.
      * The angle should be between  {@link #getMinAngle()} and {@link #getMaxAngle()} which was specified during initialization.
-     * Values outside of this inclusive range are automatically being clamped to their respective minimum / maximum.
+     * Values outside this inclusive range are automatically being clamped to their respective minimum / maximum.
      *
      * @param angle New absolute angle
      */
@@ -234,6 +229,13 @@ public class ServoMotor extends Component {
     }
 
     /**
+     * shutting down the component
+     */
+    public void off(){
+        this.pwm.off();
+    }
+
+    /**
      * Returns the created PWM instance for the servo
      *
      * @return PWM instance
@@ -250,11 +252,11 @@ public class ServoMotor extends Component {
      * @param frequency PWM frequency
      * @return PWM configuration
      */
-    protected PwmConfig buildPwmConfig(Context pi4j, int address, int frequency) {
+    protected PwmConfig buildPwmConfig(Context pi4j, PIN address, int frequency) {
         return Pwm.newConfigBuilder(pi4j)
                 .id("BCM" + address)
                 .name("Servo Motor")
-                .address(address)
+                .address(address.getPin())
                 .frequency(frequency)
                 .initial(0)
                 .shutdown(0)

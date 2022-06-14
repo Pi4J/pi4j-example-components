@@ -6,6 +6,9 @@ import com.pi4j.example.components.ADS1115;
 import com.pi4j.example.components.JoystickAnalog;
 import com.pi4j.example.components.helpers.PIN;
 
+/**
+ * This example shows how to use the analog joystick component by registering different interactions for the positions of the joystick
+ */
 public class JoystickAnalog_App implements Application {
     @Override
     public void execute(Context pi4j) {

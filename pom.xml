@@ -31,8 +31,6 @@
         <picocli.version>4.6.3</picocli.version>
         <junit.version>5.7.1</junit.version>
         <ant-jsch.version>1.10.9</ant-jsch.version>
-        <slf4j.version>1.7.32</slf4j.version>
-
 
         <!-- Maven Dependencies -->
         <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
@@ -78,7 +76,6 @@
             <version>${pi4j.version}</version>
             <scope>test</scope>
         </dependency>
-
 
         <!-- PicoCLI -->
         <dependency>

@@ -1,14 +1,12 @@
 package com.pi4j.example.applications;
 
-        import com.pi4j.context.Context;
-        import com.pi4j.example.Application;
-        import com.pi4j.example.components.helpers.PIN;
-        import com.pi4j.example.components.LEDButton;
+import com.pi4j.context.Context;
+import com.pi4j.example.Application;
+import com.pi4j.example.components.helpers.PIN;
+import com.pi4j.example.components.LEDButton;
 
 /**
- * This example app initializes all four directional buttons and registers event handlers for every button. While this example itself does
- * not do much, it showcases how it could be used for controlling a player character in a game. Before the application exits it will cleanly
- * unregister all previously configured event handlers.
+ * This example shows how to use the LEDButton component by registering actions for the interaction with the button, while simultaneously toggling the LED
  */
 public class LEDButton_App implements Application {
     @Override
@@ -24,8 +22,8 @@ public class LEDButton_App implements Application {
         delay(1000);
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
-        ledbutton.onDown(() -> logInfo("Pressing the Button"));
-        ledbutton.onUp(()   -> logInfo("Stopped pressing."));
+        ledbutton.onDown(() -> System.out.println("Pressing the Button"));
+        ledbutton.onUp(()   -> System.out.println("Stopped pressing."));
 
         // Wait for 15 seconds while handling events before exiting
         System.out.println("Press the button to see it in action!");

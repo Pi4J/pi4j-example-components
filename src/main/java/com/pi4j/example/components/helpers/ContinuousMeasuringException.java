@@ -1,4 +1,4 @@
-package com.pi4j.example.helpers;
+package com.pi4j.example.components.helpers;
 
 public class ContinuousMeasuringException extends RuntimeException{
 

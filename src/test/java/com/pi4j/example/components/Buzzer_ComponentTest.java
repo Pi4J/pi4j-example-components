@@ -15,7 +15,7 @@ public class Buzzer_ComponentTest extends ComponentTest {
     private final PIN address = PIN.PWM18;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         buzzer = new Buzzer(pi4j, address);
         pwm = toMock(buzzer.pwm);
     }

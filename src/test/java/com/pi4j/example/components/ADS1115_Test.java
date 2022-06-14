@@ -2,7 +2,7 @@ package com.pi4j.example.components;
 
 import com.pi4j.config.exception.ConfigException;
 import com.pi4j.example.ComponentTest;
-import com.pi4j.example.helpers.ContinuousMeasuringException;
+import com.pi4j.example.components.helpers.ContinuousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

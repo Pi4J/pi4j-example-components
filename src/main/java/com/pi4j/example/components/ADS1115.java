@@ -2,7 +2,7 @@ package com.pi4j.example.components;
 
 import com.pi4j.config.exception.ConfigException;
 import com.pi4j.context.Context;
-import com.pi4j.example.helpers.ContinuousMeasuringException;
+import com.pi4j.example.components.helpers.ContinuousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 
@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 
 public class ADS1115 extends Component {
     /**
-     * i2c component
+     * PI4J i2c component
      */
     private final I2C i2c;
 
