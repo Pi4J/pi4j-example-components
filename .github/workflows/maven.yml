@@ -5,7 +5,7 @@ name: Maven
 
 on:
   push:
-    branches: [ main, Dev-Arcade, feature-refactor-MS ]
+    branches: [ main, Dev-Arcade ]
   pull_request:
     branches: [ main, Dev-Arcade ]
 

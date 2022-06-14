@@ -82,7 +82,7 @@ public class ADS1115 extends Component {
     /**
      * old value from last successful read of conversion register (raw data)
      */
-    private final int[] oldValue = new int[4];
+    private int[] oldValue = new int[4];
 
     /**
      * number of channels controlled by ad converter
@@ -95,7 +95,7 @@ public class ADS1115 extends Component {
     /**
      * flag which channel is continuous reading active
      */
-    private final boolean[] continuousReadingActiveChannel;
+    private boolean[] continuousReadingActiveChannel;
 
     /**
      * The Conversion register contains the result of the last conversion.
@@ -122,7 +122,7 @@ public class ADS1115 extends Component {
     /**
      * Consumer code when current value from slow read is changed
      */
-    private final Consumer<Double>[] consumersSlowRead;
+    private Consumer<Double>[] consumersSlowRead;
 
     /**
      * Config register default configuration
