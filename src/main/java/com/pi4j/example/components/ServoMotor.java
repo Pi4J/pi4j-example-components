@@ -1,6 +1,7 @@
 package com.pi4j.example.components;
 
 import com.pi4j.context.Context;
+import com.pi4j.example.components.helpers.PIN;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
 
@@ -65,7 +66,7 @@ public class ServoMotor extends Component {
      * @param pi4j Pi4J context
      * @param address      Custom BCM pin address
      */
-    public ServoMotor(Context pi4j, int address) {
+    public ServoMotor(Context pi4j, PIN address) {
         this(pi4j, address, DEFAULT_MIN_ANGLE, DEFAULT_MAX_ANGLE, DEFAULT_MIN_DUTY_CYCLE, DEFAULT_MAX_DUTY_CYCLE);
     }
 
@@ -80,7 +81,7 @@ public class ServoMotor extends Component {
      * @param minDutyCycle Minimum duty cycle as float, between 0 and 100
      * @param maxDutyCycle Maximum duty cycle as float, between 0 and 100
      */
-    public ServoMotor(Context pi4j, int address, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
+    public ServoMotor(Context pi4j, PIN address, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
         this(pi4j, address, DEFAULT_FREQUENCY, minAngle, maxAngle, minDutyCycle, maxDutyCycle);
     }
 
@@ -95,7 +96,7 @@ public class ServoMotor extends Component {
      * @param minDutyCycle Minimum duty cycle as float, between 0 and 100
      * @param maxDutyCycle Maximum duty cycle as float, between 0 and 100
      */
-    public ServoMotor(Context pi4j, int address, int frequency, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
+    public ServoMotor(Context pi4j, PIN address, int frequency, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
         this.pwm = pi4j.create(buildPwmConfig(pi4j, address, frequency));
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
@@ -245,11 +246,11 @@ public class ServoMotor extends Component {
      * @param frequency PWM frequency
      * @return PWM configuration
      */
-    protected PwmConfig buildPwmConfig(Context pi4j, int address, int frequency) {
+    protected PwmConfig buildPwmConfig(Context pi4j, PIN address, int frequency) {
         return Pwm.newConfigBuilder(pi4j)
                 .id("BCM" + address)
                 .name("Servo Motor")
-                .address(address)
+                .address(address.getPin())
                 .frequency(frequency)
                 .initial(0)
                 .shutdown(0)
