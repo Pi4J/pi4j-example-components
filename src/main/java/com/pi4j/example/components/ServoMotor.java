@@ -7,16 +7,16 @@ import com.pi4j.io.pwm.PwmConfig;
 
 public class ServoMotor extends Component {
     /**
-     * Default PWM frequency of the servo, based on values for the CrowPi servo
+     * Default PWM frequency of the servo, based on values for SG92R
      */
     protected final static int DEFAULT_FREQUENCY = 50;
 
     /**
-     * Default minimum angle of the servo motor, based on values for the CrowPi servo
+     * Default minimum angle of the servo motor, based on values for SG92R
      */
     protected final static float DEFAULT_MIN_ANGLE = -90;
     /**
-     * Default maximum angle of the servo motor, based on values for the CrowPi servo
+     * Default maximum angle of the servo motor, based on values for SG92R
      */
     protected static final float DEFAULT_MAX_ANGLE = 90;
 
@@ -72,7 +72,6 @@ public class ServoMotor extends Component {
 
     /**
      * Creates a new step motor component with the default pin and frequency but customized angle and duty cycle values.
-     * This can be used if the servo bundled with the CrowPi should for some reason have values which are totally off.
      *
      * @param pi4j         Pi4J context
      * @param address      Custom BCM pin address
@@ -107,7 +106,7 @@ public class ServoMotor extends Component {
     /**
      * Rotates the servo motor to the specified angle in degrees.
      * The angle should be between  {@link #getMinAngle()} and {@link #getMaxAngle()} which was specified during initialization.
-     * Values outside of this inclusive range are automatically being clamped to their respective minimum / maximum.
+     * Values outside this inclusive range are automatically being clamped to their respective minimum / maximum.
      *
      * @param angle New absolute angle
      */
