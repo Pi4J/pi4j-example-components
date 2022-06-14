@@ -229,6 +229,13 @@ public class ServoMotor extends Component {
     }
 
     /**
+     * shutting down the component
+     */
+    public void off(){
+        this.pwm.off();
+    }
+
+    /**
      * Returns the created PWM instance for the servo
      *
      * @return PWM instance
