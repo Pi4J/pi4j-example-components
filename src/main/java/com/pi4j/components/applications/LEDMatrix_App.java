@@ -12,7 +12,7 @@ public class LEDMatrix_App implements Application {
     @Override
     public void execute(Context pi4j) {
         int Rows = 3;
-        int Columns = 3;
+        int Columns = 4;
         double brightness = 0.5;
 
         System.out.println("Initialising the matrix");

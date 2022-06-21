@@ -11,7 +11,7 @@ public class LEDStrip_App implements Application {
     @Override
     public void execute(Context pi4j) {
         // Initialize the RGB
-        int pixels = 10;
+        int pixels = 4;
         final var ledstrip = new LEDStrip(pi4j, pixels, 0.5);
 
         //set them all off, so nothing is shining
