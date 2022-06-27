@@ -2,10 +2,12 @@ package com.pi4j.components.components;
 
 import com.pi4j.components.ComponentTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 public class JoystickAnalogTest extends ComponentTest {
 
@@ -27,6 +29,74 @@ public class JoystickAnalogTest extends ComponentTest {
         mockPotentiometerY = mock(Potentiometer.class);
         mockSimpleButton = mock(SimpleButton.class);
         joystickAnalog = new JoystickAnalog(mockPotentiometerX, mockPotentiometerY, true, mockSimpleButton);
+    }
+
+    @Test
+    public void testStartStop(){
+        //when
+        joystickAnalog.start(0.05,10);
+        //then
+        verify(mockPotentiometerX, times(1)).startSlowContinuousReading(0.05,10);
+        verify(mockPotentiometerY, times(1)).startSlowContinuousReading(0.05,10);
+        verify(mockPotentiometerX, times(0)).startFastContinuousReading(0.05,10);
+        verify(mockPotentiometerY, times(0)).startFastContinuousReading(0.05,10);
+        //when
+        joystickAnalog.stop();
+        //then
+        verify(mockPotentiometerX, times(1)).stopSlowContinuousReading();
+        verify(mockPotentiometerY, times(1)).stopSlowContinuousReading();
+        verify(mockPotentiometerX, times(0)).stopFastContinuousReading();
+        verify(mockPotentiometerY, times(0)).stopFastContinuousReading();
+
+    }
+
+    @Test
+    public void testDeregisterAll(){
+        //when
+        joystickAnalog.deregisterAll();
+        //then
+        verify(mockPotentiometerX, times(1)).deregisterAll();
+        verify(mockPotentiometerY, times(1)).deregisterAll();
+        verify(mockSimpleButton, times(1)).deRegisterAll();
+    }
+
+    @Test
+    public void testPushOnDown(){
+        //when
+        joystickAnalog.pushOnDown(null);
+        //then
+        verify(mockSimpleButton, times(1)).onDown(null);
+    }
+
+    @Test
+    public void testPushOnUp(){
+        //when
+        joystickAnalog.pushOnUp(null);
+        //then
+        verify(mockSimpleButton, times(1)).onUp(null);
+    }
+
+    @Test
+    public void testWhilePressed(){
+        //when
+        joystickAnalog.pushWhilePressed(null, 10);
+        //then
+        verify(mockSimpleButton, times(1)).whilePressed(null, 10);
+    }
+
+    @Test
+    public void testCalibrateJoystick(){
+        //given
+        double centerPosition = 0.5;
+        double calibrationX = 0.05;
+        double calibrationY = 0.1;
+        when(mockPotentiometerX.singleShotGetNormalizedValue()).thenReturn(calibrationX);
+        when(mockPotentiometerY.singleShotGetNormalizedValue()).thenReturn(calibrationY);
+        //when
+        joystickAnalog.calibrateJoystick();
+        //then
+        assertEquals(joystickAnalog.getX_Offset(), centerPosition-calibrationX);
+        assertEquals(joystickAnalog.getY_Offset(), centerPosition-calibrationY);
     }
 
 }
