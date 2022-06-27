@@ -36,7 +36,7 @@ public final class Launcher implements Runnable {
         new LEDMatrix_App(),
         new Buzzer_App(),
         new Servo_App(),
-        new RaspiCamera_App()
+        new Camera_App()
     ));
 
     /**
