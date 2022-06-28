@@ -26,7 +26,7 @@ public class Camera_App implements Application {
 
         camera.takeStill(config);
 
-        System.out.println("waiting for camera to take pic");
+        System.out.println("Waiting for camera to take pic");
         delay(4000);
 
         System.out.println("Taking a video for 3 seconds");

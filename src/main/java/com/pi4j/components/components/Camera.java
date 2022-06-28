@@ -19,7 +19,7 @@ public class Camera extends Component{
      * Constructor for using the picture and video functionality
      */
     public Camera() {
-        logDebug("new Component Camera is initialised");
+        logDebug("new component Camera is initialised");
     }
 
     /**
@@ -37,7 +37,7 @@ public class Camera extends Component{
      * @param config Use the ConfigBuilder of the CameraConfig to create the desired parameters
      */
     public void takeStill(PicConfig config) {
-        logDebug("Taking Picture");
+        logDebug("Taking picture");
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("bash", "-c", config.asCommand());
@@ -50,7 +50,7 @@ public class Camera extends Component{
     }
 
     /**
-     * Uses a ProcessBuilder to call the bash of the RaspberryPI.
+     * Uses a ProcessBuilder to call the bash of the raspberry-pi.
      * This will call the command and write the output to the console
      *
      * @param processBuilder which process needs to be built
@@ -71,7 +71,7 @@ public class Camera extends Component{
     }
 
     /**
-     * Takes a video and saves it to the default Videos folder
+     * Takes a video and saves it to the default videos folder
      *
      * If a file already exists, the code will break. better use useDate while taking videos
      */
@@ -85,7 +85,7 @@ public class Camera extends Component{
      * @param config path to the .h264 file
      */
     public void takeVid(VidConfig config) {
-        logDebug("Taking Video");
+        logDebug("Taking video");
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("bash", "-c", config.asCommand());
@@ -98,7 +98,7 @@ public class Camera extends Component{
     }
 
     /**
-     * The Output format of a single picture
+     * The output format of a picture
      */
     public enum PicEncoding {
         PNG("png"),
@@ -119,7 +119,7 @@ public class Camera extends Component{
     }
 
     /**
-     * The Output format of a video
+     * The output format of a video
      */
     public enum VidEncoding {
         H264("h264"),
@@ -138,7 +138,7 @@ public class Camera extends Component{
     }
 
     /**
-     * Builder Pattern to create a config for a single Picture
+     * Builder Pattern to create a config for a picture
      */
     public static class PicConfig {
         /** where should it be saved and what's the filename?*/
@@ -207,7 +207,7 @@ public class Camera extends Component{
         }
 
         /**
-         * Builder Pattern, to create a config for a single picture
+         * Builder pattern, to create a config for a picture
          */
         public static class Builder{
             private String outputPath;
@@ -276,7 +276,7 @@ public class Camera extends Component{
     }
 
     /**
-     * Builder Pattern to create a config for a video
+     * Builder pattern to create a config for a video
      */
     public static class VidConfig {
         /** where should it be saved and what's the filename?*/
@@ -319,7 +319,7 @@ public class Camera extends Component{
         }
 
         /**
-         * Builder Pattern, to create a config for a video
+         * Builder pattern, to create a config for a video
          */
         public static class Builder{
             private String outputPath;
