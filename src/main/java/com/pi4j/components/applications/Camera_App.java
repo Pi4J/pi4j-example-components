@@ -14,7 +14,8 @@ public class Camera_App implements Application {
         camera.takeStill();
 
         System.out.println("Taking a pic with different parameters");
-        var config = Camera.PicConfig.Builder.outputPath("/home/pi/Pictures/")
+        var config = Camera.PicConfig.Builder.newInstance()
+                .outputPath("/home/pi/Pictures/")
                 .delay(3000)
                 .disablePreview(true)
                 .encoding(Camera.PicEncoding.PNG)
@@ -30,7 +31,8 @@ public class Camera_App implements Application {
         delay(4000);
 
         System.out.println("Taking a video for 3 seconds");
-        var vidconfig = Camera.VidConfig.Builder.outputPath("/home/pi/Videos/")
+        var vidconfig = Camera.VidConfig.Builder.newInstance()
+                .outputPath("/home/pi/Videos/")
                 .recordTime(3000)
                 .useDate(true)
                 .build();

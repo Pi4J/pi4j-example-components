@@ -18,7 +18,8 @@ public class CameraTest extends ComponentTest {
     @Test
     public void testBuilderPattern() {
         //when
-        var config = Camera.PicConfig.Builder.outputPath("/home/pi/Pictures/pic.png")
+        var config = Camera.PicConfig.Builder.newInstance()
+                .outputPath("/home/pi/Pictures/pic.png")
                 .delay(3000)
                 .disablePreview(true)
                 .encoding(Camera.PicEncoding.PNG)
@@ -29,5 +30,18 @@ public class CameraTest extends ComponentTest {
 
         //then
         assertEquals("libcamera-still -o '/home/pi/Pictures/pic.png' -t 3000 --width 1280 --height 800 -q 93 --encoding png -n", config.asCommand());
+    }
+
+    @Test
+    public void testBuilderPatternVideo() {
+        //when
+        var config = Camera.VidConfig.Builder.newInstance()
+                .outputPath("/home/pi/Videos/video.mjpeg")
+                .encoding(Camera.VidEncoding.MJPEG)
+                .recordTime(5000)
+                .build();
+
+        //then
+        assertEquals("libcamera-vid -t 5000 -o '/home/pi/Videos/video.mjpeg' --codec mjpeg", config.asCommand());
     }
 }

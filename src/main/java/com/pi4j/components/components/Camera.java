@@ -28,7 +28,7 @@ public class Camera extends Component{
      * If a file already exists, the code will break. better use useDate while taking pictures
      */
     public void takeStill() {
-        takeStill(PicConfig.Builder.outputPath("/home/pi/Pictures/picam.jpg").build());
+        takeStill(PicConfig.Builder.newInstance().outputPath("/home/pi/Pictures/picam.jpg").build());
     }
 
     /**
@@ -50,33 +50,12 @@ public class Camera extends Component{
     }
 
     /**
-     * Uses a ProcessBuilder to call the bash of the RaspberryPI.
-     * This will call the command and write the output to the console
-     *
-     * @param processBuilder which process needs to be built
-     */
-    private void callBash(ProcessBuilder processBuilder) throws IOException, InterruptedException {
-        Process process = processBuilder.start();
-
-        BufferedReader reader =
-                new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            System.out.println(line);
-        }
-
-        int exitCode = process.waitFor();
-        System.out.println("\nExited with error code : " + exitCode);
-    }
-
-    /**
      * Takes a video and saves it to the default Videos folder
      *
      * If a file already exists, the code will break. better use useDate while taking videos
      */
     public void takeVid() {
-        takeVid(VidConfig.Builder.outputPath("/home/pi/Videos/video.h264").recordTime(5000).build());
+        takeVid(VidConfig.Builder.newInstance().outputPath("/home/pi/Videos/video.h264").recordTime(5000).build());
     }
 
     /**
@@ -98,7 +77,37 @@ public class Camera extends Component{
     }
 
     /**
-     * The Output format of a single picture
+     * Uses a ProcessBuilder to call the bash of the RaspberryPI.
+     * This will call the command and write the output to the console
+     *
+     * @param processBuilder which process needs to be built
+     */
+    private void callBash(ProcessBuilder processBuilder) throws IOException, InterruptedException {
+        Process process = processBuilder.start();
+
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
+        }
+
+        //exitCode 0 = No Errors
+        int exitCode = process.waitFor();
+        System.out.println("\nExited with error code : " + exitCode);
+    }
+
+    /**
+     * Output Format of pictures
+     * These modes determine the output of the picture-file
+     * <p>
+     * The following encodings can be set
+     * {@link #PNG}
+     * {@link #JPG}
+     * {@link #RGB}
+     * {@link #BMP}
+     * {@link #YUV420}
      */
     public enum PicEncoding {
         PNG("png"),
@@ -119,7 +128,13 @@ public class Camera extends Component{
     }
 
     /**
-     * The Output format of a video
+     * Output Format of videos
+     * These modes determine the output of the video-file
+     * <p>
+     * The following encodings can be set
+     * {@link #H264}
+     * {@link #MJPEG}
+     * {@link #YUV420}
      */
     public enum VidEncoding {
         H264("h264"),
@@ -154,7 +169,7 @@ public class Camera extends Component{
         /** output height of the picture */
         public final int height;
         /** the quality of the picture, ranging from 0 to 100
-         * where 100 is the best quality */
+         * where 100 is the best quality of the picture, with no blurring*/
         public final int quality;
         /** The format of the output */
         public final PicEncoding encoding;
@@ -188,8 +203,8 @@ public class Camera extends Component{
         public String asCommand(){
             StringBuilder command = new StringBuilder("libcamera-still");
             if (useDate){
-                command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "jpg").append("'");}
-            if (!useDate){
+                command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "jpg").append("'");
+            }else{
                 command.append(" -o '").append(outputPath).append("'");}
             if (delay != 0){
                 command.append(" -t ").append(delay);}
@@ -220,10 +235,13 @@ public class Camera extends Component{
             private boolean disablePreview;
             private boolean allowFullscreenPreview;
 
-            public static Builder outputPath(String outputPath){
-                Builder b = new Builder();
-                b.outputPath = outputPath;
-                return b;
+            public static Builder newInstance(){
+                return new Builder();
+            }
+
+            public Builder outputPath(String outputPath){
+                this.outputPath = outputPath;
+                return this;
             }
 
             public Builder useDate(boolean useDate){
@@ -308,10 +326,10 @@ public class Camera extends Component{
          * @return a string that can be called from the bash
          */
         public String asCommand(){
-            StringBuilder command = new StringBuilder("libcamera-vid -o " + outputPath + " -t " + recordTime);
+            StringBuilder command = new StringBuilder("libcamera-vid -t " + recordTime);
             if (useDate){
-                command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "h264").append("'");}
-            if (!useDate){
+                command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "h264").append("'");
+            }else{
                 command.append(" -o '").append(outputPath).append("'");}
             if(encoding != null){
                 command.append(" --codec ").append(encoding.getEncoding());}
@@ -327,10 +345,13 @@ public class Camera extends Component{
             private VidEncoding encoding;
             private boolean useDate;
 
-            public static Builder outputPath(String outputPath){
-                Builder b = new Builder();
-                b.outputPath = outputPath;
-                return b;
+            public static Builder newInstance(){
+                return new Builder();
+            }
+
+            public Builder outputPath(String outputPath){
+                this.outputPath = outputPath;
+                return this;
             }
 
             public Builder recordTime(int recordTime){
