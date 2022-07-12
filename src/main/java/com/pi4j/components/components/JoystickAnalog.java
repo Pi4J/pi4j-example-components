@@ -137,7 +137,6 @@ public class JoystickAnalog extends Component {
             if (!normalized0to1) {
                 value = rescaleValue(value);
             }
-
             task.accept(value);
         });
     }
@@ -241,6 +240,18 @@ public class JoystickAnalog extends Component {
     }
 
     /**
+     * returns xOffset
+     * @return double xOffset
+     */
+    public double getX_Offset(){return xOffset;}
+
+    /**
+     * returns yOffset
+     * @return double yOffset
+     */
+    public double getY_Offset(){return yOffset;}
+
+    /**
      * Changes the output value from 0 to 1 to -1 to 1
      *
      * @param in original output value between 0 and 1
@@ -249,6 +260,4 @@ public class JoystickAnalog extends Component {
     private double rescaleValue(double in) {
         return (in - NORMALIZED_CENTER_POSITION) * 2;
     }
-
-
 }
