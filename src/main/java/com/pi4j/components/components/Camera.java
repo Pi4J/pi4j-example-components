@@ -17,9 +17,10 @@ public class Camera extends Component{
 
     /**
      * Constructor for using the picture and video functionality
+     * calling the init function to test if a camera is active
      */
     public Camera() {
-        logDebug("new Component Camera is initialised");
+        init();
     }
 
     /**
@@ -96,6 +97,23 @@ public class Camera extends Component{
         //exitCode 0 = No Errors
         int exitCode = process.waitFor();
         System.out.println("\nExited with error code : " + exitCode);
+    }
+
+    /**
+     * testing, if camera is installed on raspberrypi, and if the bash commands
+     * will work
+     */
+    private void init(){
+        logDebug("initialisation of camera");
+
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", "libcamera-still");
+
+        try {
+            callBash(processBuilder);
+        } catch (Exception e) {
+            logError("Camera: Error at initialisation: " + e.getMessage());
+        }
     }
 
     /**
@@ -223,6 +241,20 @@ public class Camera extends Component{
 
         /**
          * Builder Pattern, to create a config for a single picture
+         *
+         * A Config is buildable like this:
+         * var config = Camera.PicConfig.Builder.newInstance()
+         *                 .outputPath("/home/pi/Pictures/")
+         *                 .delay(3000)
+         *                 .disablePreview(true)
+         *                 .encoding(Camera.PicEncoding.PNG)
+         *                 .useDate(true)
+         *                 .quality(93)
+         *                 .width(1280)
+         *                 .height(800)
+         *                 .build();
+         *
+         * Every property can be added or not.
          */
         public static class Builder{
             private String outputPath;
@@ -338,6 +370,15 @@ public class Camera extends Component{
 
         /**
          * Builder Pattern, to create a config for a video
+         *
+         * A Config is buildable like this:
+         * var vidconfig = Camera.VidConfig.Builder.newInstance()
+         *                 .outputPath("/home/pi/Videos/")
+         *                 .recordTime(3000)
+         *                 .useDate(true)
+         *                 .build();
+         *
+         * Every Property can be added or not.
          */
         public static class Builder{
             private String outputPath;
