@@ -241,7 +241,8 @@ public class LCDDisplay extends Component {
             // line break in text found
             if (text.charAt(i) == '\n' && currentLine < rows) {
                 currentLine++;
-                //When after newLine a space, it is omitted
+                //if a space comes after newLine, it is omitted
+                if (i+1 >= text.length()) return;
                 if (text.charAt(i + 1) == ' ') i++;
                 continue;
             }
@@ -252,6 +253,7 @@ public class LCDDisplay extends Component {
             if (lines[currentLine].length() == columns && currentLine < rows) {
                 currentLine++;
                 //if a space comes after newLine, it is omitted
+                if (i+1 >= text.length()) return;
                 if (text.charAt(i + 1) == ' ') i++;
             }
         }
