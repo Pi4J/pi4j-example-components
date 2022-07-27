@@ -96,7 +96,11 @@ public class Camera extends Component{
 
         //exitCode 0 = No Errors
         int exitCode = process.waitFor();
-        System.out.println("\nExited with error code : " + exitCode);
+        if(exitCode != 0){
+            System.out.println("\nCamera exited with error code : " + exitCode);
+        }else{
+            System.out.println("\nCamera finished successfully");
+        }
     }
 
     /**
