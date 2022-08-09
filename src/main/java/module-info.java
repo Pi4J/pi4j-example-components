@@ -26,9 +26,9 @@
  */
 module com.pi4j.example {
     // Module Exports
-    exports com.pi4j.components;
-    exports com.pi4j.components.components;
-    exports com.pi4j.components.components.helpers;
+    exports com.pi4j.catalog;
+    exports com.pi4j.catalog.components;
+    exports com.pi4j.catalog.components.helpers;
 
     // Pi4J MODULES
     requires com.pi4j;
@@ -45,5 +45,5 @@ module com.pi4j.example {
     requires info.picocli;
 
     // allow access to classes in the following namespaces for Pi4J annotation processing
-    opens com.pi4j.components to info.picocli, com.pi4j;
+    opens com.pi4j.catalog to info.picocli, com.pi4j;
 }

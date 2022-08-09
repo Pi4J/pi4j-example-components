@@ -14,7 +14,7 @@
     <properties>
 
         <!-- Project Properties -->
-        <example.launcher.class>com.pi4j.example/com.pi4j.components.Launcher</example.launcher.class>
+        <example.launcher.class>com.pi4j.example/com.pi4j.catalog.Launcher</example.launcher.class>
         <example.launcher.args/>
 
         <!-- Raspberry Remote Deployment -->
