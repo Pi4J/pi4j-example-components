@@ -25,16 +25,16 @@ public final class Launcher implements Runnable {
      */
     public static final List<Application> APPLICATIONS = new ArrayList<Application>(Arrays.asList(
         new SimpleButton_App(),
-        new SimpleLED_App(),
-        new ADS1115_App(),
+        new SimpleLed_App(),
+        new Ads1115_App(),
         new Buzzer_App(),
         new Camera_App(),
         new Joystick_App(),
         new JoystickAnalog_App(),
-        new LCDDisplay_App(),
-        new LEDButton_App(),
-        new LEDMatrix_App(),
-        new LEDStrip_App(),
+        new LcdDisplay_App(),
+        new LedButton_App(),
+        new LedMatrix_App(),
+        new LedStrip_App(),
         new Potentiometer_App(),
         new SerialGps_App(),
         new Servo_App()

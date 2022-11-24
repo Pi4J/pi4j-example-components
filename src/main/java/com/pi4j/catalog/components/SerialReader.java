@@ -28,13 +28,13 @@ public class SerialReader implements Runnable {
         BufferedReader br = new BufferedReader(new InputStreamReader(serial.getInputStream()));
 
         try {
-            // Data from the GPS is recieved in lines
+            // Data from the GPS is received in lines
             String line = "";
 
             // Read data until the flag is false
             while (continueReading) {
                 // First we need to check if there is data available to read.
-                // The read() command for pigio-serial is a NON-BLOCKING call, in contrast to typical java input streams.
+                // The read() command for pgio-serial is a NON-BLOCKING call, in contrast to typical java input streams.
                 var available = serial.available();
                 if (available > 0) {
                     for (int i = 0; i < available; i++) {

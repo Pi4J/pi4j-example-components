@@ -5,7 +5,7 @@ import com.pi4j.catalog.components.helpers.PIN;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfig;
 
-public class SimpleLED extends Component {
+public class SimpleLed extends Component {
     /**
      * Pi4J digital output instance used by this component
      */
@@ -17,7 +17,7 @@ public class SimpleLED extends Component {
      * @param pi4j    Pi4J context
      * @param address Custom BCM pin address
      */
-    public SimpleLED(Context pi4j, PIN address) {
+    public SimpleLed(Context pi4j, PIN address) {
         this.digitalOutput = pi4j.create(buildDigitalOutputConfig(pi4j, address));
     }
 

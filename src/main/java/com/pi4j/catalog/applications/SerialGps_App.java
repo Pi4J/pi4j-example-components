@@ -42,7 +42,7 @@ public class SerialGps_App implements Application {
                 .flowControl(FlowControl.NONE)
                 .id("my-serial")
                 .device("/dev/ttyS0")
-                .provider("pigpio-serial")
+                .provider("pi-gpio-serial")
                 .build());
         serial.open();
 

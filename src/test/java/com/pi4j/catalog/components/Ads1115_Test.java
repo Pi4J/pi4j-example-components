@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ADS1115_Test extends ComponentTest {
+public class Ads1115_Test extends ComponentTest {
 
     private final int i2cBus = 0x1;
 
@@ -26,7 +26,7 @@ public class ADS1115_Test extends ComponentTest {
     private static final int CONVERSION_REGISTER = 0x00;
     private static final int CONFIG_REGISTER = 0x01;
     @InjectMocks
-    ADS1115 ads1115;
+    Ads1115 ads1115;
 
     @Mock
     I2C mockI2C;
@@ -36,23 +36,23 @@ public class ADS1115_Test extends ComponentTest {
         mockI2C = mock(I2C.class);
 
         //setup mocks
-        defaultConfigRegister = ADS1115.OS.WRITE_START.getOs()
-                | ADS1115.GAIN.GAIN_4_096V.gain()
-                | ADS1115.DR.SPS_128.getConf()
-                | ADS1115.COMP_MODE.TRAD_COMP.getCompMode()
-                | ADS1115.COMP_POL.ACTIVE_LOW.getCompPol()
-                | ADS1115.COMP_LAT.NON_LATCH.getLatching()
-                | ADS1115.COMP_QUE.DISABLE_COMP.getCompQue();
+        defaultConfigRegister = Ads1115.OS.WRITE_START.getOs()
+                | Ads1115.GAIN.GAIN_4_096V.gain()
+                | Ads1115.DR.SPS_128.getConf()
+                | Ads1115.COMP_MODE.TRAD_COMP.getCompMode()
+                | Ads1115.COMP_POL.ACTIVE_LOW.getCompPol()
+                | Ads1115.COMP_LAT.NON_LATCH.getLatching()
+                | Ads1115.COMP_QUE.DISABLE_COMP.getCompQue();
 
         answerSingleShotAIN0ConfigRegister = defaultConfigRegister
-                & ADS1115.OS.CLR_CURRENT_CONF_PARAM.getOs()
-                | ADS1115.OS.READ_NO_CONV.getOs()
-                | ADS1115.MUX.AIN0_GND.getMux()
-                | ADS1115.MODE.SINGLE.getMode();
+                & Ads1115.OS.CLR_CURRENT_CONF_PARAM.getOs()
+                | Ads1115.OS.READ_NO_CONV.getOs()
+                | Ads1115.MUX.AIN0_GND.getMux()
+                | Ads1115.MODE.SINGLE.getMode();
 
-        when(mockI2C.writeRegisterWord(CONFIG_REGISTER, defaultConfigRegister | ADS1115.MUX.AIN0_GND.getMux() | ADS1115.MODE.SINGLE.getMode())).thenReturn(answerSingleShotAIN0ConfigRegister);
+        when(mockI2C.writeRegisterWord(CONFIG_REGISTER, defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode())).thenReturn(answerSingleShotAIN0ConfigRegister);
 
-        ads1115 = new ADS1115(pi4j, i2cBus, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 1, mockI2C);
+        ads1115 = new Ads1115(pi4j, i2cBus, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 1, mockI2C);
 
     }
 
@@ -73,7 +73,7 @@ public class ADS1115_Test extends ComponentTest {
 
     @Test
     public void testGetGain() {
-        assertEquals(ADS1115.DR.SPS_128.getSpS(), ads1115.getSamplingRate());
+        assertEquals(Ads1115.DR.SPS_128.getSpS(), ads1115.getSamplingRate());
     }
 
     @Test
@@ -88,17 +88,17 @@ public class ADS1115_Test extends ComponentTest {
     @Test
     public void testWriteConfigRegister() {
         //given
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN0_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
         //then
-        assertEquals(answerSingleShotAIN0ConfigRegister, ads1115.writeConfigRegister( defaultConfigRegister | ADS1115.MUX.AIN0_GND.getMux() | ADS1115.MODE.SINGLE.getMode()));
+        assertEquals(answerSingleShotAIN0ConfigRegister, ads1115.writeConfigRegister( defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode()));
     }
 
     @Test
     public void testSingleShotAIn0(){
         //given
         int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN0_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
         when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
         //then
@@ -117,7 +117,7 @@ public class ADS1115_Test extends ComponentTest {
     public void testSingleShotExceptionReadWrongChanel(){
         //given
         int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN0_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
         when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
         //then
@@ -129,7 +129,7 @@ public class ADS1115_Test extends ComponentTest {
     public void testSingleShotAIn1(){
         //given
         int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN1_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN1_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
         when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
         //then
@@ -148,7 +148,7 @@ public class ADS1115_Test extends ComponentTest {
     public void testSingleShotAIn2(){
         //given
         int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN2_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN2_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
         when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
         //then
@@ -167,7 +167,7 @@ public class ADS1115_Test extends ComponentTest {
     public void testSingleShotAIn3(){
         //given
         int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN3_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN3_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
         when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
         //then
@@ -186,7 +186,7 @@ public class ADS1115_Test extends ComponentTest {
     public void testFastContinuousReading(){
         //given
         int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN3_GND.getMux() | ADS1115.MODE.CONTINUOUS.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN3_GND.getMux() | Ads1115.MODE.CONTINUOUS.getMode();
         when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
 
@@ -269,7 +269,7 @@ public class ADS1115_Test extends ComponentTest {
     public void testSlowContinuousReading(){
         //given
         int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | ADS1115.MUX.AIN0_GND.getMux() | ADS1115.MODE.SINGLE.getMode();
+        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
         when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
         when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
 

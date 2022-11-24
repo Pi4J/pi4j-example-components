@@ -2,16 +2,16 @@ package com.pi4j.catalog.applications;
 
 import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.LCDDisplay;
+import com.pi4j.catalog.components.LcdDisplay;
 
 /**
  * This example shows how to use the LCDDisplay component by writing different things to the display
  */
-public class LCDDisplay_App implements Application {
+public class LcdDisplay_App implements Application {
     @Override
     public void execute(Context pi4j) {
         //Create a Component, with amount of ROWS and COLUMNS of the Device
-        LCDDisplay lcd = new LCDDisplay(pi4j, 4, 20);
+        LcdDisplay lcd = new LcdDisplay(pi4j, 4, 20);
         System.out.println("Here we go.. let's have some fun with that LCD Display!");
 
         // Turn on the backlight makes the display appear turned on
@@ -64,7 +64,7 @@ public class LCDDisplay_App implements Application {
         lcd.setDisplayBacklight(false);
     }
 
-    public void createCharacters(LCDDisplay lcd) {
+    public void createCharacters(LcdDisplay lcd) {
         // Create upper left part of the house
         lcd.createCharacter(1, new byte[]{
                 0b00000,

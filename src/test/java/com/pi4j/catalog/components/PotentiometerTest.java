@@ -15,19 +15,19 @@ public class PotentiometerTest extends ComponentTest {
     @InjectMocks
     Potentiometer potentiometer;
     @Mock
-    ADS1115 mockAds1115;
+    Ads1115 mockAds1115;
 
     private final double voltageFromAdConverter = 2.3;
 
     @BeforeEach
     public void setUp(){
         //create mock ads1115
-        mockAds1115 = mock(ADS1115.class);
+        mockAds1115 = mock(Ads1115.class);
 
         //set mock function ads1115
         //function returns voltage
         when(mockAds1115.singleShotAIn0()).thenReturn(voltageFromAdConverter);
-        when(mockAds1115.getPga()).thenReturn(ADS1115.GAIN.GAIN_4_096V);
+        when(mockAds1115.getPga()).thenReturn(Ads1115.GAIN.GAIN_4_096V);
         //when(mockAds1115.setConsumerFastRead()).thenReturn();
         //when(mockAds1115.setConsumerSlowReadChannel0()).thenReturn();
 

@@ -7,15 +7,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LCDDisplayTest extends ComponentTest {
-    LCDDisplay lcd420Display;
-    LCDDisplay lcd216Display;
+public class LcdDisplayTest extends ComponentTest {
+    LcdDisplay lcd420Display;
+    LcdDisplay lcd216Display;
     MockI2C i2c;
 
     @BeforeEach
     public void setUp() {
-        lcd420Display = new LCDDisplay(pi4j, 4, 20);
-        lcd216Display = new LCDDisplay(pi4j, 2, 16, 0x2, 0x28);
+        lcd420Display = new LcdDisplay(pi4j, 4, 20);
+        lcd216Display = new LcdDisplay(pi4j, 2, 16, 0x2, 0x28);
         i2c = toMock(lcd420Display.getI2C());
     }
 

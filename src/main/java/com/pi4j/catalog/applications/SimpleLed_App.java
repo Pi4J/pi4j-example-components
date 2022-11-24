@@ -3,19 +3,19 @@ package com.pi4j.catalog.applications;
 import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.helpers.PIN;
-import com.pi4j.catalog.components.SimpleLED;
+import com.pi4j.catalog.components.SimpleLed;
 
 
 /**
  * This example shows how to use the simple LED component by creating a flashing light by repeatedly toggling the LED on and off.
  */
-public class SimpleLED_App implements Application {
+public class SimpleLed_App implements Application {
     @Override
     public void execute(Context pi4j) {
         System.out.println("Simple LED app started ...");
 
         // Create a new SimpleLED component
-        SimpleLED led = new SimpleLED(pi4j, PIN.D26);
+        SimpleLed led = new SimpleLed(pi4j, PIN.D26);
 
         // Turn on the LED to have a defined state
         System.out.println("Turn on LED.");

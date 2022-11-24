@@ -15,7 +15,7 @@ import java.util.List;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Joystick_ComponentTest5_Inputs extends ComponentTest {
+public class JoystickComponentTest5_Inputs extends ComponentTest {
 
     private Joystick joystick;
     private MockDigitalInput diNorth;

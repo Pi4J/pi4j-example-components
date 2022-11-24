@@ -9,7 +9,7 @@ public class Potentiometer extends Component {
     /**
      * ads1115 instance
      */
-    private final ADS1115 ads1115;
+    private final Ads1115 ads1115;
 
     /**
      * AD channel connected to potentiometer (must be between 0 and 3)
@@ -42,7 +42,7 @@ public class Potentiometer extends Component {
      * @param channel     custom ad channel
      * @param maxVoltage custom maxVoltage
      */
-    public Potentiometer(ADS1115 ads1115, int channel, double maxVoltage) {
+    public Potentiometer(Ads1115 ads1115, int channel, double maxVoltage) {
         this.ads1115  = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = maxVoltage;
@@ -60,7 +60,7 @@ public class Potentiometer extends Component {
      *
      * @param ads1115 ads instance
      */
-    public Potentiometer(ADS1115 ads1115) {
+    public Potentiometer(Ads1115 ads1115) {
         this.ads1115 = ads1115;
         this.minValue = ads1115.getPga().gain() * 0.1;
         this.maxValue = 3.3;
