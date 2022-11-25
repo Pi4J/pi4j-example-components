@@ -2,9 +2,9 @@ package com.pi4j.catalog.applications;
 
 import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.ADS1115;
+import com.pi4j.catalog.components.Ads1115;
 
-public class ADS1115_App implements Application {
+public class Ads1115_App implements Application {
     @Override
     public void execute(Context pi4j) {
         System.out.println("ADS1115 test started ...");
@@ -24,7 +24,7 @@ public class ADS1115_App implements Application {
         //start test
         System.out.println("Single read started ...");
         System.out.println("Create ADS1115 object");
-        ADS1115 adc = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
+        Ads1115 adc = new Ads1115(pi4j, 0x1, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
 
         //read analog value from all four channels
         for (int i = 0; i < 30; i++) {
@@ -47,7 +47,7 @@ public class ADS1115_App implements Application {
         //start test
         System.out.println("Continuous slow read test started ...");
 
-        ADS1115 ads1115 = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
+        Ads1115 ads1115 = new Ads1115(pi4j, 0x1, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
 
         // Register event handlers to print a message on value change
         ads1115.setConsumerSlowReadChannel0((value) -> System.out.println("The actual value from channel 0 is: " + String.format("%.3f", value) + "voltage."));
@@ -77,7 +77,7 @@ public class ADS1115_App implements Application {
         //start test
         System.out.println("Continuous fast read test started ...");
 
-        ADS1115 ads1115 = new ADS1115(pi4j, 0x1, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
+        Ads1115 ads1115 = new Ads1115(pi4j, 0x1, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
 
         // Register event handlers to print a message on value change
         ads1115.setConsumerFastRead((value) -> {

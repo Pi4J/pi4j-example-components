@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Buzzer_ComponentTest extends ComponentTest {
+public class BuzzerComponentTest extends ComponentTest {
 
     private Buzzer buzzer;
     private MockPwm pwm;

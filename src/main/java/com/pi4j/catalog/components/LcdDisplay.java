@@ -8,7 +8,7 @@ import com.pi4j.io.i2c.I2CConfig;
  * Implementation of a LCDDisplay using GPIO with Pi4J
  * For now, only works with the PCF8574T Backpack
  */
-public class LCDDisplay extends Component {
+public class LcdDisplay extends Component {
     /** Flags for display commands */
     private static final byte LCD_CLEAR_DISPLAY   = (byte) 0x01;
     private static final byte LCD_RETURN_HOME     = (byte) 0x02;
@@ -87,7 +87,7 @@ public class LCDDisplay extends Component {
      *
      * @param pi4j Pi4J context
      */
-    public LCDDisplay(Context pi4j){
+    public LcdDisplay(Context pi4j){
         this(pi4j, 2, 16);
     }
 
@@ -98,7 +98,7 @@ public class LCDDisplay extends Component {
      * @param rows      Custom amount of display lines
      * @param columns   Custom amount of chars on line
      */
-    public LCDDisplay(Context pi4j, int rows, int columns) {
+    public LcdDisplay(Context pi4j, int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
@@ -114,7 +114,7 @@ public class LCDDisplay extends Component {
      * @param bus       Custom I2C bus address
      * @param device    Custom I2C device Address
      */
-    public LCDDisplay(Context pi4j, int rows, int columns, int bus, int device) {
+    public LcdDisplay(Context pi4j, int rows, int columns, int bus, int device) {
         this.rows = rows;
         this.columns = columns;
         this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, device));

@@ -2,7 +2,7 @@ package com.pi4j.catalog.applications;
 
 import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.ADS1115;
+import com.pi4j.catalog.components.Ads1115;
 import com.pi4j.catalog.components.JoystickAnalog;
 import com.pi4j.catalog.components.helpers.PIN;
 
@@ -14,7 +14,7 @@ public class JoystickAnalog_App implements Application {
     public void execute(Context pi4j) {
         System.out.println("Joystick test started ...");
 
-        ADS1115 ads1115 = new ADS1115(pi4j, 0x01, ADS1115.GAIN.GAIN_4_096V, ADS1115.ADDRESS.GND, 4);
+        Ads1115 ads1115 = new Ads1115(pi4j, 0x01, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
 
         //joystick with normalized axis from 0 to 1
         JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, true, PIN.D26);
@@ -23,12 +23,8 @@ public class JoystickAnalog_App implements Application {
         //JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, false, PIN.D26);
 
         //register event handlers
-        joystick.xOnMove((value) -> {
-            System.out.println("Current value of joystick x axis is: " + String.format("%.3f", value));
-        });
-        joystick.yOnMove((value) -> {
-            System.out.println("Current value of joystick y axis is: " + String.format("%.3f", value));
-        });
+        joystick.xOnMove((value) -> System.out.println("Current value of joystick x axis is: " + String.format("%.3f", value)));
+        joystick.yOnMove((value) -> System.out.println("Current value of joystick y axis is: " + String.format("%.3f", value)));
 
         joystick.pushOnDown(() -> System.out.println("Pressing the Button"));
         joystick.pushOnUp(() -> System.out.println("Stopped pressing."));

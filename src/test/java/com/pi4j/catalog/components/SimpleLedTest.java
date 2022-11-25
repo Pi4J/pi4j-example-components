@@ -9,21 +9,20 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class SimpleLedTest extends ComponentTest {
 
-public class SimpleLEDTest extends ComponentTest {
-
-    protected SimpleLED led;
+    protected SimpleLed led;
 
     protected DigitalOutput digitalOutput;
 
     @BeforeEach
     public void setUp() {
-        this.led = new SimpleLED(pi4j, PIN.D26);
+        this.led = new SimpleLed(pi4j, PIN.D26);
         this.digitalOutput = led.getDigitalOutput();
     }
 
     @Test
-    public void testLED_Address() {
+    public void testLed_Address() {
         //when
         digitalOutput = led.getDigitalOutput();
         //then

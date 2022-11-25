@@ -75,7 +75,7 @@ public class JoystickAnalog extends Component {
      * @param ads1115 ads object
      * @param push    additional push button on joystick
      */
-    public JoystickAnalog(Context pi4j, ADS1115 ads1115, PIN push) {
+    public JoystickAnalog(Context pi4j, Ads1115 ads1115, PIN push) {
         this(pi4j, ads1115, DEFAULT_CHANNEL_POTENTIOMETER_X, DEFAULT_CHANNEL_POTENTIOMETER_Y, DEFAULT_MAX_VOLTAGE, DEFAULT_NORMALIZATION, push);
     }
 
@@ -91,7 +91,7 @@ public class JoystickAnalog extends Component {
      * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push        additional push button on joystick
      */
-    public JoystickAnalog(Context pi4j, ADS1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
+    public JoystickAnalog(Context pi4j, Ads1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
         this(new Potentiometer(ads1115, chanelXAxis, maxVoltage), new Potentiometer(ads1115, chanelYAxis, maxVoltage), normalized0to1, new SimpleButton(pi4j, push, true));
     }
 

@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * Creates an SPI Control for Neopixel LED Strips
  */
-public class LEDMatrix extends Component {
+public class LedMatrix extends Component {
 
     /**
      * Default Channel of the SPI Pins
@@ -31,7 +31,7 @@ public class LEDMatrix extends Component {
      * The corresponding LEDStrip to the matrix. The matrix is nothing more than just an array from LEDStrips, that
      * can be calculated to a single LEDStrip
      */
-    private final LEDStrip ledStrip;
+    private final LedStrip ledStrip;
     /**
      * Brightness value between 0 and 1
      */
@@ -49,7 +49,7 @@ public class LEDMatrix extends Component {
      * @param matrix     How many LEDs are on this Strand
      * @param brightness How bright the LEDs can be at max, Range 0 - 1
      */
-    public LEDMatrix(Context pi4j, int[][] matrix, double brightness) {
+    public LedMatrix(Context pi4j, int[][] matrix, double brightness) {
         this(pi4j, matrix, brightness, DEFAULT_SPI_CHANNEL);
     }
 
@@ -61,7 +61,7 @@ public class LEDMatrix extends Component {
      * @param columns    How many columns of LED
      * @param brightness How bright the LEDs can be at max, Range 0 - 1
      */
-    public LEDMatrix(Context pi4j, int rows, int columns, double brightness) {
+    public LedMatrix(Context pi4j, int rows, int columns, double brightness) {
         this(pi4j, new int[rows][columns], brightness, DEFAULT_SPI_CHANNEL);
     }
 
@@ -73,7 +73,7 @@ public class LEDMatrix extends Component {
      * @param brightness How bright the LEDs can be at max, Range 0 - 255
      * @param channel    which channel to use
      */
-    public LEDMatrix(Context pi4j, int[][] matrix, double brightness, int channel) {
+    public LedMatrix(Context pi4j, int[][] matrix, double brightness, int channel) {
         this.matrix = matrix;
         this.brightness = brightness;
         this.context = pi4j;
@@ -84,7 +84,7 @@ public class LEDMatrix extends Component {
             this.numLEDs += strips.length;
         }
 
-        this.ledStrip = new LEDStrip(pi4j, numLEDs, brightness, channel);
+        this.ledStrip = new LedStrip(pi4j, numLEDs, brightness, channel);
         this.spi = ledStrip.spi;
     }
 

@@ -6,9 +6,10 @@ import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
-public class ADS1115 extends Component {
+public class Ads1115 extends Component {
     /**
      * PI4J i2c component
      */
@@ -51,7 +52,7 @@ public class ADS1115 extends Component {
     /**
      * programmable gain amplifier
      */
-    private final ADS1115.GAIN pga;
+    private final Ads1115.GAIN pga;
 
     /**
      * sampling rate of device
@@ -135,7 +136,7 @@ public class ADS1115 extends Component {
      *
      * @param pi4j Pi4J context
      */
-    public ADS1115(Context pi4j) {
+    public Ads1115(Context pi4j) {
         this(pi4j, DEFAULT_I2C_BUS,GAIN.GAIN_4_096V, ADDRESS.GND, DEFAULT_NUMBER_OF_CHANNELS);
     }
 
@@ -147,7 +148,7 @@ public class ADS1115 extends Component {
      * @param gain    Custom gain amplifier
      * @param address Custom device address on I2C
      */
-    public ADS1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels) {
+    public Ads1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels) {
         this(pi4j, bus, gain, address, numberOfChannels, pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), DEVICE_ID)));
     }
 
@@ -160,7 +161,7 @@ public class ADS1115 extends Component {
      * @param address Custom device address on I2C
      * @param i2c     Custom I2C bus
      */
-    public ADS1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels, I2C i2c){
+    public Ads1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels, I2C i2c){
         this.context = pi4j;
         this.numberOfChannels = numberOfChannels;
         this.consumersSlowRead = new Consumer[numberOfChannels];
@@ -207,7 +208,7 @@ public class ADS1115 extends Component {
     /**
      * read upper threshold from device
      *
-     * @return upper thershold
+     * @return upper threshold
      */
     public int readHiThreshRegister() {
         return i2c.readRegisterWord(HI_THRESH_REGISTER);
@@ -281,18 +282,12 @@ public class ADS1115 extends Component {
         //only if continuous reading is not set to true by other component
         if (!continuousReadingActive) {
             //get mux from channel
-            MUX mux = MUX.AIN0_GND;
-            switch (channel) {
-                case 1:
-                    mux = MUX.AIN1_GND;
-                    break;
-                case 2:
-                    mux = MUX.AIN2_GND;
-                    break;
-                case 3:
-                    mux = MUX.AIN3_GND;
-                    break;
-            }
+            MUX mux = switch (channel) {
+                case 1 -> MUX.AIN1_GND;
+                case 2 -> MUX.AIN2_GND;
+                case 3 -> MUX.AIN3_GND;
+                default -> MUX.AIN0_GND;
+            };
             continuousReadingActive = true;
             fastReadContinuousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
             logDebug("Start fast continuous reading");
@@ -357,8 +352,8 @@ public class ADS1115 extends Component {
     public void stopSlowReadContinuousReading(int channel) {
         logDebug("Stop continuous reading channel " + channel);
         continuousReadingActiveChannel[channel] = false;
-        for (int i = 0; i < continuousReadingActiveChannel.length; i++) {
-            if (continuousReadingActiveChannel[i]) {
+        for (boolean b : continuousReadingActiveChannel) {
+            if (b) {
                 return;
             }
         }
@@ -522,7 +517,7 @@ public class ADS1115 extends Component {
 
         String[] compPolInfo  = {"0 : Active low (default)\n", "1 : Active high\n"};
 
-        String[] compLatInfo  = {"0 : Nonlatching comparator\n", "1 : Latching comparator\n"};
+        String[] compLatInfo  = {"0 : Non latching comparator\n", "1 : Latching comparator\n"};
 
         String[] compQueInfo  = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
 
@@ -530,27 +525,26 @@ public class ADS1115 extends Component {
         int result = i2c.readRegisterWord(CONFIG_REGISTER);
 
         //create logger message
-        StringBuilder loggerMessage = new StringBuilder();
         //check os
-        loggerMessage.append((osInfo[result >> 15]));
-        //check mux
-        loggerMessage.append(muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12]);
-        //check pga
-        loggerMessage.append(pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9]);
-        //check mode
-        loggerMessage.append(modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8]);
-        //check dr
-        loggerMessage.append(drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5]);
-        //check comp mode
-        loggerMessage.append(compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4]);
-        //check comp pol
-        loggerMessage.append(compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3]);
-        //check comp lat
-        loggerMessage.append(compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2]);
-        //check comp que
-        loggerMessage.append(compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()]);
+        String loggerMessage = (osInfo[result >> 15]) +
+                //check mux
+                muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12] +
+                //check pga
+                pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9] +
+                //check mode
+                modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8] +
+                //check dr
+                drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5] +
+                //check comp mode
+                compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4] +
+                //check comp pol
+                compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3] +
+                //check comp lat
+                compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2] +
+                //check comp que
+                compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()];
 
-        logDebug(loggerMessage.toString());
+        logDebug(loggerMessage);
 
         return result;
     }
@@ -598,7 +592,7 @@ public class ADS1115 extends Component {
                     //convert threshold voltage to digits
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
                     if (oldValue[0] - thresholdDigits > result || oldValue[0] + thresholdDigits < result) {
-                        logDebug("New event triggered on value change, old value: " + oldValue + " , new value: " + result);
+                        logDebug("New event triggered on value change, old value: " + Arrays.toString(oldValue) + " , new value: " + result);
                         oldValue[0] = result;
                         consumerFastRead.accept(pga.gainPerBit * (double) result);
                     }
@@ -738,7 +732,7 @@ public class ADS1115 extends Component {
         }
 
         /**
-         * Retunrs the address from the device on an I2C bus
+         * Returns the address from the device on an I2C bus
          *
          * @return Returns the address form the device
          */
@@ -795,7 +789,7 @@ public class ADS1115 extends Component {
         private final double gainPerBit;
 
         /**
-         * Set bit structure for configuration and resolution (gain per bit)
+         * Set bit-structure for configuration and resolution (gain per bit)
          *
          * @param gain       configuration for gain
          * @param gainPerBit resolution
@@ -879,7 +873,7 @@ public class ADS1115 extends Component {
         }
 
         /**
-         * Retruns comparator queue configuration
+         * Returns comparator queue configuration
          *
          * @return comparator queue configuration
          */
@@ -901,7 +895,7 @@ public class ADS1115 extends Component {
      */
     public enum COMP_LAT {
         /**
-         * Nonlatching comparator. The ALERT/RDY pin does not latch when asserted.
+         * Non latching comparator. The ALERT/RDY pin does not latch when asserted.
          */
         NON_LATCH(0b0000_0000_0000_0000),
         /**
@@ -932,7 +926,7 @@ public class ADS1115 extends Component {
         }
 
         /**
-         * Retruns configuration for comparator latching
+         * Returns configuration for comparator latching
          *
          * @return comparator latching configuration
          */
@@ -1122,7 +1116,7 @@ public class ADS1115 extends Component {
         }
 
         /**
-         * Retruns sampling rate
+         * Returns sampling rate
          *
          * @return sampling rate
          */
@@ -1332,7 +1326,7 @@ public class ADS1115 extends Component {
         }
 
         /**
-         * Retruns configuration for Input multiplexer
+         * Returns configuration for Input multiplexer
          *
          * @return Input multiplexer configuration
          */

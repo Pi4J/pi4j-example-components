@@ -10,7 +10,7 @@ import java.util.Arrays;
 /**
  * Creates an SPI Control for a Neopixel LED Strip
  */
-public class LEDStrip extends Component {
+public class LedStrip extends Component {
     /**
      * Default Channel of the SPI Pins
      */
@@ -69,7 +69,7 @@ public class LEDStrip extends Component {
      * @param numLEDs    How many LEDs are on this Strand
      * @param brightness How bright the leds can be at max, Range 0 - 255
      */
-    public LEDStrip(Context pi4j, int numLEDs, double brightness) {
+    public LedStrip(Context pi4j, int numLEDs, double brightness) {
         this(pi4j, numLEDs, brightness, DEFAULT_SPI_CHANNEL);
     }
 
@@ -81,18 +81,18 @@ public class LEDStrip extends Component {
      * @param brightness How bright the leds can be at max, range 0 - 1
      * @param channel    which channel to use
      */
-    public LEDStrip(Context pi4j, int numLEDs, double brightness, int channel) {
+    public LedStrip(Context pi4j, int numLEDs, double brightness, int channel) {
         if (numLEDs < 1 || brightness < 0 || brightness > 1 || channel < 0 || channel > 1) {
             throw new IllegalArgumentException("Illegal Constructor");
         }
-        logDebug("initialising a ledstrip with " + numLEDs + " leds");
+        logDebug("initialising a LED strip with " + numLEDs + " leds");
         this.numLEDs = numLEDs;
         this.LEDs = new int[numLEDs];
         this.brightness = brightness;
         this.context = pi4j;
         this.spi = pi4j.create(buildSpiConfig(pi4j, channel, frequency));
 
-        // The raw bytes that get sent to the ledstrip
+        // The raw bytes that get sent to the LED strip
         // 3 Color channels per led, at 8 bytes each, with 2 reset bytes
         pixelRaw = new byte[(3 * numLEDs * 8) + 2];
 
@@ -112,12 +112,12 @@ public class LEDStrip extends Component {
                 .name("LED Matrix")
                 .address(channel)
                 .mode(SpiMode.MODE_0)
-                .baud(8 * frequency) //bitbanging from Bit to SPI-Byte
+                .baud(8 * frequency) //bit-banging from Bit to SPI-Byte
                 .build();
     }
 
     /**
-     * @return the pi4j context
+     * @return the Pi4J context
      */
     public Context getContext() {
         return this.context;
@@ -143,7 +143,7 @@ public class LEDStrip extends Component {
     /**
      * function to get the color (as an int) of a specified led
      *
-     * @param pixel which position on the ledstrip, range 0 - numLEDS-1
+     * @param pixel which position on the LED strip, range 0 - numLEDS-1
      * @return the color of the specified led on the strip
      */
     public int getPixelColor(int pixel) {
@@ -212,7 +212,7 @@ public class LEDStrip extends Component {
             }
         }
 
-        // While bitbanging, the first and last byte have to be a reset
+        // While bit-banging, the first and last byte have to be a reset
         pixelRaw[0] = Bit_Reset;
         pixelRaw[pixelRaw.length - 1] = Bit_Reset;
 

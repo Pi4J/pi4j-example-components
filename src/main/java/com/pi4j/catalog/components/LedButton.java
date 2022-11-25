@@ -7,7 +7,7 @@ import com.pi4j.io.gpio.digital.*;
 /**
  * Implementation of a button using GPIO with Pi4J
  */
-public class LEDButton extends Component {
+public class LedButton extends Component {
     /**
      * Default debounce time in microseconds
      */
@@ -20,32 +20,32 @@ public class LEDButton extends Component {
     /**
      * LED component
      */
-    private final SimpleLED led;
+    private final SimpleLed led;
 
     /**
      * Creates a new button component
      *
      * @param pi4j   Pi4J context
-     * @param buttonaddress  GPIO address of button
+     * @param buttonAddress  GPIO address of button
      * @param inverted Specify if button state is inverted
-     * @param ledaddress  GPIO address of LED
+     * @param ledAddress  GPIO address of LED
      */
-    public LEDButton(Context pi4j, PIN buttonaddress, Boolean inverted, PIN ledaddress) {
-        this(pi4j, buttonaddress, inverted, ledaddress, DEFAULT_DEBOUNCE);
+    public LedButton(Context pi4j, PIN buttonAddress, Boolean inverted, PIN ledAddress) {
+        this(pi4j, buttonAddress, inverted, ledAddress, DEFAULT_DEBOUNCE);
     }
 
     /**
      * Creates a new button component with custom GPIO address and debounce time.
      *
      * @param pi4j     Pi4J context
-     * @param buttonaddress  GPIO address of button
+     * @param buttonAddress  GPIO address of button
      * @param inverted Specify if button state is inverted
-     * @param ledaddress  GPIO address of LED
+     * @param ledAddress  GPIO address of LED
      * @param debounce Debounce time in microseconds
      */
-    public LEDButton(Context pi4j, PIN buttonaddress, boolean inverted, PIN ledaddress, long debounce) {
-        this.button = new SimpleButton(pi4j, buttonaddress, inverted, debounce);
-        this.led    = new SimpleLED(pi4j, ledaddress);
+    public LedButton(Context pi4j, PIN buttonAddress, boolean inverted, PIN ledAddress, long debounce) {
+        this.button = new SimpleButton(pi4j, buttonAddress, inverted, debounce);
+        this.led    = new SimpleLed(pi4j, ledAddress);
     }
 
     /**
@@ -53,21 +53,21 @@ public class LEDButton extends Component {
      *
      * @param on Sets the LED to on (true) or off (false)
      */
-    public void LEDsetState(boolean on) {
+    public void ledSetState(boolean on) {
         led.setState(on);
     }
 
     /**
      * Sets the LED to on.
      */
-    public void LEDsetStateOn() {
+    public void ledOn() {
         led.on();
     }
 
     /**
      * Sets the LED to off
      */
-    public void LEDsetStateOff() {
+    public void ledOff() {
         led.off();
     }
 
@@ -76,7 +76,7 @@ public class LEDButton extends Component {
      *
      * @return Return true or false according to the new state of the relay.
      */
-    public boolean LEDtoggleState() {
+    public boolean ledToggleState() {
         return led.toggleState();
     }
 
@@ -85,7 +85,7 @@ public class LEDButton extends Component {
      *
      * @return DigitalOutput instance of the LED
      */
-    public DigitalOutput LEDgetDigitalOutput() {
+    public DigitalOutput ledGetDigitalOutput() {
         return led.getDigitalOutput();
     }
 
@@ -94,14 +94,14 @@ public class LEDButton extends Component {
      *
      * @return Current DigitalInput state (Can be HIGH, LOW or UNKNOWN)
      */
-    public DigitalState btngetState() { return button.getState(); }
+    public DigitalState btnGetState() { return button.getState(); }
 
     /**
      * Checks if button is currently pressed
      *
      * @return True if button is pressed
      */
-    public boolean btnisDown() {
+    public boolean btnIsDown() {
         return button.isDown();
     }
 
@@ -110,7 +110,7 @@ public class LEDButton extends Component {
      *
      * @return True if button is depressed
      */
-    public boolean btnisUp() {
+    public boolean btnIsUp() {
         return button.isUp();
     }
 
@@ -119,7 +119,7 @@ public class LEDButton extends Component {
      *
      * @return Returns the Pi4J DigitalInput associated with this component.
      */
-    public DigitalInput btngetDigitalInput() {
+    public DigitalInput btnGetDigitalInput() {
         return button.getDigitalInput();
     }
 
@@ -130,7 +130,7 @@ public class LEDButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void onDown(Runnable method) { button.onDown(method); }
+    public void btnOnDown(Runnable method) { button.onDown(method); }
 
     /**
      * Sets or disables the handler for the onUp event.
@@ -139,7 +139,7 @@ public class LEDButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void onUp(Runnable method) {
+    public void btnOnUp(Runnable method) {
         button.onUp(method);
     }
     /**
@@ -149,12 +149,12 @@ public class LEDButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void btnwhilePressed(Runnable method, long millis) {button.whilePressed(method, millis); }
+    public void btnWhilePressed(Runnable method, long millis) {button.whilePressed(method, millis); }
 
     /**
-     * disables all the handlers for the onUp, onDown and WhilePressed Events
+     * disables all the handlers for the onUp, onDown and whilePressed Events
      */
-    public void btndeRegisterAll(){ button.deRegisterAll(); }
+    public void btnDeRegisterAll(){ button.deRegisterAll(); }
 
     /**
      * @return the current Runnable that is set
