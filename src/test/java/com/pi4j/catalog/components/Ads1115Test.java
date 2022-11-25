@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class Ads1115_Test extends ComponentTest {
+public class Ads1115Test extends ComponentTest {
 
     private final int i2cBus = 0x1;
 

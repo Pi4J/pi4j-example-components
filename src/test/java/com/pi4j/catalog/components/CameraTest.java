@@ -14,7 +14,6 @@ public class CameraTest extends ComponentTest {
         this.camera = new Camera();
     }
 
-
     @Test
     public void testBuilderPattern() {
         //when

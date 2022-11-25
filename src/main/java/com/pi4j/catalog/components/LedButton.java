@@ -60,14 +60,14 @@ public class LedButton extends Component {
     /**
      * Sets the LED to on.
      */
-    public void ledSetStateOn() {
+    public void ledOn() {
         led.on();
     }
 
     /**
      * Sets the LED to off
      */
-    public void ledSetStateOff() {
+    public void ledOff() {
         led.off();
     }
 

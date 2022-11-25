@@ -224,7 +224,7 @@ public class LedButtonTest extends ComponentTest {
     @Test
     public void testSetStateOn(){
         //when
-        button.ledSetStateOn();
+        button.ledOn();
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
     }
@@ -232,9 +232,9 @@ public class LedButtonTest extends ComponentTest {
     @Test
     public void testSetStateOff(){
         //given
-        button.ledSetStateOn();
+        button.ledOn();
         //when
-        button.ledSetStateOff();
+        button.ledOff();
         //then
         assertEquals(DigitalState.LOW, digitalOutput.state());
     }

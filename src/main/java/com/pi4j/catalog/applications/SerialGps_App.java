@@ -15,7 +15,7 @@ public class SerialGps_App implements Application {
     public void execute(Context pi4j) {
 
         // Create Pi4J console wrapper/helper
-        // (This is a utility class to abstract some of the boilerplate stdin/stdout code)
+        // (This is a utility class to abstract some boilerplate stdin/stdout code)
         var console = new Console();
 
         // Print program title/header
