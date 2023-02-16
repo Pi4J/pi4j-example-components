@@ -5,6 +5,7 @@ import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class Mcp23017 extends Component{
     /**
@@ -38,6 +39,14 @@ public class Mcp23017 extends Component{
     private final int _INTFB = 0x0F;
     private final int _INTCAPA = 0x10;
     private final int _INTCAPB = 0x11;
+    /**
+     * continuous reading active
+     */
+    protected boolean continuousReadingActive;
+    /**
+     * Runnable code when current value from fast read is changed
+     */
+    private Consumer<Integer> consumerRead;
 
     /**
      * CTOR
@@ -89,6 +98,27 @@ public class Mcp23017 extends Component{
                 .bus(bus)
                 .device(device)
                 .build();
+    }
+
+    public void startContinuosReading(int readFrequency){
+        if(!continuousReadingActive){
+            continuousReadingActive = true;
+
+        }
+    }
+
+    private void readContinousValue(int config, int readFrequency){
+        if(readFrequency > 1000){
+            new Thread(() -> {
+                while ( continuousReadingActive){
+                    long startTime = System.nanoTime();
+
+                    var results = int_flag();
+
+
+                }
+            }).start();
+        }
     }
 
     /**
