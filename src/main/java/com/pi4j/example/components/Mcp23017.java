@@ -57,6 +57,18 @@ public class Mcp23017 extends Component{
         this.address = device;
         this.i2cDevice = pi4j.create(buildI2CConfig(pi4j, bus, device));
         this.pins = new ArrayList<>();
+        this.init();
+    }
+
+    /**
+     * Initialization of the registers and the pins
+     */
+    private void init(){
+        this.iodir(0xffff);
+        this.gppu(0x0000);
+        this.io_control(0x4);
+        this.ipol(0x0000);
+
         for (int i = 0; i < 16; i++) {
             this.pins.add(new DigitalInOut(this, i));
         }
@@ -79,8 +91,17 @@ public class Mcp23017 extends Component{
                 .build();
     }
 
+    /**
+     * Reading from the register address, 16 bits. the A side is switched with the B side,
+     * so the 8 bits from b are coming first, then the 8 bits from a
+     * @param register the desired register
+     * @return an int consisting of 16 bits
+     */
     private int read_int(int register){
         var reg = this.i2cDevice.register(register);
+
+        //maybe like this?
+        //reg.writeReadWord(register & 0xff);
 
         byte first8 = (byte) (reg.readWord() & 0xff);
         byte sec8 = (byte) (reg.readWord() & 0xff00 >> 8);
@@ -88,12 +109,24 @@ public class Mcp23017 extends Component{
         return first8 << 8 | sec8;
     }
 
+    /**
+     * Reading from the register address, 8 bits, 1 byte.
+     * @param register the desired register
+     * @return 8 bits, a byte
+     */
     private byte read_u8(int register){
         var reg = this.i2cDevice.register(register);
 
         return reg.readByte();
     }
 
+    /**
+     * Writing to the register address, 16 bits. the A side is switched with the B side,
+     * so the 8 bits from b are coming first, then the 8 bits from a
+     *
+     * @param register the desired register
+     * @param value the 16bit value to write
+     */
     private void write_int(int register, int value){
         var reg = this.i2cDevice.register(register);
 
@@ -103,12 +136,23 @@ public class Mcp23017 extends Component{
         reg.write(first8 << 8 | sec8);
     }
 
+    /**
+     * Writing to the register address, 8 bits, 1 byte
+     * @param register the desired register
+     * @param value the 8bit value to write
+     */
     private void write_u8(int register, byte value){
         var reg = this.i2cDevice.register(register);
 
         reg.write(value);
     }
 
+    /**
+     * Getting the PIN Information
+     *
+     * @param pin pin from 0 to 15
+     * @return the pin itself
+     */
     public DigitalInOut getPin(int pin){
         if(pin > 16 || pin < 0){
             logError("PIN " + pin + " does not exist.");
