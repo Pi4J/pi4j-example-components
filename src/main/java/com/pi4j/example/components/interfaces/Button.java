@@ -7,7 +7,7 @@ public interface Button {
     boolean isUp();
     void onUp(Runnable task);
     void onDown(Runnable task);
-    void whilePressed(Runnable task);
+    void whilePressed(Runnable task, long whilePressedDelay);
     void deRegisterAll();
     Runnable getOnDown();
     Runnable getOnUp();

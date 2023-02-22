@@ -14,8 +14,7 @@ public class McpLed extends Component implements LED {
         this.pi4j = pi4j;
         this.PIN = PIN;
 
-        this.PIN.setDirection(Mcp23017.DigitalInOut.Direction.INPUT);
-        this.PIN.setPullup(true);
+        this.PIN.setDirection(Mcp23017.DigitalInOut.Direction.OUTPUT);
         this.PIN.invert_polarity(false);
     }
 

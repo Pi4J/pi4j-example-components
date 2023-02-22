@@ -30,7 +30,8 @@ public final class Launcher implements Runnable {
         new Joystick_App(),
         new ADS1115_App(),
         new Potentiometer_App(),
-        new MCP_App()
+        new McpButton_App(),
+        new McpLed_App()
     ));
 
     /**
