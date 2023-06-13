@@ -3,7 +3,6 @@ package com.pi4j.catalog;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.catalog.applications.*;
-import com.pi4j.catalog.components.helpers.SingletonAppHelper;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.linuxfs.provider.i2c.LinuxFsI2CProvider;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
@@ -198,15 +197,7 @@ public final class Launcher implements Runnable {
      * @return Exit code after running the requested command
      */
     public int execute(String[] args) {
-        // first initialize a semaphore,
-        // so we don't initialize pi4j multiple times on the same host
-        SingletonAppHelper.initialize();
-
-        try {
-            return this.cmdLine.execute(args);
-        } finally {
-            SingletonAppHelper.close();
-        }
+        return this.cmdLine.execute(args);
     }
 
     /**

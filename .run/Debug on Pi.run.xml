@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Example Run (Demo Mode)" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="Debug on Pi" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings">
@@ -11,8 +11,7 @@
           <option name="jreName" value="#USE_PROJECT_JDK" />
           <option name="mavenProperties">
             <map>
-              <entry key="example.launcher.args" value="--demo" />
-              <entry key="example.remote.host" value="crowpi.local" />
+              <entry key="pi.ipnumber" value="pi4j.local" />
             </map>
           </option>
           <option name="passParentEnv" value="true" />
@@ -34,7 +33,7 @@
           <option name="pomFileName" value="pom.xml" />
           <option name="profilesMap">
             <map>
-              <entry key="remote-run" value="true" />
+              <entry key="debug" value="true" />
             </map>
           </option>
           <option name="resolveToWorkspace" value="false" />

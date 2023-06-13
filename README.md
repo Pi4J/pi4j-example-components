@@ -4,28 +4,38 @@ Pi4J V2 :: Java I/O Library for Raspberry Pi :: Example applications for various
 GitHub Actions:
 ![Maven build](https://github.com/pi4j/pi4j-example-serial/workflows/Maven/badge.svg)
 
-This project contains a minimal example application which uses the Pi4J (V2) library to communicate with a device overal
-a serial link. Full description is available
-on [the Pi4J website](https://v2.pi4j.com/getting-started/minimal-example-application)
-
 ## PROJECT OVERVIEW
 
-The goal of the example project is to show how to use Pi4J with Maven for various electronic components connected to the
-Raspberry Pi.
+This project shows how to use Pi4J with Maven for various electronic components connected to the Raspberry Pi.
 
 ## DETAILED INFORMATION
 
-See the README.md file per example application.
+See [the Pi4J website](https://pi4j.com/examples/components/).
 
-## RUNTIME DEPENDENCIES
 
-This project uses Pi4J V.2 which has the following runtime dependency requirements:
+## Start application on Pi
 
-- [**SLF4J (API)**](https://www.slf4j.org/)
-- [**SLF4J-SIMPLE**](https://www.slf4j.org/)
-- [**PIGPIO Library**](http://abyz.me.uk/rpi/pigpio) (for the Raspberry Pi) - This dependency comes pre-installed on
-  recent Raspbian images. However, you can also download and install it yourself using the instructions found
-  [here](http://abyz.me.uk/rpi/pigpio/download.html).
+Make sure that Pi and your development machine are in the same WLAN. 
+
+There are ready-made run-configurations for 
+
+- Set `launcher.class` in `pom.xml`:
+    - `<launcher.class>com.pi4j.mvc/com.pi4j.mvc.templatepuiapp.AppStarter</launcher.class>`
+- `Run local` makes no sense for PUI only applications
+- With `Run on Pi` starts remotely on the Raspberry Pi
+
+## Start application in debugger
+
+To start the application on the Raspberry Pi in debug mode the two run configurations `Debug on Pi` and `Attach to Pi Debugger` are required.
+
+The sequence of starting the run configurations is critical:
+
+1. Start `Debug on Pi` using the **Run** button
+2. Wait till the console contains the following message: `Listening for transport dt_socket at address: 5005 (Attach debugger)`
+3. Start `Attach to Pi Debugger` using the **Debug** button
+4. Only now will the GUI be shown on the Raspberry Pi screen
+
+Now one can use the debugger from IntelliJ IDEA, setting breakpoints and stepping through the application.
 
 ## LICENSE
 

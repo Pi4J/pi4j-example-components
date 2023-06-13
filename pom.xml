@@ -14,30 +14,31 @@
     <properties>
 
         <!-- Project Properties -->
-        <example.launcher.class>com.pi4j.example/com.pi4j.catalog.Launcher</example.launcher.class>
-        <example.launcher.args/>
+        <launcher.class>com.pi4j.example/com.pi4j.catalog.Launcher</launcher.class>
+        <launcher.args>--demo</launcher.args>
 
         <!-- Raspberry Remote Deployment -->
-        <example.remote.host/>
-        <example.remote.port>22</example.remote.port>
-        <example.remote.username>pi</example.remote.username>
-        <example.remote.password>crowpi</example.remote.password>
-        <example.remote.target>/home/pi/deployment</example.remote.target>
-        <example.remote.jvmOptions/>
+        <pi.ipnumber/>
+        <pi.port>22</pi.port>
+        <pi.username>pi</pi.username>
+        <pi.password>pi4j</pi.password>
+        <pi.deploydirectory>/home/pi/deploy</pi.deploydirectory>
+        <pi.jvmOptions/>
 
         <!-- Project Dependencies -->
         <java.version>17</java.version>
-        <pi4j.version>2.1.1</pi4j.version>
-        <picocli.version>4.6.3</picocli.version>
-        <junit.version>5.7.1</junit.version>
+        <pi4j.version>2.3.0</pi4j.version>
+        <picocli.version>4.7.4</picocli.version>
+        <junit.version>5.9.3</junit.version>
+        <mockito.version>5.3.1</mockito.version>
         <ant-jsch.version>1.10.9</ant-jsch.version>
 
         <!-- Maven Dependencies -->
         <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
-        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-        <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+        <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
+        <maven-jar-plugin.version>3.2.1</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
 
@@ -77,6 +78,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Plugin for I2C -->
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-linuxfs</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+
         <!-- PicoCLI -->
         <dependency>
             <groupId>info.picocli</groupId>
@@ -98,27 +106,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Plugin for I2C -->
-        <dependency>
-            <groupId>com.pi4j</groupId>
-            <artifactId>pi4j-plugin-linuxfs</artifactId>
-            <version>${pi4j.version}</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.6.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-
 
     </dependencies>
 
@@ -142,7 +135,7 @@
                     </annotationProcessorPaths>
                     <compilerArgs>
                         <!-- Used by PicoCLI annotation processor -->
-                        <arg>-Aproject=${example.launcher.class}</arg>
+                        <arg>-Aproject=${launcher.class}</arg>
                     </compilerArgs>
                     <source>17</source>
                     <target>17</target>
@@ -228,7 +221,7 @@
             <id>local-run</id>
             <activation>
                 <property>
-                    <name>!example.remote.host</name>
+                    <name>!pi.ipnumber</name>
                 </property>
             </activation>
             <build>
@@ -246,7 +239,7 @@
                         </executions>
                         <configuration>
                             <executable>sudo</executable>
-                            <commandlineArgs>java --module-path ${project.build.directory}/distribution --module ${example.launcher.class} ${example.launcher.args}</commandlineArgs>
+                            <commandlineArgs>java --module-path ${project.build.directory}/distribution --module ${launcher.class} ${launcher.args}</commandlineArgs>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -258,7 +251,7 @@
             <id>remote-run</id>
             <activation>
                 <property>
-                    <name>example.remote.host</name>
+                    <name>pi.ipnumber</name>
                 </property>
             </activation>
             <build>
@@ -275,23 +268,30 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <!-- Ensure target directory exists on Raspberry -->
-                                        <sshexec host="${example.remote.host}" port="${example.remote.port}"
-                                                 username="${example.remote.username}" password="${example.remote.password}"
-                                                 trust="true" command="mkdir --parents ${example.remote.target}"/>
+                                        <!-- Stop all running Java processes -->
+                                        <sshexec host="${pi.ipnumber}" port="${pi.port}"
+                                                 username="${pi.username}" password="${pi.password}" trust="true"
+                                                 failonerror="false" usepty="true" useSystemIn="false"
+                                                 suppresssystemerr="true" suppresssystemout="true"
+                                                 command="sudo killall -9 java"/>
 
-                                        <!-- Transfer distribution folder to Raspberry via SCP -->
+                                        <!-- Ensure target directory exists on RaspPi -->
+                                        <sshexec host="${pi.ipnumber}" port="${pi.port}"
+                                                 username="${pi.username}" password="${pi.password}"
+                                                 trust="true" command="mkdir --parents ${pi.deploydirectory}; rm -f ${pi.deploydirectory}/*"/>
+
+                                        <!-- Transfer distribution folder to RaspPi via SCP -->
                                         <scp trust="true"
-                                             todir="${example.remote.username}:${example.remote.password}@${example.remote.host}:${example.remote.target}"
-                                             port="${example.remote.port}">
+                                             todir="${pi.username}:${pi.password}@${pi.ipnumber}:${pi.deploydirectory}"
+                                             port="${pi.port}">
                                             <fileset dir="${project.build.directory}/distribution"/>
                                         </scp>
 
                                         <!-- Run application on Raspberry Pi -->
-                                        <sshexec host="${example.remote.host}" port="${example.remote.port}"
-                                                 username="${example.remote.username}" password="${example.remote.password}" trust="true"
+                                        <sshexec host="${pi.ipnumber}" port="${pi.port}"
+                                                 username="${pi.username}" password="${pi.password}" trust="true"
                                                  failonerror="false" usepty="true" useSystemIn="true"
-                                                 command="sudo java ${example.remote.jvmOptions} --module-path ${example.remote.target} --module ${example.launcher.class} ${example.launcher.args}"/>
+                                                 command="sudo java ${pi.jvmOptions} --module-path ${pi.deploydirectory} --module ${launcher.class} ${launcher.args}"/>
                                     </target>
                                 </configuration>
                             </execution>
@@ -312,9 +312,9 @@
         <profile>
             <id>debug</id>
             <properties>
-                <example.remote.jvmOptions>
+                <pi.jvmOptions>
                     -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
-                </example.remote.jvmOptions>
+                </pi.jvmOptions>
             </properties>
         </profile>
     </profiles>
