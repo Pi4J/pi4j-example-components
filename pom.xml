@@ -10,6 +10,19 @@
     <description>Pi4J Sample Code</description>
     <version>0.0.1</version>
 
+    <repositories>
+       <repository>
+            <id>oss.sonatype.org-snapshot</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <!-- BUILD PROPERTIES -->
     <properties>
 
@@ -27,7 +40,7 @@
 
         <!-- Project Dependencies -->
         <java.version>17</java.version>
-        <pi4j.version>2.3.0</pi4j.version>
+        <pi4j.version>2.3.0-SNAPSHOT</pi4j.version>
         <picocli.version>4.7.4</picocli.version>
         <junit.version>5.9.3</junit.version>
         <mockito.version>5.3.1</mockito.version>

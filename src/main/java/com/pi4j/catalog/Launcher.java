@@ -123,17 +123,18 @@ public final class Launcher implements Runnable {
                         }
                     })
                     .add(PiGpioDigitalInputProvider.newInstance(piGpio),
-                            PiGpioDigitalOutputProvider.newInstance(piGpio),
-                            PiGpioPwmProvider.newInstance(piGpio),
-                            PiGpioSerialProvider.newInstance(piGpio),
-                            PiGpioSpiProvider.newInstance(piGpio),
-                            LinuxFsI2CProvider.newInstance()
+                            PiGpioDigitalOutputProvider.newInstance(piGpio) //,
+//                            PiGpioPwmProvider.newInstance(piGpio),
+//                            PiGpioSerialProvider.newInstance(piGpio),
+//                            PiGpioSpiProvider.newInstance(piGpio),
+//                            LinuxFsI2CProvider.newInstance()
                     )
                     .build();
             // Run the application
             getTargetInteractively(targets).run();
             // Clean up
             pi4j.shutdown();
+
         } while (demoMode);
     }
 
