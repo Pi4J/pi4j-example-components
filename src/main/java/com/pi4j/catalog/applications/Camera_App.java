@@ -4,6 +4,10 @@ import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Camera;
 
+/**
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/camera/">Description on Pi4J website</a>
+ */
 public class Camera_App implements Application {
     @Override
     public void execute(Context pi4j) {

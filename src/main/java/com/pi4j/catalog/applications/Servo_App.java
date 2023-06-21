@@ -7,6 +7,8 @@ import com.pi4j.catalog.components.helpers.PIN;
 
 /**
  * This example shows how to use the servo component by turning the servo to different positions
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/servo/">Description on Pi4J website</a>
  */
 public class Servo_App implements Application {
     @Override

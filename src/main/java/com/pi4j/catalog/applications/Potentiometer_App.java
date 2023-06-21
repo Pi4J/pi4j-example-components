@@ -7,6 +7,8 @@ import com.pi4j.catalog.components.Potentiometer;
 
 /**
  * This example shows how to use the potentiometer component displaying the values of the hooked potentiometer
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/potentiometer/">Description on Pi4J website</a>
  */
 public class Potentiometer_App implements Application {
     @Override

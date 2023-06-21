@@ -7,6 +7,8 @@ import com.pi4j.catalog.components.helpers.PIN;
 
 /**
  * This example shows how to use the buzzer component by playing different tunes on it
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/buzzer/">Description on Pi4J website</a>
  */
 public class Buzzer_App implements Application {
     @Override

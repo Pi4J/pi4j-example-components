@@ -6,6 +6,8 @@ import com.pi4j.catalog.components.LcdDisplay;
 
 /**
  * This example shows how to use the LCDDisplay component by writing different things to the display
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/lcddisplay/">Description on Pi4J website</a>
  */
 public class LcdDisplay_App implements Application {
     @Override

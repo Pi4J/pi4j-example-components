@@ -8,6 +8,8 @@ import com.pi4j.catalog.components.SimpleLed;
 
 /**
  * This example shows how to use the simple LED component by creating a flashing light by repeatedly toggling the LED on and off.
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/simpleled/">Description on Pi4J website</a>
  */
 public class SimpleLed_App implements Application {
     @Override

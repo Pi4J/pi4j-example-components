@@ -8,6 +8,8 @@ import com.pi4j.catalog.components.helpers.PIN;
 
 /**
  * This example shows how to use the analog joystick component by registering different interactions for the positions of the joystick
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/joystickanalog/">Description on Pi4J website</a>
  */
 public class JoystickAnalog_App implements Application {
     @Override

@@ -5,7 +5,7 @@ import com.pi4j.catalog.components.helpers.PIN;
 import com.pi4j.io.gpio.digital.*;
 
 /**
- * Implementation of a button using GPIO with Pi4J
+ * Implementation of a button with integrated LED using GPIO with Pi4J.
  */
 public class LedButton extends Component {
     /**

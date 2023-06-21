@@ -7,6 +7,8 @@ import com.pi4j.catalog.components.Joystick;
 
 /**
  * This example shows how to use the Joystick by registering actions for each position of the joystick
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/joystick/">Description on Pi4J website</a>
  */
 public class Joystick_App implements Application {
     @Override

@@ -6,6 +6,8 @@ import com.pi4j.catalog.components.LedStrip;
 
 /**
  * This example shows how to use the LEDStrip component by setting the LEDs on the strip to different colors
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/ledstrip/">Description on Pi4J website</a>
  */
 public class LedStrip_App implements Application {
     @Override

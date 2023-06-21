@@ -7,11 +7,11 @@ import java.time.LocalDateTime;
 
 /**
  * FHNW implementation of a camera, works with the raspberry-pi v2 camera module and
- * the crowpi-image on the raspberry-pi.
+ * the Pi4J-Basic-OS image on the raspberry-pi.
  * maybe works on other camera-modules too, but is not yet tested.
  *
  * It uses the libcamera-still and libcamera-vid bash commands. those are pre-installed
- * on all raspbian-versions after Buster. (Crowpi is raspbian Version Bullseye)
+ * on all raspbian-versions after Buster.
  */
 public class Camera extends Component{
 

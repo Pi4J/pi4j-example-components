@@ -7,6 +7,8 @@ import com.pi4j.catalog.components.LedStrip;
 
 /**
  * This example shows how to use the LEDMatrix component by setting the LEDs on the strips to different colors
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/ledmatrix/">Description on Pi4J website</a>
  */
 public class LedMatrix_App implements Application {
     @Override

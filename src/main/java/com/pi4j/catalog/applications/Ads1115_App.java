@@ -4,6 +4,10 @@ import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Ads1115;
 
+/**
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/ads1115/">Description on Pi4J website</a>
+ */
 public class Ads1115_App implements Application {
     @Override
     public void execute(Context pi4j) {

@@ -6,7 +6,9 @@ import com.pi4j.catalog.components.helpers.PIN;
 import com.pi4j.catalog.components.SimpleButton;
 
 /**
- * This example shows how to use the simpleButton component by registering events for different interactions with the button
+ * This example shows how to use the SimpleButton component by registering events for different interactions with the button
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/simplebutton/">Description on Pi4J website</a>
  */
 public class SimpleButton_App implements Application {
     @Override

@@ -7,6 +7,8 @@ import com.pi4j.catalog.components.LedButton;
 
 /**
  * This example shows how to use the LEDButton component by registering actions for the interaction with the button, while simultaneously toggling the LED
+ * <P>
+ * see <a href="https://pi4j.com/examples/components/ledbutton/">Description on Pi4J website</a>
  */
 public class LedButton_App implements Application {
     @Override
