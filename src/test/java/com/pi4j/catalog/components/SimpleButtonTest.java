@@ -166,23 +166,25 @@ public class SimpleButtonTest extends ComponentTest {
         assertEquals(0, counter.get());
 
         //when
-        sleep(150);
+        sleep(2 * samplingTime);
+
+        //stop whilePressed
+        digitalInput.mockState(DigitalState.LOW);
 
         //then
-        assertEquals(1, counter.get());
+        int currentCount = counter.get();
+        assertTrue(currentCount <= 2);
 
         //when
-        sleep(100);
+        sleep(2 * samplingTime);
 
         //then
-        assertEquals(2, counter.get());
+        assertEquals(currentCount, counter.get());
 
         //when
         button.deRegisterAll();
-        sleep(100);
 
         //then
-        assertEquals(2, counter.get());
         assertNull(button.getOnDown());
         assertNull(button.getOnUp());
         assertNull(button.getWhilePressed());

@@ -44,7 +44,7 @@ public class SimpleButton extends Component {
     private final Runnable whilePressedWorker = () -> {
         while (isDown()) {
             delay(whilePressedDelay);
-            if (isDown()) {
+            if (isDown() && whilePressed != null) {
                 whilePressed.run();
             }
         }

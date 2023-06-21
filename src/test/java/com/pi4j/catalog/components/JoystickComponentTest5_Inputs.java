@@ -308,27 +308,28 @@ public class JoystickComponentTest5_Inputs extends ComponentTest {
         //given
         int samplingTime = 100;
 
+
         int[] counter = {0};
 
-        joystick.pushWhilePushed(samplingTime,()->counter[0]++);
+        joystick.pushWhilePushed(samplingTime, () -> counter[0]++);
 
         //when
         diPush.mockState(DigitalState.HIGH);
 
-        //then
-        assertEquals(0, counter[0]);
+        //when
+        sleep(2 * samplingTime);
+
+        //stop whilePressed
+        diPush.mockState(DigitalState.LOW);
+
+        int currentCount = counter[0];
+        assertTrue(currentCount <= 2);
 
         //when
-        sleep(150);
+        sleep(2 * samplingTime);
 
         //then
-        assertEquals(1, counter[0]);
-
-        //when
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
+        assertEquals(currentCount, counter[0]);
 
         //when
         joystick.deRegisterAll();

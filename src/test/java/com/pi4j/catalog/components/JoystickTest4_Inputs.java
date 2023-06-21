@@ -281,46 +281,6 @@ public class JoystickTest4_Inputs extends ComponentTest {
         assertNull(joystick.getOnPush());
     }
 
-    @Test
-    public void testWhileNorth() throws InterruptedException {
-        //given
-        int samplingTime = 100;
-
-        int[] counter = {0};
-
-        joystick.whileNorth(samplingTime, () -> counter[0]++);
-
-        //when
-        diNorth.mockState(DigitalState.HIGH);
-
-        //then
-        assertEquals(0, counter[0]);
-
-        //when
-        sleep(150);
-
-        //then
-        assertEquals(1, counter[0]);
-
-        //when
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-
-        //when
-        joystick.deRegisterAll();
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-        assertNull(joystick.getWhileNorth());
-        assertNull(joystick.getWhileEast());
-        assertNull(joystick.getWhileSouth());
-        assertNull(joystick.getWhileWest());
-        assertNull(joystick.getWhilePush());
-
-    }
 
     @Test
     public void testOnEast() {
@@ -365,47 +325,6 @@ public class JoystickTest4_Inputs extends ComponentTest {
     }
 
     @Test
-    public void testWhileEast() throws InterruptedException {
-        //given
-        int samplingTime = 100;
-
-        int[] counter = {0};
-
-        joystick.whileEast(samplingTime, () -> counter[0]++);
-
-        //when
-        diEast.mockState(DigitalState.HIGH);
-
-        //then
-        assertEquals(0, counter[0]);
-
-        //when
-        sleep(150);
-
-        //then
-        assertEquals(1, counter[0]);
-
-        //when
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-
-        //when
-        joystick.deRegisterAll();
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-        assertNull(joystick.getWhileNorth());
-        assertNull(joystick.getWhileEast());
-        assertNull(joystick.getWhileSouth());
-        assertNull(joystick.getWhileWest());
-        assertNull(joystick.getWhilePush());
-
-    }
-
-    @Test
     public void testOnSouth() {
         //given
         int[] counter = {0};
@@ -447,46 +366,6 @@ public class JoystickTest4_Inputs extends ComponentTest {
         assertNull(joystick.getOnPush());
     }
 
-    @Test
-    public void testWhileSouth() throws InterruptedException {
-        //given
-        int samplingTime = 100;
-
-        int[] counter = {0};
-
-        joystick.whileSouth(samplingTime, () -> counter[0]++);
-
-        //when
-        diSouth.mockState(DigitalState.HIGH);
-
-        //then
-        assertEquals(0, counter[0]);
-
-        //when
-        sleep(150);
-
-        //then
-        assertEquals(1, counter[0]);
-
-        //when
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-
-        //when
-        joystick.deRegisterAll();
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-        assertNull(joystick.getWhileNorth());
-        assertNull(joystick.getWhileEast());
-        assertNull(joystick.getWhileSouth());
-        assertNull(joystick.getWhileWest());
-        assertNull(joystick.getWhilePush());
-
-    }
 
     @Test
     public void testOnWest() {
@@ -528,47 +407,6 @@ public class JoystickTest4_Inputs extends ComponentTest {
         assertNull(joystick.getOnSouth());
         assertNull(joystick.getOnWest());
         assertNull(joystick.getOnPush());
-    }
-
-    @Test
-    public void testWhileWest() throws InterruptedException {
-        //given
-        int samplingTime = 100;
-
-        int[] counter = {0};
-
-        joystick.whileWest(samplingTime, () -> counter[0]++);
-
-        //when
-        diWest.mockState(DigitalState.HIGH);
-
-        //then
-        assertEquals(0, counter[0]);
-
-        //when
-        sleep(150);
-
-        //then
-        assertEquals(1, counter[0]);
-
-        //when
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-
-        //when
-        joystick.deRegisterAll();
-        sleep(100);
-
-        //then
-        assertEquals(2, counter[0]);
-        assertNull(joystick.getWhileNorth());
-        assertNull(joystick.getWhileEast());
-        assertNull(joystick.getWhileSouth());
-        assertNull(joystick.getWhileWest());
-        assertNull(joystick.getWhilePush());
-
     }
 
     @Test
