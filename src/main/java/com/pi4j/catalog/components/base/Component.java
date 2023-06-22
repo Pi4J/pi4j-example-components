@@ -1,4 +1,4 @@
-package com.pi4j.catalog.components;
+package com.pi4j.catalog.components.base;
 
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -39,7 +39,7 @@ public abstract class Component {
      *
      * @param milliseconds Time in milliseconds to sleep
      */
-    void delay(long milliseconds) {
+    protected void delay(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {

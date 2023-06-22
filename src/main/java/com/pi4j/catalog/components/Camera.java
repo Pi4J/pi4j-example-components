@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 
+import com.pi4j.catalog.components.base.Component;
+
 /**
  * FHNW implementation of a camera, works with the raspberry-pi v2 camera module and
  * the Pi4J-Basic-OS image on the raspberry-pi.
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
  * It uses the libcamera-still and libcamera-vid bash commands. those are pre-installed
  * on all raspbian-versions after Buster.
  */
-public class Camera extends Component{
+public class Camera extends Component {
 
     /**
      * Constructor for using the picture and video functionality

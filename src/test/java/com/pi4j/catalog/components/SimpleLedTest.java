@@ -1,7 +1,7 @@
 package com.pi4j.catalog.components;
 
 import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalState;
 import org.junit.jupiter.api.BeforeEach;

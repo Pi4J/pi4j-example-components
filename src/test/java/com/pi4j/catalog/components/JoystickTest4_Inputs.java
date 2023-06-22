@@ -1,7 +1,7 @@
 package com.pi4j.catalog.components;
 
 import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalInput;
 import org.junit.jupiter.api.BeforeEach;

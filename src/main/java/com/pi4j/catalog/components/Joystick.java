@@ -1,7 +1,8 @@
 package com.pi4j.catalog.components;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.context.Context;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalState;
 
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Implementation of a joystick using 5 GPIO up, left, down, right and push  with Pi4J
  */
-public class Joystick extends Component{
+public class Joystick extends Component {
 
     /**
      * Default debounce time in microseconds

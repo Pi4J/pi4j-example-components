@@ -1,7 +1,7 @@
 package com.pi4j.catalog.components;
 
 import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.plugin.mock.provider.pwm.MockPwm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

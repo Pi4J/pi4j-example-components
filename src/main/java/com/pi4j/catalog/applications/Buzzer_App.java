@@ -3,7 +3,7 @@ package com.pi4j.catalog.applications;
 import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Buzzer;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the buzzer component by playing different tunes on it

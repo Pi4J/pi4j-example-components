@@ -4,7 +4,7 @@ import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Ads1115;
 import com.pi4j.catalog.components.JoystickAnalog;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the analog joystick component by registering different interactions for the positions of the joystick

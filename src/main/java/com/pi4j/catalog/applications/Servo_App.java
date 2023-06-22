@@ -3,7 +3,7 @@ package com.pi4j.catalog.applications;
 import com.pi4j.context.Context;
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.ServoMotor;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the servo component by turning the servo to different positions

@@ -1,7 +1,8 @@
 package com.pi4j.catalog.components;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.context.Context;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
 import com.pi4j.io.pwm.PwmType;
@@ -9,7 +10,7 @@ import com.pi4j.io.pwm.PwmType;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Buzzer extends Component{
+public class Buzzer extends Component {
 
     /**
      * PI4J PWM used by this buzzer

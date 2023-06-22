@@ -2,7 +2,7 @@ package com.pi4j.catalog;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.catalog.components.Component;
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.i2c.I2C;
