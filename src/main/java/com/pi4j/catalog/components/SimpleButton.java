@@ -11,7 +11,7 @@ public class SimpleButton extends Component {
     /**
      * Default debounce time in microseconds
      */
-    private static final long DEFAULT_DEBOUNCE = 10_000;
+    private static final long DEFAULT_DEBOUNCE = 10_000L;
 
     /**
      * Pi4J digital input instance used by this component
@@ -153,10 +153,12 @@ public class SimpleButton extends Component {
      * @return DigitalInput configuration
      */
     private DigitalInputConfig buildDigitalInputConfig(Context pi4j, PIN address, boolean inverted, long debounce) {
-        return DigitalInput.newConfigBuilder(pi4j).id("BCM" + address)
+        return DigitalInput.newConfigBuilder(pi4j)
+                .id("BCM" + address)
                 .name("Button #" + address)
                 .address(address.getPin())
-                .debounce(debounce).pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN)
+                .debounce(debounce)
+                .pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN)
                 .build();
     }
 

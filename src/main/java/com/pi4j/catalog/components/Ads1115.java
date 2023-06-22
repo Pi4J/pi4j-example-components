@@ -2,7 +2,6 @@ package com.pi4j.catalog.components;
 
 import com.pi4j.config.exception.ConfigException;
 import com.pi4j.context.Context;
-import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 
@@ -236,7 +235,7 @@ public class Ads1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn0() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
+        if (continuousReadingActive) throw new IllegalStateException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -246,7 +245,7 @@ public class Ads1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn1() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
+        if (continuousReadingActive) throw new IllegalStateException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -256,7 +255,7 @@ public class Ads1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn2() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
+        if (continuousReadingActive) throw new IllegalStateException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -266,7 +265,7 @@ public class Ads1115 extends Component {
      * @return double voltage
      */
     public double singleShotAIn3() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
+        if (continuousReadingActive) throw new IllegalStateException("Continuous measuring active");
         return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
     }
 
@@ -292,7 +291,7 @@ public class Ads1115 extends Component {
             fastReadContinuousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
             logDebug("Start fast continuous reading");
         }else{
-            throw new ContinuousMeasuringException("Continuous reading already active!");
+            throw new IllegalStateException("Continuous reading already active!");
         }
     }
 
@@ -606,7 +605,7 @@ public class Ads1115 extends Component {
                 }
             }).start();
         } else {
-            throw new ContinuousMeasuringException("readFrequency to high");
+            throw new IllegalStateException("readFrequency to high");
         }
     }
 
@@ -670,7 +669,7 @@ public class Ads1115 extends Component {
                 }
             }).start();
         } else {
-            throw new ContinuousMeasuringException("readFrequency too high");
+            throw new IllegalStateException("readFrequency too high");
         }
     }
 

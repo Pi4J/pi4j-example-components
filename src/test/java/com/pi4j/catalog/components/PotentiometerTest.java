@@ -1,7 +1,7 @@
 package com.pi4j.catalog.components;
 
 import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class PotentiometerTest extends ComponentTest {
     public void testStartSlowContinuousReading(){
         potentiometer.startFastContinuousReading(0.05, 10);
 
-        Assertions.assertThrows(ContinuousMeasuringException.class, ()->{potentiometer.startSlowContinuousReading(0.05, 10);});
+        Assertions.assertThrows(IllegalStateException.class, ()-> potentiometer.startSlowContinuousReading(0.05, 10));
 
         potentiometer.stopFastContinuousReading();
 
@@ -64,7 +64,7 @@ public class PotentiometerTest extends ComponentTest {
     public void testStartFastContiniousReading(){
         potentiometer.startSlowContinuousReading(0.05, 10);
 
-        Assertions.assertThrows(ContinuousMeasuringException.class, ()->{potentiometer.startFastContinuousReading(0.05, 10);});
+        Assertions.assertThrows(IllegalStateException.class, ()-> potentiometer.startFastContinuousReading(0.05, 10));
 
         potentiometer.stopSlowContinuousReading();
 

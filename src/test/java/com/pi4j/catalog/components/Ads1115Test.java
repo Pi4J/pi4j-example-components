@@ -2,7 +2,6 @@ package com.pi4j.catalog.components;
 
 import com.pi4j.config.exception.ConfigException;
 import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
 import com.pi4j.io.i2c.I2C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,7 +109,7 @@ public class Ads1115Test extends ComponentTest {
         //when
         ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn1());
+        assertThrows(IllegalStateException.class, () -> ads1115.singleShotAIn1());
     }
 
     @Test
@@ -141,7 +140,7 @@ public class Ads1115Test extends ComponentTest {
         //when
         ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn1());
+        assertThrows(IllegalStateException.class, () -> ads1115.singleShotAIn1());
     }
 
     @Test
@@ -160,7 +159,7 @@ public class Ads1115Test extends ComponentTest {
         //when
         ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn2());
+        assertThrows(IllegalStateException.class, () -> ads1115.singleShotAIn2());
     }
 
     @Test
@@ -179,7 +178,7 @@ public class Ads1115Test extends ComponentTest {
         //when
         ads1115.startFastContinuousReading(0,0.05,10);
         //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn3());
+        assertThrows(IllegalStateException.class, () -> ads1115.singleShotAIn3());
     }
 
     @Test
@@ -252,7 +251,7 @@ public class Ads1115Test extends ComponentTest {
     @Test
     public void testFastContinuousReadingExceptionFrequency(){
         //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startFastContinuousReading(0,0.05, 200));
+        assertThrows(IllegalStateException.class, () -> ads1115.startFastContinuousReading(0,0.05, 200));
     }
 
     @Test
@@ -262,7 +261,7 @@ public class Ads1115Test extends ComponentTest {
         //then
         ads1115.stopFastContinuousReading();
         ads1115.startFastContinuousReading(0,0.05,10);
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startFastContinuousReading(0,0.05, 10));
+        assertThrows(IllegalStateException.class, () -> ads1115.startFastContinuousReading(0,0.05, 10));
     }
 
     @Test
@@ -335,6 +334,6 @@ public class Ads1115Test extends ComponentTest {
     @Test
     public void testSlowContinuousReadingExceptionFrequency(){
         //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startSlowContinuousReading(0,0.05, 200));
+        assertThrows(IllegalStateException.class, () -> ads1115.startSlowContinuousReading(0,0.05, 200));
     }
 }

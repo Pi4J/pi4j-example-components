@@ -1,7 +1,6 @@
 package com.pi4j.catalog.components;
 
 import com.pi4j.config.exception.ConfigException;
-import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
 
 import java.util.function.Consumer;
 
@@ -171,7 +170,7 @@ public class Potentiometer extends Component {
      */
     public void startSlowContinuousReading(double threshold, int readFrequency) {
         if (fastContinuousReadingActive) {
-            throw new ContinuousMeasuringException("fast continuous reading currently active");
+            throw new IllegalStateException("fast continuous reading currently active");
         } else {
             //set slow continuous reading active to lock fast continuous reading
             slowContinuousReadingActive = true;
@@ -197,7 +196,7 @@ public class Potentiometer extends Component {
      */
     public void startFastContinuousReading(double threshold, int readFrequency) {
         if (slowContinuousReadingActive) {
-            throw new ContinuousMeasuringException("slow continuous reading currently active");
+            throw new IllegalStateException("slow continuous reading currently active");
         } else {
             //set fast continuous reading active to lock slow continuous reading
             fastContinuousReadingActive = true;
