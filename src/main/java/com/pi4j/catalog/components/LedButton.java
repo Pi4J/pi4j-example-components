@@ -1,14 +1,19 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.components.base.Component;
+import java.time.Duration;
+
 import com.pi4j.context.Context;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalOutput;
+
+import com.pi4j.catalog.components.base.Component;
+import com.pi4j.catalog.components.base.DigitalInputConsumer;
 import com.pi4j.catalog.components.base.PIN;
-import com.pi4j.io.gpio.digital.*;
 
 /**
  * Implementation of a button with integrated LED using GPIO with Pi4J.
  */
-public class LedButton extends Component {
+public class LedButton extends Component implements DigitalInputConsumer {
     /**
      * Default debounce time in microseconds
      */
@@ -47,6 +52,11 @@ public class LedButton extends Component {
     public LedButton(Context pi4j, PIN buttonAddress, boolean inverted, PIN ledAddress, long debounce) {
         this.button = new SimpleButton(pi4j, buttonAddress, inverted, debounce);
         this.led    = new SimpleLed(pi4j, ledAddress);
+    }
+
+    @Override
+    public DigitalInput getDigitalInput() {
+        return button.getDigitalInput();
     }
 
     /**
@@ -91,13 +101,6 @@ public class LedButton extends Component {
     }
 
     /**
-     * Returns the current state of the Digital State
-     *
-     * @return Current DigitalInput state (Can be HIGH, LOW or UNKNOWN)
-     */
-    public DigitalState btnGetState() { return button.getState(); }
-
-    /**
      * Checks if button is currently pressed
      *
      * @return True if button is pressed
@@ -115,14 +118,6 @@ public class LedButton extends Component {
         return button.isUp();
     }
 
-    /**
-     * Returns the Pi4J DigitalInput associated with this component.
-     *
-     * @return Returns the Pi4J DigitalInput associated with this component.
-     */
-    public DigitalInput btnGetDigitalInput() {
-        return button.getDigitalInput();
-    }
 
     /**
      * Sets or disables the handler for the onDown event.
@@ -150,25 +145,14 @@ public class LedButton extends Component {
      *
      * @param method Event handler to call or null to disable
      */
-    public void btnWhilePressed(Runnable method, long millis) {button.whilePressed(method, millis); }
+    public void btnWhilePressed(Runnable method, Duration delay) {
+        button.whilePressed(method, delay);
+    }
 
     /**
      * disables all the handlers for the onUp, onDown and whilePressed Events
      */
     public void btnDeRegisterAll(){ button.deRegisterAll(); }
 
-    /**
-     * @return the current Runnable that is set
-     */
-    public Runnable btnGetOnUp(){return button.getOnUp();}
 
-    /**
-     * @return the current Runnable that is set
-     */
-    public Runnable btnGetOnDown(){return button.getOnDown();}
-
-    /**
-     * @return the current Runnable that is set
-     */
-    public Runnable btnGetWhilePressed(){return button.getWhilePressed();}
 }

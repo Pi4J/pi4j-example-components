@@ -1,12 +1,13 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.components.base.Component;
+import java.util.Arrays;
+
 import com.pi4j.context.Context;
 import com.pi4j.io.spi.Spi;
 import com.pi4j.io.spi.SpiConfig;
 import com.pi4j.io.spi.SpiMode;
 
-import java.util.Arrays;
+import com.pi4j.catalog.components.base.Component;
 
 /**
  * Creates an SPI Control for a Neopixel LED Strip

@@ -1,9 +1,10 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.components.base.Component;
+import java.util.function.Consumer;
+
 import com.pi4j.config.exception.ConfigException;
 
-import java.util.function.Consumer;
+import com.pi4j.catalog.components.base.Component;
 
 public class Potentiometer extends Component {
     /**

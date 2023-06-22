@@ -1,9 +1,10 @@
 package com.pi4j.catalog.applications;
 
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.LedButton;
+import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the LEDButton component by registering actions for the interaction with the button, while simultaneously toggling the LED

@@ -1,10 +1,11 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.components.base.Component;
 import com.pi4j.context.Context;
-import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfig;
+
+import com.pi4j.catalog.components.base.Component;
+import com.pi4j.catalog.components.base.PIN;
 
 public class SimpleLed extends Component {
     /**

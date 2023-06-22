@@ -1,14 +1,15 @@
 package com.pi4j.catalog.applications;
 
-import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.SerialReader;
-import com.pi4j.catalog.components.helpers.PrintInfo;
 import com.pi4j.context.Context;
 import com.pi4j.io.serial.FlowControl;
 import com.pi4j.io.serial.Parity;
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.StopBits;
 import com.pi4j.util.Console;
+
+import com.pi4j.catalog.Application;
+import com.pi4j.catalog.components.SerialReader;
+import com.pi4j.catalog.components.helpers.PrintInfo;
 
 public class SerialGps_App implements Application {
     @Override

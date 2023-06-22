@@ -1,10 +1,13 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import java.time.Duration;
+
+import com.pi4j.catalog.ComponentTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -79,9 +82,9 @@ public class JoystickAnalogTest extends ComponentTest {
     @Test
     public void testWhilePressed(){
         //when
-        joystickAnalog.pushWhilePressed(null, 10);
+        joystickAnalog.pushWhilePressed(null, Duration.ofMillis(10));
         //then
-        verify(mockSimpleButton, times(1)).whilePressed(null, 10);
+        verify(mockSimpleButton, times(1)).whilePressed(null,  Duration.ofMillis(10));
     }
 
     @Test

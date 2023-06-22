@@ -1,14 +1,15 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Mockito.*;
+import com.pi4j.catalog.ComponentTest;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class PotentiometerTest extends ComponentTest {
 

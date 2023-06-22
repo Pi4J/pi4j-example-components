@@ -1,8 +1,12 @@
 package com.pi4j.catalog;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+
+import java.util.Arrays;
+
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.catalog.components.base.Component;
 import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.i2c.I2C;
@@ -22,13 +26,12 @@ import com.pi4j.plugin.mock.provider.pwm.MockPwmProvider;
 import com.pi4j.plugin.mock.provider.serial.MockSerialProvider;
 import com.pi4j.plugin.mock.provider.spi.MockSpi;
 import com.pi4j.plugin.mock.provider.spi.MockSpiProvider;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
-import java.util.Arrays;
+import com.pi4j.catalog.components.base.Component;
 
 public abstract class ComponentTest extends Component {
     protected Context pi4j;
+
 
     @SuppressWarnings("RedundantThrows")
     @BeforeEach

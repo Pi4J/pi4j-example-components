@@ -1,9 +1,13 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Ads1115;
 import com.pi4j.catalog.components.JoystickAnalog;
+import com.pi4j.catalog.components.SimpleButton;
 import com.pi4j.catalog.components.base.PIN;
 
 /**
@@ -19,7 +23,8 @@ public class JoystickAnalog_App implements Application {
         Ads1115 ads1115 = new Ads1115(pi4j, 0x01, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
 
         //joystick with normalized axis from 0 to 1
-        JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, true, PIN.D26);
+        JoystickAnalog joystick = new JoystickAnalog(ads1115, 0, 1, 3.3, true,
+                                                     new SimpleButton(pi4j, PIN.D26, true));
 
         //joystick with normalized axis from -1 to 1
         //JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, false, PIN.D26);
@@ -30,7 +35,7 @@ public class JoystickAnalog_App implements Application {
 
         joystick.pushOnDown(() -> System.out.println("Pressing the Button"));
         joystick.pushOnUp(() -> System.out.println("Stopped pressing."));
-        joystick.pushWhilePressed(() -> System.out.println("Button is still pressed."), 1000);
+        joystick.pushWhilePressed(() -> System.out.println("Button is still pressed."), Duration.ofSeconds(1));
 
         joystick.calibrateJoystick();
 

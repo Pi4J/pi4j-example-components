@@ -1,28 +1,27 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.components.base.Component;
-import com.pi4j.context.Context;
-import com.pi4j.catalog.components.base.PIN;
-import com.pi4j.io.gpio.digital.*;
-
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class SimpleButton extends Component {
-    /**
-     * Default debounce time in microseconds
-     */
-    private static final long DEFAULT_DEBOUNCE = 10_000L;
+import com.pi4j.context.Context;
+import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalState;
+import com.pi4j.io.gpio.digital.PullResistance;
 
-    /**
-     * Pi4J digital input instance used by this component
-     */
-    private final DigitalInput digitalInput;
+import com.pi4j.catalog.components.base.DigitalInputComponent;
+import com.pi4j.catalog.components.base.PIN;
+
+public class SimpleButton extends DigitalInputComponent {
     /**
      * Specifies if button state is inverted, e.g. HIGH = depressed, LOW = pressed
      * This will also automatically switch the pull resistance to PULL_UP
      */
     private final boolean inverted;
+    /**
+     * Runnable Code when button is depressed
+     */
+    private Runnable onUp;
     /**
      * Runnable Code when button is pressed
      */
@@ -30,27 +29,26 @@ public class SimpleButton extends Component {
     /**
      * Handler while button is pressed
      */
-    private Runnable whilePressed;
+    private Runnable whileDown;
     /**
      * Timer while button is pressed
      */
     private long whilePressedDelay;
-    /**
-     * Runnable Code when button is depressed
-     */
-    private Runnable onUp;
+
     /**
      * what needs to be done while button is pressed (and whilePressed is != null)
      */
-    private final Runnable whilePressedWorker = () -> {
+    private final Runnable whileDownWorker = () -> {
         while (isDown()) {
             delay(whilePressedDelay);
-            if (isDown() && whilePressed != null) {
-                whilePressed.run();
+            if (isDown() && whileDown != null) {
+                logDebug("whileDown triggered");
+                whileDown.run();
             }
         }
     };
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    private ExecutorService executor;
 
     /**
      * Creates a new button component
@@ -70,9 +68,16 @@ public class SimpleButton extends Component {
      * @param debounce Debounce time in microseconds
      */
     public SimpleButton(Context pi4j, PIN address, boolean inverted, long debounce) {
-        this.inverted = inverted;
+        super(pi4j,
+              DigitalInput.newConfigBuilder(pi4j)
+                      .id("BCM" + address)
+                      .name("Button #" + address)
+                      .address(address.getPin())
+                      .debounce(debounce)
+                      .pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN)
+                      .build());
 
-        this.digitalInput = pi4j.create(buildDigitalInputConfig(pi4j, address, inverted, debounce));
+        this.inverted = inverted;
 
         /*
          * Gets a DigitalStateChangeEvent directly from the Provider, as this
@@ -80,22 +85,24 @@ public class SimpleButton extends Component {
          * Calls the methods onUp, onDown and whilePressed. WhilePressed gets
          * executed in an own Thread, as to not block other resources.
          */
-        this.digitalInput.addListener(digitalStateChangeEvent -> {
+        getDigitalInput().addListener(digitalStateChangeEvent -> {
             DigitalState state = getState();
 
-            logDebug("Button switched to '" + state + "'");
+            logDebug("Button switched to '%s'", state);
 
             switch (state) {
                 case HIGH -> {
                     if (onDown != null) {
+                        logDebug("onDown triggered");
                         onDown.run();
                     }
-                    if (whilePressed != null) {
-                        executor.submit(whilePressedWorker);
+                    if (whileDown != null) {
+                        executor.submit(whileDownWorker);
                     }
                 }
                 case LOW -> {
                     if (onUp != null) {
+                        logDebug("onUp triggered");
                         onUp.run();
                     }
                 }
@@ -105,22 +112,12 @@ public class SimpleButton extends Component {
     }
 
     /**
-     * Returns the current state of the Digital State
+     * Checks if button is currently pressed.
+     * <P>
+     * For a not-inverted button this means: if the button is pressed, then full voltage is present
+     * at the GPIO-Pin. Therefore, the DigitalState is HIGH
      *
-     * @return Current DigitalInput state (Can be HIGH, LOW or UNKNOWN)
-     */
-    public DigitalState getState() {
-        return switch (digitalInput.state()) {
-            case HIGH -> inverted ? DigitalState.LOW  : DigitalState.HIGH;
-            case LOW  -> inverted ? DigitalState.HIGH : DigitalState.LOW;
-            default   -> DigitalState.UNKNOWN;
-        };
-    }
-
-    /**
-     * Checks if button is currently pressed
-     *
-     * @return True if button is pressed
+     * @return true if button is pressed
      */
     public boolean isDown() {
         return getState() == DigitalState.HIGH;
@@ -128,110 +125,88 @@ public class SimpleButton extends Component {
 
     /**
      * Checks if button is currently depressed (= NOT pressed)
+     * <P>
+     * For a not-inverted button this means: if the button is depressed, then no voltage is present
+     * at the GPIO-Pin. Therefore, the DigitalState is LOW
      *
-     * @return True if button is depressed
+     * @return true if button is depressed
      */
     public boolean isUp() {
         return getState() == DigitalState.LOW;
     }
 
-    /**
-     * Returns the Pi4J DigitalInput associated with this component.
-     *
-     * @return Returns the Pi4J DigitalInput associated with this component.
-     */
-    public DigitalInput getDigitalInput() {
-        return this.digitalInput;
-    }
-
-    /**
-     * Builds a new DigitalInput configuration for the button component.
-     *
-     * @param pi4j     Pi4J context
-     * @param address  GPIO address of button component
-     * @param inverted Specify if button state is inverted
-     * @param debounce Debounce time in microseconds
-     * @return DigitalInput configuration
-     */
-    private DigitalInputConfig buildDigitalInputConfig(Context pi4j, PIN address, boolean inverted, long debounce) {
-        return DigitalInput.newConfigBuilder(pi4j)
-                .id("BCM" + address)
-                .name("Button #" + address)
-                .address(address.getPin())
-                .debounce(debounce)
-                .pull(inverted ? PullResistance.PULL_UP : PullResistance.PULL_DOWN)
-                .build();
-    }
-
 
     /**
      * Sets or disables the handler for the onDown event.
+     * <P>
      * This event gets triggered whenever the button is pressed.
      * Only a single event handler can be registered at once.
      *
      * @param task Event handler to call or null to disable
      */
     public void onDown(Runnable task) {
-        this.onDown = task;
+        onDown = task;
     }
 
     /**
      * Sets or disables the handler for the onUp event.
+     * <P>
      * This event gets triggered whenever the button is no longer pressed.
      * Only a single event handler can be registered at once.
      *
      * @param task Event handler to call or null to disable
      */
     public void onUp(Runnable task) {
-        this.onUp = task;
+        onUp = task;
     }
 
     /**
      * Sets or disables the handler for the whilePressed event.
+     * <P>
      * This event gets triggered whenever the button is pressed.
      * Only a single event handler can be registered at once.
      *
      * @param task Event handler to call or null to disable
      */
-    public void whilePressed(Runnable task, long whilePressedDelay) {
-        this.whilePressed = task;
-        this.whilePressedDelay = whilePressedDelay;
+    public void whilePressed(Runnable task, Duration delay) {
+        whileDown = task;
+        whilePressedDelay = delay.toMillis();
+        if(executor != null){
+            executor.shutdownNow();
+        }
+        if(task != null){
+            executor = Executors.newSingleThreadExecutor();
+        }
+    }
+
+    public boolean isInInitialState(){
+        return onDown == null && onUp == null && whileDown == null && executor == null;
     }
 
     /**
-     * disables all the handlers for the onUp, onDown and WhilePressed Events
+     * disables all the handlers for the onUp, onDown and WhileDown Events
      */
     public void deRegisterAll() {
-        this.onDown = null;
-        this.onUp = null;
-        this.whilePressed = null;
-        this.executor.shutdown();
+        onDown    = null;
+        onUp      = null;
+        whileDown = null;
+        if(executor != null){
+            executor.shutdown();
+        }
+        executor = null;
     }
 
     /**
-     * Returns the methode for OnDown
+     * Returns the current state of the Digital State
      *
-     * @return Runnable onDown
+     * @return Current DigitalInput state (Can be HIGH, LOW or UNKNOWN)
      */
-    public Runnable getOnDown() {
-        return onDown;
+    private DigitalState getState() {
+        return switch (getDigitalInput().state()) {
+            case HIGH -> inverted ? DigitalState.LOW  : DigitalState.HIGH;
+            case LOW  -> inverted ? DigitalState.HIGH : DigitalState.LOW;
+            default   -> DigitalState.UNKNOWN;
+        };
     }
 
-    /**
-     * Returns the methode for OnUp
-     *
-     * @return Runnable onUp
-     */
-    public Runnable getOnUp() {
-        return onUp;
-    }
-
-    /**
-     * Returns the methode for whilePressed
-     *
-     * @return Runnable whilePressed
-     */
-    public Runnable getWhilePressed() {
-        return whilePressed;
-    }
 }

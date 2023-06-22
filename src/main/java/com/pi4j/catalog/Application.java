@@ -1,8 +1,8 @@
 package com.pi4j.catalog;
 
-import com.pi4j.context.Context;
-
 import java.util.logging.Logger;
+
+import com.pi4j.context.Context;
 
 /**
  * This interface should be implemented by each CrowPi example / application

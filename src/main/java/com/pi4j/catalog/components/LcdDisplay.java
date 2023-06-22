@@ -1,9 +1,10 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.components.base.Component;
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
+
+import com.pi4j.catalog.components.base.Component;
 
 /**
  * Implementation of a LCDDisplay using GPIO with Pi4J

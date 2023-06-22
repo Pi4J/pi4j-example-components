@@ -1,11 +1,14 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.plugin.mock.provider.i2c.MockI2C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.pi4j.plugin.mock.provider.i2c.MockI2C;
+
+import com.pi4j.catalog.ComponentTest;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LcdDisplayTest extends ComponentTest {
     LcdDisplay lcd420Display;

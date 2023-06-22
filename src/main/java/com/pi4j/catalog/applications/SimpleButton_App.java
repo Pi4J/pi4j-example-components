@@ -1,9 +1,12 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.SimpleButton;
+import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the SimpleButton component by registering events for different interactions with the button
@@ -20,7 +23,7 @@ public class SimpleButton_App implements Application {
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
         button.onDown      (() -> System.out.println("Pressing the button"));
-        button.whilePressed(() -> System.out.println("Pressing"), 1000);
+        button.whilePressed(() -> System.out.println("Pressing"), Duration.ofSeconds(1));
         button.onUp        (() -> System.out.println("Stopped pressing."));
 
         // Wait for 15 seconds while handling events before exiting

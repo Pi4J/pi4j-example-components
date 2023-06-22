@@ -1,8 +1,5 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.config.exception.ConfigException;
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.io.i2c.I2C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -10,8 +7,14 @@ import org.mockito.Mock;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.pi4j.config.exception.ConfigException;
+import com.pi4j.io.i2c.I2C;
+
+import com.pi4j.catalog.ComponentTest;
+
 import static java.lang.Thread.sleep;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

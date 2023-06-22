@@ -1,9 +1,12 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Joystick;
+import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the Joystick by registering actions for each position of the joystick
@@ -19,16 +22,16 @@ public class Joystick_App implements Application {
 
         //Register event handlers to print a message when pressed (onDown) and (onUp)
         joystick.onNorth(() -> System.out.println("Start Pressing joystick button North"));
-        joystick.whileNorth(1000, () -> System.out.println("Pressing joystick button North"));
+        joystick.whileNorth(() -> System.out.println("Pressing joystick button North"), Duration.ofSeconds(1));
 
         joystick.onWest(() -> System.out.println("Start Pressing joystick button West"));
-        joystick.whileWest(1000, () -> System.out.println("Pressing joystick button West"));
+        joystick.whileWest(() -> System.out.println("Pressing joystick button West"), Duration.ofSeconds(1));
 
         joystick.onSouth(() -> System.out.println("Start Pressing joystick button South"));
-        joystick.whileSouth(1000, () -> System.out.println("Pressing joystick button South"));
+        joystick.whileSouth(() -> System.out.println("Pressing joystick button South"), Duration.ofSeconds(1));
 
         joystick.onEast(() -> System.out.println(" Start Pressing joystick button East"));
-        joystick.whileEast(1000, () -> System.out.println("Pressing joystick button East"));
+        joystick.whileEast(() -> System.out.println("Pressing joystick button East"), Duration.ofSeconds(1));
 
         joystick.onPushDown(() -> System.out.println("Start Pressing joystick button PUSH"));
         joystick.onPushUp(() -> System.out.println("Stop pressing joystick button PUSH"));

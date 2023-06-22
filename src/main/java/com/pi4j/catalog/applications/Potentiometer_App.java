@@ -1,6 +1,7 @@
 package com.pi4j.catalog.applications;
 
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Ads1115;
 import com.pi4j.catalog.components.Potentiometer;

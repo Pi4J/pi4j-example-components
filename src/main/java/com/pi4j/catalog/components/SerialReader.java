@@ -1,10 +1,10 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.io.serial.Serial;
-import com.pi4j.util.Console;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
+import com.pi4j.io.serial.Serial;
+import com.pi4j.util.Console;
 
 public class SerialReader implements Runnable {
 

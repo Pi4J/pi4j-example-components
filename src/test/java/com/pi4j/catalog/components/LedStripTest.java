@@ -1,9 +1,11 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.plugin.mock.provider.spi.MockSpi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.pi4j.plugin.mock.provider.spi.MockSpi;
+
+import com.pi4j.catalog.ComponentTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

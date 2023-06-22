@@ -1,10 +1,9 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.components.base.Component;
-import com.pi4j.context.Context;
-import com.pi4j.catalog.components.base.PIN;
-
+import java.time.Duration;
 import java.util.function.Consumer;
+
+import com.pi4j.catalog.components.base.Component;
 
 public class JoystickAnalog extends Component {
     /**
@@ -69,22 +68,11 @@ public class JoystickAnalog extends Component {
      */
     private double yMaxNormValue;
 
-    /**
-     * Builds a new JoystickAnalog component with default configuration for raspberry pi with ads1115 object
-     *
-     * @param pi4j    Pi4J context
-     * @param ads1115 ads object
-     * @param push    additional push button on joystick
-     */
-    public JoystickAnalog(Context pi4j, Ads1115 ads1115, PIN push) {
-        this(pi4j, ads1115, DEFAULT_CHANNEL_POTENTIOMETER_X, DEFAULT_CHANNEL_POTENTIOMETER_Y, DEFAULT_MAX_VOLTAGE, DEFAULT_NORMALIZATION, push);
-    }
 
     /**
      * Builds a new JoystickAnalog component with custom input for x-, y-axis, custom pin for push button.
      * ads component needs to be created outside this clas, other channels may be used for other components.
      *
-     * @param pi4j        Pi4J context
      * @param ads1115     ads object
      * @param chanelXAxis analog potentiometer x-axis
      * @param chanelYAxis analog potentiometer y-axis
@@ -92,8 +80,11 @@ public class JoystickAnalog extends Component {
      * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push        additional push button on joystick
      */
-    public JoystickAnalog(Context pi4j, Ads1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, PIN push) {
-        this(new Potentiometer(ads1115, chanelXAxis, maxVoltage), new Potentiometer(ads1115, chanelYAxis, maxVoltage), normalized0to1, new SimpleButton(pi4j, push, true));
+    public JoystickAnalog(Ads1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, SimpleButton push) {
+        this(new Potentiometer(ads1115, chanelXAxis, maxVoltage),
+             new Potentiometer(ads1115, chanelYAxis, maxVoltage),
+             normalized0to1,
+             push);
     }
 
     /**
@@ -200,7 +191,7 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void pushWhilePressed(Runnable task, long whilePressedDelay) {
+    public void pushWhilePressed(Runnable task, Duration whilePressedDelay) {
         push.whilePressed(task, whilePressedDelay);
     }
 
