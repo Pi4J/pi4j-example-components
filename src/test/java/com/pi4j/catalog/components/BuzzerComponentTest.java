@@ -20,26 +20,26 @@ public class BuzzerComponentTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         buzzer = new Buzzer(pi4j, address);
-        pwm = toMock(buzzer.pwm);
+        pwm = toMock(buzzer.getPwm());
     }
 
     @Test
     public void testPlayTone() {
         // when
-        this.buzzer.playTone(1000);
+        buzzer.playTone(1000);
 
         // then
-        assertTrue(this.pwm.isOn());
-        assertEquals(1000, this.pwm.frequency());
+        assertTrue(pwm.isOn());
+        assertEquals(1000, pwm.frequency());
     }
 
     @Test
     public void testPlayToneWithDuration() {
         // when
-        this.buzzer.playTone(1000, 10);
+        buzzer.playTone(1000, 10);
 
         // then
-        assertTrue(this.pwm.isOff());
+        assertTrue(pwm.isOff());
         assertEquals(1000, pwm.frequency());
     }
 
@@ -50,7 +50,7 @@ public class BuzzerComponentTest extends ComponentTest {
         buzzer.playTone(1000, 5000);
 
         // then
-        assertTrue(this.pwm.isOff());
+        assertTrue(pwm.isOff());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class BuzzerComponentTest extends ComponentTest {
         buzzer.playTone(1000);
 
         // when
-        buzzer.playSilence();
+        buzzer.off();
 
         // then
         assertTrue(pwm.isOff());
@@ -72,7 +72,7 @@ public class BuzzerComponentTest extends ComponentTest {
 
         // when
         Thread.currentThread().interrupt();
-        buzzer.playSilence(5000);
+        buzzer.pause(5000);
 
         // then
         assertTrue(pwm.isOff());

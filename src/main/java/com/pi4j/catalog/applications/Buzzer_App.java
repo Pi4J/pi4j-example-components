@@ -17,12 +17,12 @@ public class Buzzer_App implements Application {
         //initialising the buzzer
         Buzzer buzzer = new Buzzer(pi4j, PIN.PWM18);
 
-        //playing a simple note
+        //playing a simple tone
         System.out.println("playing note b6 for 1 sec");
-        buzzer.playTone(Buzzer.Note.B6.getFrequency(), 1000);
+        buzzer.playTone(1976, 1000);
 
         //shutting it down for 1 second
-        buzzer.playSilence(1000);
+        buzzer.pause(1000);
 
         //Piano baseline of Seven Nation Army by the white Stripes
         Buzzer.Sound[] melody = new Buzzer.Sound[]{
