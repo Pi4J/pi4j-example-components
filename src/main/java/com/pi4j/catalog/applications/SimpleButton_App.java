@@ -14,9 +14,10 @@ import com.pi4j.catalog.components.base.PIN;
  * see <a href="https://pi4j.com/examples/components/simplebutton/">Description on Pi4J website</a>
  */
 public class SimpleButton_App implements Application {
+
     @Override
     public void execute(Context pi4j) {
-        System.out.println("Simple button  app started ...");
+        System.out.println("Simple button app started ...");
 
         // Initialize the button component
         final var button = new SimpleButton(pi4j, PIN.D26, Boolean.FALSE);
@@ -31,7 +32,7 @@ public class SimpleButton_App implements Application {
         delay(15_000);
 
         // Unregister all event handlers to exit this application in a clean way
-        button.deRegisterAll();
+        button.reset();
 
         /*
         if you want to deRegister only a single function, you can do so like this:

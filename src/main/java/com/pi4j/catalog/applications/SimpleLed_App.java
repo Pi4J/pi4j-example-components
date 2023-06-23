@@ -27,13 +27,13 @@ public class SimpleLed_App implements Application {
 
         // Make a flashing light by toggling the LED every second
         for (int i = 0; i < 10; i++) {
-            System.out.println("Current LED state is " + led.toggleState() +".");
+            System.out.println("Current LED state is " + led.toggle() +".");
             delay(1000);
         }
 
-        // That's all so turn off the relay and quit
-        led.off();
-        System.out.println("Turn off LED.");
+        // That's it so reset all and quit
+        led.reset();
+        System.out.println("Reset LED.");
         delay(2000);
 
         System.out.println("Simple LED app done.");

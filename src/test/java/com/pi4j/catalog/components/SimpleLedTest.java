@@ -13,65 +13,55 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimpleLedTest extends ComponentTest {
 
-    protected SimpleLed led;
-
-    protected DigitalOutput digitalOutput;
+    private SimpleLed led;
+    private DigitalOutput digitalOutput;
 
     @BeforeEach
     public void setUp() {
-        this.led = new SimpleLed(pi4j, PIN.D26);
-        this.digitalOutput = led.getDigitalOutput();
-    }
-
-    @Test
-    public void testLed_Address() {
-        //when
+        led = new SimpleLed(pi4j, PIN.D26);
         digitalOutput = led.getDigitalOutput();
-        //then
-        assertEquals(26, digitalOutput.getAddress());
-
     }
 
     @Test
-    public void testSetState_On() {
+    public void testInitialization() {
+        assertEquals(26, led.pinNumber());
+    }
+
+    @Test
+    public void testOn() {
         //when
-        led.setState(true);
+        led.on();
+
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
     }
 
     @Test
-    public void testSetState_Off() {
-        //when
-        led.setState(false);
-        //then
-        assertEquals(DigitalState.LOW, digitalOutput.state());
-    }
-
-    @Test
-    public void testSetStateOn() {
-        //when
-        led.on();
-        //then
-        assertEquals(DigitalState.HIGH, digitalOutput.state());
-    }
-
-    @Test
-    public void testSetStateOff() {
-        //given
-        led.on();
+    public void testOff() {
         //when
         led.off();
+
         //then
         assertEquals(DigitalState.LOW, digitalOutput.state());
     }
 
+
     @Test
-    public void testToggleState() {
+    public void testToggle() {
+        //given
+        led.off();
+
         //when
-        led.toggleState();
+        led.toggle();
+
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
+
+        //when
+        led.toggle();
+
+        //then
+        assertEquals(DigitalState.LOW, digitalOutput.state());
     }
 
 }

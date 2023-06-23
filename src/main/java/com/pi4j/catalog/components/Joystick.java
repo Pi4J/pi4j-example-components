@@ -49,7 +49,8 @@ public class Joystick extends Component {
         bWest  = new SimpleButton(pi4j, addrWest,  false);
         bSouth = new SimpleButton(pi4j, addrSouth, false);
         bEast  = new SimpleButton(pi4j, addrEast,  false);
-        //joystick with push button
+
+        //joystick has push button
         if(addrPush != null){
             bPush = new SimpleButton(pi4j, addrPush, false);
         }
@@ -74,7 +75,7 @@ public class Joystick extends Component {
     /**
      * Checks if button north is currently pressed
      *
-     * @return True if button is pressed
+     * @return true if button is pressed
      */
     public boolean isNorth() {
         return bNorth.isDown();
@@ -83,7 +84,7 @@ public class Joystick extends Component {
     /**
      * Checks if button west is currently pressed
      *
-     * @return True if button is pressed
+     * @return true if button is pressed
      */
     public boolean isWest() {
         return bWest.isDown();
@@ -92,7 +93,7 @@ public class Joystick extends Component {
     /**
      * Checks if button south is currently pressed
      *
-     * @return True if button is pressed
+     * @return true if button is pressed
      */
     public boolean isSouth() {
         return bSouth.isDown();
@@ -101,7 +102,7 @@ public class Joystick extends Component {
     /**
      * Checks if button east is currently pressed
      *
-     * @return True if button is pressed
+     * @return true if button is pressed
      */
     public boolean isEast() {
         return bEast.isDown();
@@ -110,7 +111,7 @@ public class Joystick extends Component {
     /**
      * Checks if button push is currently pressed
      *
-     * @return True if button is pressed, False if button is not pressed or button does not exist
+     * @return true if button is pressed, False if button is not pressed or button does not exist
      */
     public boolean isPushed() {
         return pushIsPresent() && bPush.isDown();
@@ -264,17 +265,15 @@ public class Joystick extends Component {
         }
     }
 
-    /**
-     * disables all the handlers for every button and each
-     * onUp, onDown and WhilePressed Events
-     */
-    public void deRegisterAll(){
-        bNorth.deRegisterAll();
-        bWest.deRegisterAll();
-        bSouth.deRegisterAll();
-        bEast.deRegisterAll();
+
+    @Override
+    public void reset(){
+        bNorth.reset();
+        bWest.reset();
+        bSouth.reset();
+        bEast.reset();
         if(pushIsPresent()){
-            bPush.deRegisterAll();
+            bPush.reset();
         }
     }
 
@@ -286,6 +285,12 @@ public class Joystick extends Component {
                 (!pushIsPresent() || (pushIsPresent() && bPush.isInInitialState()));
     }
 
+    private boolean pushIsPresent(){
+        return bPush != null;
+    }
+
+
+    // these are for testing reasons
     DigitalInput getDigitalInputNorth() {
         return bNorth.getDigitalInput();
     }
@@ -302,11 +307,7 @@ public class Joystick extends Component {
         return bWest.getDigitalInput();
     }
 
-    private boolean pushIsPresent(){
-        return bPush != null;
-    }
-
-    public DigitalInput getDigitalInputPush() {
+    DigitalInput getDigitalInputPush() {
         if(pushIsPresent()){
             return bPush.getDigitalInput();
         }

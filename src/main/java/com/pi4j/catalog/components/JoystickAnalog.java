@@ -220,7 +220,7 @@ public class JoystickAnalog extends Component {
     public void deregisterAll() {
         x.deregisterAll();
         y.deregisterAll();
-        push.deRegisterAll();
+        push.reset();
     }
 
     /**

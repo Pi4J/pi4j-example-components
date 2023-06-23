@@ -9,10 +9,12 @@ import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalState;
 import com.pi4j.io.gpio.digital.PullResistance;
 
-import com.pi4j.catalog.components.base.DigitalInputComponent;
+import com.pi4j.catalog.components.base.DigitalSensorComponent;
 import com.pi4j.catalog.components.base.PIN;
 
-public class SimpleButton extends DigitalInputComponent {
+import static com.pi4j.io.gpio.digital.DigitalInput.DEFAULT_DEBOUNCE;
+
+public class SimpleButton extends DigitalSensorComponent {
     /**
      * Specifies if button state is inverted, e.g. HIGH = depressed, LOW = pressed
      * This will also automatically switch the pull resistance to PULL_UP
@@ -186,7 +188,8 @@ public class SimpleButton extends DigitalInputComponent {
     /**
      * disables all the handlers for the onUp, onDown and WhileDown Events
      */
-    public void deRegisterAll() {
+    @Override
+    public void reset() {
         onDown    = null;
         onUp      = null;
         whileDown = null;

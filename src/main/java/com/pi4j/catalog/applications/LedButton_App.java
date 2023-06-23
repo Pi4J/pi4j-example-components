@@ -25,8 +25,8 @@ public class LedButton_App implements Application {
         delay(1000);
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
-        ledButton.btnOnDown(() -> System.out.println("Pressing the Button"));
-        ledButton.btnOnUp(()   -> System.out.println("Stopped pressing."));
+        ledButton.onDown(() -> System.out.println("Pressing the Button"));
+        ledButton.onUp  (() -> System.out.println("Stopped pressing."));
 
         // Wait for 15 seconds while handling events before exiting
         System.out.println("Press the button to see it in action!");
@@ -34,13 +34,12 @@ public class LedButton_App implements Application {
         // Make a flashing light by toggling the LED every second
         // in the meantime, the Button can still be pressed, as we only freeze the main thread
         for (int i = 0; i < 15; i++) {
-            System.out.println(ledButton.ledToggleState());
+            System.out.println(ledButton.toggleLed());
             delay(1000);
         }
 
         // Unregister all event handlers to exit this application in a clean way
-        ledButton.btnDeRegisterAll();
-        ledButton.ledOff();
+        ledButton.reset();
 
         System.out.println("LED button app done.");
     }

@@ -41,7 +41,7 @@ public class Joystick_App implements Application {
         delay(15_000);
 
         // Unregister all event handlers to exit this application in a clean way
-        joystick.deRegisterAll();
+        joystick.reset();
 
         System.out.println("Joystick app done.");
     }

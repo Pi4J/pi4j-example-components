@@ -7,18 +7,16 @@ import com.pi4j.io.gpio.digital.DigitalInput;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 
 import com.pi4j.catalog.components.base.Component;
-import com.pi4j.catalog.components.base.DigitalInputConsumer;
+import com.pi4j.catalog.components.base.DigitalSensor;
+import com.pi4j.catalog.components.base.DigitalActuator;
 import com.pi4j.catalog.components.base.PIN;
+
+import static com.pi4j.io.gpio.digital.DigitalInput.DEFAULT_DEBOUNCE;
 
 /**
  * Implementation of a button with integrated LED using GPIO with Pi4J.
  */
-public class LedButton extends Component implements DigitalInputConsumer {
-    /**
-     * Default debounce time in microseconds
-     */
-    protected static final long DEFAULT_DEBOUNCE = 10000;
-
+public class LedButton extends Component implements DigitalSensor, DigitalActuator {
     /**
      * Button component
      */
@@ -50,22 +48,23 @@ public class LedButton extends Component implements DigitalInputConsumer {
      * @param debounce Debounce time in microseconds
      */
     public LedButton(Context pi4j, PIN buttonAddress, boolean inverted, PIN ledAddress, long debounce) {
-        this.button = new SimpleButton(pi4j, buttonAddress, inverted, debounce);
-        this.led    = new SimpleLed(pi4j, ledAddress);
+        this(new SimpleButton(pi4j, buttonAddress, inverted, debounce),
+             new SimpleLed(pi4j, ledAddress));
+    }
+
+    public LedButton(SimpleButton button, SimpleLed led){
+        this.button = button;
+        this.led = led;
+    }
+
+    @Override
+    public DigitalOutput getDigitalOutput() {
+        return led.getDigitalOutput();
     }
 
     @Override
     public DigitalInput getDigitalInput() {
         return button.getDigitalInput();
-    }
-
-    /**
-     * Set the LED on or off depending on the boolean argument.
-     *
-     * @param on Sets the LED to on (true) or off (false)
-     */
-    public void ledSetState(boolean on) {
-        led.setState(on);
     }
 
     /**
@@ -87,17 +86,8 @@ public class LedButton extends Component implements DigitalInputConsumer {
      *
      * @return Return true or false according to the new state of the relay.
      */
-    public boolean ledToggleState() {
-        return led.toggleState();
-    }
-
-    /**
-     * Returns the instance of the digital output
-     *
-     * @return DigitalOutput instance of the LED
-     */
-    public DigitalOutput ledGetDigitalOutput() {
-        return led.getDigitalOutput();
+    public boolean toggleLed() {
+        return led.toggle();
     }
 
     /**
@@ -105,7 +95,7 @@ public class LedButton extends Component implements DigitalInputConsumer {
      *
      * @return True if button is pressed
      */
-    public boolean btnIsDown() {
+    public boolean isDown() {
         return button.isDown();
     }
 
@@ -114,45 +104,47 @@ public class LedButton extends Component implements DigitalInputConsumer {
      *
      * @return True if button is depressed
      */
-    public boolean btnIsUp() {
+    public boolean isUp() {
         return button.isUp();
     }
-
 
     /**
      * Sets or disables the handler for the onDown event.
      * This event gets triggered whenever the button is pressed.
      * Only a single event handler can be registered at once.
      *
-     * @param method Event handler to call or null to disable
+     * @param task Event handler to call or null to disable
      */
-    public void btnOnDown(Runnable method) { button.onDown(method); }
+    public void onDown(Runnable task) {
+        button.onDown(task);
+    }
 
     /**
      * Sets or disables the handler for the onUp event.
      * This event gets triggered whenever the button is no longer pressed.
      * Only a single event handler can be registered at once.
      *
-     * @param method Event handler to call or null to disable
+     * @param task Event handler to call or null to disable
      */
-    public void btnOnUp(Runnable method) {
-        button.onUp(method);
+    public void onUp(Runnable task) {
+        button.onUp(task);
     }
+
     /**
      * Sets or disables the handler for the whilePressed event.
      * This event gets triggered whenever the button is pressed.
      * Only a single event handler can be registered at once.
      *
-     * @param method Event handler to call or null to disable
+     * @param task Event handler to call or null to disable
      */
-    public void btnWhilePressed(Runnable method, Duration delay) {
-        button.whilePressed(method, delay);
+    public void whilePressed(Runnable task, Duration delay) {
+        button.whilePressed(task, delay);
     }
 
-    /**
-     * disables all the handlers for the onUp, onDown and whilePressed Events
-     */
-    public void btnDeRegisterAll(){ button.deRegisterAll(); }
-
+    @Override
+    public void reset(){
+        button.reset();
+        led.reset();
+    }
 
 }

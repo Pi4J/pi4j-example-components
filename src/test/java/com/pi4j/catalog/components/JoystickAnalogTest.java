@@ -60,7 +60,7 @@ public class JoystickAnalogTest extends ComponentTest {
         //then
         verify(mockPotentiometerX, times(1)).deregisterAll();
         verify(mockPotentiometerY, times(1)).deregisterAll();
-        verify(mockSimpleButton, times(1)).deRegisterAll();
+        verify(mockSimpleButton, times(1)).reset();
     }
 
     @Test

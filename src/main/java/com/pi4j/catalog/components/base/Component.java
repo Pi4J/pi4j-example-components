@@ -17,6 +17,13 @@ public abstract class Component {
         logger.setLevel(Level.INFO);
     }
 
+    /**
+     * Override this method to cleanup all used resources
+     */
+    public void reset(){
+        //nothing to do by default
+    }
+
     protected void logInfo(String msg, Object... args) {
         logger.info(() -> String.format(msg, args));
     }

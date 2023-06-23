@@ -2,7 +2,7 @@ package com.pi4j.catalog.components.base;
 
 import com.pi4j.io.gpio.digital.DigitalInput;
 
-public interface DigitalInputConsumer {
+public interface DigitalSensor {
 
     /**
      * It's a public method for testing, mainly.
