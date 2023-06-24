@@ -8,9 +8,9 @@ import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmType;
 
 import com.pi4j.catalog.components.base.PIN;
-import com.pi4j.catalog.components.base.PwmActuatorComponent;
+import com.pi4j.catalog.components.base.PwmActuator;
 
-public class Buzzer extends PwmActuatorComponent {
+public class Buzzer extends PwmActuator {
 
     /**
      * the Thread, that plays the melodies.
@@ -63,7 +63,7 @@ public class Buzzer extends PwmActuatorComponent {
             logDebug("Play tone %d Hz for %d ms", frequency, duration);
             // Activate the PWM with a duty cycle of 50% and the given frequency in Hz.
             // This causes the buzzer to be on for half of the time during each cycle, resulting in the desired frequency.
-            getPwm().on(50, frequency);
+            pwm.on(50, frequency);
 
             // If the duration is larger than zero, the tone should be automatically stopped after the given duration.
             if (duration > 0) {
@@ -80,7 +80,7 @@ public class Buzzer extends PwmActuatorComponent {
      */
     public void off() {
         logDebug("set buzzer off");
-        getPwm().off();
+        pwm.off();
     }
 
     /**

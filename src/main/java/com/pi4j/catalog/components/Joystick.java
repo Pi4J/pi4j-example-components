@@ -3,7 +3,7 @@ package com.pi4j.catalog.components;
 import java.time.Duration;
 
 import com.pi4j.context.Context;
-import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalInput;
 
 import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.base.PIN;
@@ -290,26 +290,28 @@ public class Joystick extends Component {
     }
 
 
-    // these are for testing reasons
-    DigitalInput getDigitalInputNorth() {
-        return bNorth.getDigitalInput();
+
+    // --------------- for testing --------------------
+
+    MockDigitalInput mockNorth() {
+        return bNorth.mock();
     }
 
-    DigitalInput getDigitalInputEast() {
-        return bEast.getDigitalInput();
+    MockDigitalInput mockSouth() {
+        return bSouth.mock();
     }
 
-    DigitalInput getDigitalInputSouth() {
-        return bSouth.getDigitalInput();
+    MockDigitalInput mockEast() {
+        return bEast.mock();
     }
 
-    DigitalInput getDigitalInputWest() {
-        return bWest.getDigitalInput();
+    MockDigitalInput mockWest() {
+        return bWest.mock();
     }
 
-    DigitalInput getDigitalInputPush() {
+    MockDigitalInput mockPush() {
         if(pushIsPresent()){
-            return bPush.getDigitalInput();
+            return bPush.mock();
         }
         else {
             throw new IllegalStateException("No push button available, no DigitalInput available");

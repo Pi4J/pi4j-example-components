@@ -4,10 +4,10 @@ import com.pi4j.context.Context;
 import com.pi4j.io.pwm.Pwm;
 import com.pi4j.io.pwm.PwmConfig;
 
-import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.base.PIN;
+import com.pi4j.catalog.components.base.PwmActuator;
 
-public class ServoMotor extends Component {
+public class ServoMotor extends PwmActuator {
     /**
      * Default PWM frequency of the servo, based on values for SG92R
      */
@@ -30,11 +30,6 @@ public class ServoMotor extends Component {
      * Maximum PWM duty cycle to put the PWM into the maximum angle position
      */
     protected final static float DEFAULT_MAX_DUTY_CYCLE = 12;
-
-    /**
-     * Pi4J PWM instance for this servo
-     */
-    private final Pwm pwm;
 
     /**
      * Minimum angle of the servo motor used for this instance, should match previously tested real world values
@@ -98,7 +93,15 @@ public class ServoMotor extends Component {
      * @param maxDutyCycle Maximum duty cycle as float, between 0 and 100
      */
     public ServoMotor(Context pi4j, PIN address, int frequency, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
-        this.pwm = pi4j.create(buildPwmConfig(pi4j, address, frequency));
+        super(pi4j,
+                Pwm.newConfigBuilder(pi4j)
+                .id("BCM-" + address)
+                .name("Servo Motor " + address)
+                .address(address.getPin())
+                .frequency(frequency)
+                .initial(0)
+                .shutdown(0)
+                .build());
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
         this.minDutyCycle = minDutyCycle;

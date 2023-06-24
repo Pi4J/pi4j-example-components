@@ -18,7 +18,7 @@ public class ServoTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         servo = new ServoMotor(pi4j, address);
-        pwm = toMock(servo.getPwm());
+        pwm = servo.mock();
     }
 
     @Test

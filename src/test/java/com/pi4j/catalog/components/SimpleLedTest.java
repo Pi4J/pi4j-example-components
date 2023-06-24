@@ -3,8 +3,8 @@ package com.pi4j.catalog.components;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalState;
+import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalOutput;
 
 import com.pi4j.catalog.ComponentTest;
 import com.pi4j.catalog.components.base.PIN;
@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SimpleLedTest extends ComponentTest {
 
     private SimpleLed led;
-    private DigitalOutput digitalOutput;
+    private MockDigitalOutput digitalOutput;
 
     @BeforeEach
     public void setUp() {
         led = new SimpleLed(pi4j, PIN.D26);
-        digitalOutput = led.getDigitalOutput();
+        digitalOutput = led.mock();
     }
 
     @Test

@@ -19,7 +19,7 @@ public class LedStripTest extends ComponentTest {
     public void setUp() {
         this.pixels = 10;
         strip = new LedStrip(pi4j, pixels, 0.5);
-        spi = toMock(strip.spi);
+        spi = strip.mock();
     }
 
 

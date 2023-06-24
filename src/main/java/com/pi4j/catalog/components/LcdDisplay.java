@@ -2,15 +2,14 @@ package com.pi4j.catalog.components;
 
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
-import com.pi4j.io.i2c.I2CConfig;
 
-import com.pi4j.catalog.components.base.Component;
+import com.pi4j.catalog.components.base.I2CDevice;
 
 /**
  * Implementation of a LCDDisplay using GPIO with Pi4J
  * For now, only works with the PCF8574T Backpack
  */
-public class LcdDisplay extends Component {
+public class LcdDisplay extends I2CDevice {
     /** Flags for display commands */
     private static final byte LCD_CLEAR_DISPLAY   = (byte) 0x01;
     private static final byte LCD_RETURN_HOME     = (byte) 0x02;
@@ -63,10 +62,6 @@ public class LcdDisplay extends Component {
     private static final int DEFAULT_DEVICE = 0x27;
 
     /**
-     * The PI4J I2C component
-     */
-    private final I2C i2c;
-    /**
      * The amount of rows on the display
      */
     private final int rows;
@@ -90,7 +85,7 @@ public class LcdDisplay extends Component {
      * @param pi4j Pi4J context
      */
     public LcdDisplay(Context pi4j){
-        this(pi4j, 2, 16);
+        this(pi4j, 2, 16, DEFAULT_BUS, DEFAULT_DEVICE);
     }
 
     /**
@@ -100,11 +95,8 @@ public class LcdDisplay extends Component {
      * @param rows      Custom amount of display lines
      * @param columns   Custom amount of chars on line
      */
-    public LcdDisplay(Context pi4j, int rows, int columns) {
-        this.rows = rows;
-        this.columns = columns;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
-        init();
+    public LcdDisplay(Context pi4j, int rows, int columns){
+        this(pi4j, rows, columns, DEFAULT_BUS, DEFAULT_DEVICE);
     }
 
     /**
@@ -117,43 +109,46 @@ public class LcdDisplay extends Component {
      * @param device    Custom I2C device Address
      */
     public LcdDisplay(Context pi4j, int rows, int columns, int bus, int device) {
+        super(pi4j,
+              I2C.newConfigBuilder(pi4j)
+                      .id("I2C-" + bus + "@" + device)
+                      .name("PCF8574AT backed LCD@" + device)
+                      .bus(bus)
+                      .device(device)
+                      .build());
         this.rows = rows;
         this.columns = columns;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, device));
-        init();
-    }
-
-    /**
-     * Registers the I2C Component on the PI4J
-     *
-     * @param pi4j   The Context
-     * @param bus    The I2C Bus
-     * @param device The I2C Device
-     * @return A Provider of an I2C Bus
-     */
-    private I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
-        return I2C.newConfigBuilder(pi4j)
-                .id("I2C-" + device + "@" + bus)
-                .name("PCF8574AT")
-                .bus(bus)
-                .device(device)
-                .build();
     }
 
 
     /**
-     * @return The current running Context
+     * Initializes the LCD with the backlight off
      */
-    public I2C getI2C(){
-        return this.i2c;
+    @Override
+    protected void init(I2C i2c) {
+        writeCommand((byte) 0x03);
+        writeCommand((byte) 0x03);
+        writeCommand((byte) 0x03);
+        writeCommand((byte) 0x02);
+
+        // Initialize display settings
+        writeCommand((byte) (LCD_FUNCTION_SET | LCD_2LINE | LCD_5x8DOTS | LCD_4BIT_MODE));
+        writeCommand((byte) (LCD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_OFF | LCD_BLINK_OFF));
+        writeCommand((byte) (LCD_ENTRY_MODE_SET | LCD_ENTRY_LEFT | LCD_ENTRY_SHIFT_DECREMENT));
+
+        clearDisplay();
+
+        // Enable backlight
+        setDisplayBacklight(true);
+        logDebug("LCD Display initialized");
     }
 
     /**
      * Turns the backlight on or off
      */
     public void setDisplayBacklight(boolean state) {
-        this.backlight = state;
-        executeCommand(this.backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT);
+        backlight = state;
+        executeCommand(backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT);
     }
 
     /**
@@ -169,7 +164,7 @@ public class LcdDisplay extends Component {
      */
     public void moveCursorHome() {
         writeCommand(LCD_RETURN_HOME);
-        sleep(3, 0);
+        delay(3);
     }
 
     /**
@@ -314,41 +309,15 @@ public class LcdDisplay extends Component {
         displayLine(" ".repeat(columns), LCD_ROW_OFFSETS[line - 1]);
     }
 
-    /**
-     * Write a command to the LCD
-     */
-    private void writeCommand(byte cmd) {
-        writeSplitCommand(cmd, (byte) 0);
-    }
-
-    /**
-     * Write a command in 2 parts to the LCD
-     */
-    private void writeSplitCommand(byte cmd, byte mode) {
-        //bitwise AND with 11110000 to remove last 4 bits
-        writeFourBits((byte) (mode | (cmd & 0xF0)));
-        //bitshift and bitwise AND to remove first 4 bits
-        writeFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
-    }
-
-    /**
-     * Write the four bits of a byte to the LCD
-     *
-     * @param data the byte that is sent
-     */
-    private void writeFourBits(byte data) {
-        i2c.write((byte) (data | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
-        lcd_strobe(data);
-    }
 
     /**
      * Clocks EN to latch command
      */
     private void lcd_strobe(byte data) {
         i2c.write((byte) (data | En | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
-        sleep(0, 500_000);
+        delay(0, 500_000);
         i2c.write((byte) ((data & ~En) | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
-        sleep(0, 100_000);
+        delay(0, 100_000);
     }
 
     /**
@@ -458,56 +427,34 @@ public class LcdDisplay extends Component {
             writeSplitCommand(character[i], (byte) 1);
         }
     }
-
+    /**
+     * Write a command to the LCD
+     */
+    private void writeCommand(byte cmd) {
+        writeSplitCommand(cmd, (byte) 0);
+    }
 
     /**
-     * Execute Display commands
+     * Write a command in 2 parts to the LCD
+     */
+    private void writeSplitCommand(byte cmd, byte mode) {
+        //bitwise AND with 11110000 to remove last 4 bits
+        writeFourBits((byte) (mode | (cmd & 0xF0)));
+        //bitshift and bitwise AND to remove first 4 bits
+        writeFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
+    }
+
+    /**
+     * Write the four bits of a byte to the LCD
      *
-     * @param command Select the LCD Command
-     * @param data    Setup command data
+     * @param data the byte that is sent
      */
-    private void executeCommand(byte command, byte data) {
-        executeCommand((byte) (command | data));
+    private void writeFourBits(byte data) {
+        i2c.write((byte) (data | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
+        lcd_strobe(data);
     }
 
-    /**
-     * Write a single command
-     */
-    private void executeCommand(byte cmd) {
-        i2c.write(cmd);
-        sleep(0, 100_000);
-    }
 
-    /**
-     * Initializes the LCD with the backlight off
-     */
-    private void init() {
-        writeCommand((byte) 0x03);
-        writeCommand((byte) 0x03);
-        writeCommand((byte) 0x03);
-        writeCommand((byte) 0x02);
 
-        // Initialize display settings
-        writeCommand((byte) (LCD_FUNCTION_SET | LCD_2LINE | LCD_5x8DOTS | LCD_4BIT_MODE));
-        writeCommand((byte) (LCD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_OFF | LCD_BLINK_OFF));
-        writeCommand((byte) (LCD_ENTRY_MODE_SET | LCD_ENTRY_LEFT | LCD_ENTRY_SHIFT_DECREMENT));
 
-        clearDisplay();
-
-        // Enable backlight
-        setDisplayBacklight(true);
-        logDebug("LCD Display initialized");
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds. An {@link InterruptedException} will be catched and ignored while setting the
-     * interrupt flag again.
-     */
-    protected void sleep(long millis, int nanos) {
-        try {
-            Thread.sleep(millis, nanos);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 }

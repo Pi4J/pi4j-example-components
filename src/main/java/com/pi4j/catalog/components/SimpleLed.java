@@ -3,10 +3,10 @@ package com.pi4j.catalog.components;
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 
-import com.pi4j.catalog.components.base.DigitalActuatorComponent;
+import com.pi4j.catalog.components.base.DigitalActuator;
 import com.pi4j.catalog.components.base.PIN;
 
-public class SimpleLed extends DigitalActuatorComponent {
+public class SimpleLed extends DigitalActuator {
 
     /**
      * Creates a new SimpleLed component with a custom BCM pin.
@@ -29,7 +29,7 @@ public class SimpleLed extends DigitalActuatorComponent {
      */
     public void on() {
         logDebug("LED turned ON");
-        getDigitalOutput().on();
+        digitalOutput.on();
     }
 
     /**
@@ -37,7 +37,7 @@ public class SimpleLed extends DigitalActuatorComponent {
      */
     public void off() {
         logDebug("LED turned OFF");
-        getDigitalOutput().off();
+        digitalOutput.off();
     }
 
     /**
@@ -46,10 +46,10 @@ public class SimpleLed extends DigitalActuatorComponent {
      * @return Return true or false according to the new state of the relay.
      */
     public boolean toggle() {
-        getDigitalOutput().toggle();
-        logDebug("LED toggled, now it is %s", getDigitalOutput().isOff() ? "OFF" : "ON");
+        digitalOutput.toggle();
+        logDebug("LED toggled, now it is %s", digitalOutput.isOff() ? "OFF" : "ON");
 
-        return getDigitalOutput().isOff();
+        return digitalOutput.isOff();
     }
 
     @Override

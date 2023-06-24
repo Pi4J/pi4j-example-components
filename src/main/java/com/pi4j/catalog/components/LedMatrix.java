@@ -18,14 +18,6 @@ public class LedMatrix extends Component {
     protected static final int DEFAULT_SPI_CHANNEL = 0;
 
     /**
-     * The PI4J SPI
-     */
-    protected final Spi spi;
-    /**
-     * The PI4J context
-     */
-    protected final Context context;
-    /**
      * The matrix, that includes all pixels of all LEDStrips
      */
     private final int[][] matrix;
@@ -34,10 +26,7 @@ public class LedMatrix extends Component {
      * can be calculated to a single LEDStrip
      */
     private final LedStrip ledStrip;
-    /**
-     * Brightness value between 0 and 1
-     */
-    private double brightness;
+
     private int numLEDs;
 
     /**
@@ -77,8 +66,6 @@ public class LedMatrix extends Component {
      */
     public LedMatrix(Context pi4j, int[][] matrix, double brightness, int channel) {
         this.matrix = matrix;
-        this.brightness = brightness;
-        this.context = pi4j;
 
         // Allocate SPI transmit buffer (same size as PCM)
         this.numLEDs = 0;
@@ -87,14 +74,6 @@ public class LedMatrix extends Component {
         }
 
         this.ledStrip = new LedStrip(pi4j, numLEDs, brightness, channel);
-        this.spi = ledStrip.spi;
-    }
-
-    /**
-     * @return the Pi4J context
-     */
-    public Context getContext() {
-        return this.context;
     }
 
     /**
@@ -229,7 +208,8 @@ public class LedMatrix extends Component {
      */
     public void render() {
         int counter = 0;
-        ledStrip.setBrightness(brightness);
+
+        //todo: this doesn't make any sense to me (dh)
         for (int[] ints : matrix) {
             for (int anInt : ints) {
                 ledStrip.setPixelColor(counter++, anInt);
@@ -245,12 +225,6 @@ public class LedMatrix extends Component {
         ledStrip.allOff();
     }
 
-    /**
-     * @return the current brightness
-     */
-    public double getBrightness() {
-        return this.brightness;
-    }
 
     /**
      * Set the brightness of all LED's
@@ -258,6 +232,6 @@ public class LedMatrix extends Component {
      * @param brightness new max. brightness, range 0 - 1
      */
     public void setBrightness(double brightness) {
-        this.brightness = brightness;
+        ledStrip.setBrightness(brightness);
     }
 }

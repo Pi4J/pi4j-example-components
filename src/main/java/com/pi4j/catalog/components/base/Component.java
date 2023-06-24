@@ -47,10 +47,18 @@ public abstract class Component {
      * @param milliseconds Time in milliseconds to sleep
      */
     protected void delay(long milliseconds) {
+        delay(milliseconds, 0);
+    }
+
+    protected void delay(long milliseconds, int nanoseconds){
         try {
-            Thread.sleep(milliseconds);
+            Thread.sleep(milliseconds, nanoseconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    protected <T> T asMock(Class<T> type, Object instance) {
+        return type.cast(instance);
     }
 }

@@ -684,7 +684,11 @@ public class Ads1115 extends Component {
      * @return I2C configuration
      */
     private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device, String deviceId) {
-        return I2C.newConfigBuilder(pi4j).id("I2C-" + device + "@" + bus).name(deviceId).bus(bus).device(device).build();
+        return I2C.newConfigBuilder(pi4j).
+                id("I2C-" + device + "@" + bus)
+                .name(deviceId)
+                .bus(bus)
+                .device(device).build();
     }
 
     /**

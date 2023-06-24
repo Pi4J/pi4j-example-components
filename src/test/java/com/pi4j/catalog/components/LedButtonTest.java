@@ -33,8 +33,8 @@ public class LedButtonTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         button = new LedButton(pi4j, btnPinNumber, false, ledPinNumber);
-        digitalInput  = toMock(button.getDigitalInput());
-        digitalOutput = toMock(button.getDigitalOutput());
+        digitalInput  = button.mockButton();
+        digitalOutput = button.mockLed();
     }
 
     @Test

@@ -20,7 +20,7 @@ public class BuzzerComponentTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         buzzer = new Buzzer(pi4j, address);
-        pwm = toMock(buzzer.getPwm());
+        pwm = buzzer.mock();
     }
 
     @Test

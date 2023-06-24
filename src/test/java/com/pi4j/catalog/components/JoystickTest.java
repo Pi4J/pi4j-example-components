@@ -33,10 +33,10 @@ public class JoystickTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         joystick = new Joystick(pi4j, pinNorth, pinEast, pinSouth, pinWest);
-        diNorth  = toMock(joystick.getDigitalInputNorth());
-        diEast   = toMock(joystick.getDigitalInputEast());
-        diSouth  = toMock(joystick.getDigitalInputSouth());
-        diWest   = toMock(joystick.getDigitalInputWest());
+        diNorth  = joystick.mockNorth();
+        diEast   = joystick.mockEast();
+        diSouth  = joystick.mockSouth();
+        diWest   = joystick.mockWest();
     }
 
     @Test
@@ -132,7 +132,7 @@ public class JoystickTest extends ComponentTest {
         //given
         joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.D17, PIN.D16, PIN.D11);
 
-        MockDigitalInput diButton   = toMock(joystick.getDigitalInputPush());
+        MockDigitalInput diButton = joystick.mockPush();
 
         //when
         diButton.mockState(DigitalState.HIGH);

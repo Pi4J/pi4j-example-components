@@ -3,12 +3,10 @@ package com.pi4j.catalog.components;
 import java.time.Duration;
 
 import com.pi4j.context.Context;
-import com.pi4j.io.gpio.digital.DigitalInput;
-import com.pi4j.io.gpio.digital.DigitalOutput;
+import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalInput;
+import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalOutput;
 
 import com.pi4j.catalog.components.base.Component;
-import com.pi4j.catalog.components.base.DigitalSensor;
-import com.pi4j.catalog.components.base.DigitalActuator;
 import com.pi4j.catalog.components.base.PIN;
 
 import static com.pi4j.io.gpio.digital.DigitalInput.DEFAULT_DEBOUNCE;
@@ -16,7 +14,7 @@ import static com.pi4j.io.gpio.digital.DigitalInput.DEFAULT_DEBOUNCE;
 /**
  * Implementation of a button with integrated LED using GPIO with Pi4J.
  */
-public class LedButton extends Component implements DigitalSensor, DigitalActuator {
+public class LedButton extends Component  {
     /**
      * Button component
      */
@@ -57,15 +55,6 @@ public class LedButton extends Component implements DigitalSensor, DigitalActuat
         this.led = led;
     }
 
-    @Override
-    public DigitalOutput getDigitalOutput() {
-        return led.getDigitalOutput();
-    }
-
-    @Override
-    public DigitalInput getDigitalInput() {
-        return button.getDigitalInput();
-    }
 
     /**
      * Sets the LED to on.
@@ -145,6 +134,16 @@ public class LedButton extends Component implements DigitalSensor, DigitalActuat
     public void reset(){
         button.reset();
         led.reset();
+    }
+
+    // --------------- for testing --------------------
+
+    public MockDigitalOutput mockLed() {
+        return led.mock();
+    }
+
+    public MockDigitalInput mockButton() {
+        return button.mock();
     }
 
 }

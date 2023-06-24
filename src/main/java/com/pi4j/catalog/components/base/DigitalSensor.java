@@ -1,21 +1,28 @@
 package com.pi4j.catalog.components.base;
 
+import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalInput;
+import com.pi4j.io.gpio.digital.DigitalInputConfig;
+import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalInput;
 
-public interface DigitalSensor {
-
+public abstract class DigitalSensor extends Component  {
     /**
-     * It's a public method for testing, mainly.
-     *
-     * In your application it shouldn't be necessary to deal with the low-level Pi4J DigitalInput.BTW: That's the main reason why you implement a Component.
-     *
-     * Inside of your component, a protected access to the underlying digital input would be appropriate.
-     *
-     * But for test cases it's necessary to be able to mock the digital input.
-     *
-     * Therefore, this method should be used inside a DigitalInputComponent or in TestCases.
-     *
-     * @return the DigitalInput the component is working on
+     * Pi4J digital input instance used by this component (that's the low-level Pi4J Class)
      */
-    DigitalInput getDigitalInput();
+    protected final DigitalInput digitalInput;
+
+    protected DigitalSensor(Context pi4j, DigitalInputConfig config){
+        digitalInput = pi4j.create(config);
+    }
+
+    public int pinNumber(){
+        return digitalInput.address().intValue();
+    }
+
+
+    // --------------- for testing --------------------
+
+    public MockDigitalInput mock() {
+        return asMock(MockDigitalInput.class, digitalInput);
+    }
 }

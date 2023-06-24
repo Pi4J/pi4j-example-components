@@ -34,8 +34,8 @@ module com.pi4j.example {
     requires com.pi4j;
     requires com.pi4j.plugin.pigpio;
     requires com.pi4j.plugin.raspberrypi;
+    requires com.pi4j.plugin.mock;
     requires com.pi4j.library.pigpio;
-    //for LCD Display
     requires com.pi4j.plugin.linuxfs;
 
     uses com.pi4j.extension.Extension;

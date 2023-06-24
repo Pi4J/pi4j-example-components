@@ -19,7 +19,7 @@ public class LcdDisplayTest extends ComponentTest {
     public void setUp() {
         lcd420Display = new LcdDisplay(pi4j, 4, 20);
         lcd216Display = new LcdDisplay(pi4j, 2, 16, 0x2, 0x28);
-        i2c = toMock(lcd420Display.getI2C());
+        i2c = lcd420Display.mock();
     }
 
     @Test

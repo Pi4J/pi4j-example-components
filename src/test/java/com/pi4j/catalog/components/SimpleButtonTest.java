@@ -23,7 +23,7 @@ public class SimpleButtonTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         button = new SimpleButton(pi4j, pinNumber, false);
-        digitalInput = toMock(button.getDigitalInput());
+        digitalInput = button.mock();
     }
 
     @Test
@@ -47,7 +47,7 @@ public class SimpleButtonTest extends ComponentTest {
     public void testButtonStateOfInvertedButton(){
         //given
         SimpleButton invertedButton = new SimpleButton(pi4j, PIN.D21, true);
-        digitalInput = toMock(invertedButton.getDigitalInput());
+        digitalInput = invertedButton.mock();
 
         //when
         digitalInput.mockState(DigitalState.LOW);
