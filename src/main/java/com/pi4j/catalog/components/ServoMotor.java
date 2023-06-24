@@ -240,31 +240,6 @@ public class ServoMotor extends PwmActuator {
         this.pwm.off();
     }
 
-    /**
-     * Returns the created PWM instance for the servo
-     *
-     * @return PWM instance
-     */
-    protected Pwm getPwm() {
-        return pwm;
-    }
 
-    /**
-     * Builds a new PWM configuration for the step motor.
-     *
-     * @param pi4j      Pi4J context
-     * @param address   BCM address
-     * @param frequency PWM frequency
-     * @return PWM configuration
-     */
-    protected PwmConfig buildPwmConfig(Context pi4j, PIN address, int frequency) {
-        return Pwm.newConfigBuilder(pi4j)
-                .id("BCM" + address)
-                .name("Servo Motor")
-                .address(address.getPin())
-                .frequency(frequency)
-                .initial(0)
-                .shutdown(0)
-                .build();
-    }
+
 }
