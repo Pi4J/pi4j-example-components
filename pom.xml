@@ -31,7 +31,7 @@
         <launcher.args>--demo</launcher.args>
 
         <!-- Raspberry Remote Deployment -->
-        <pi.ipnumber/>
+        <pi.ipnumber>pi4j.local</pi.ipnumber>
         <pi.port>22</pi.port>
         <pi.username>pi</pi.username>
         <pi.password>pi4j</pi.password>
@@ -232,11 +232,7 @@
         <!-- Run the JAR file locally -->
         <profile>
             <id>local-run</id>
-            <activation>
-                <property>
-                    <name>!pi.ipnumber</name>
-                </property>
-            </activation>
+
             <build>
                 <plugins>
                     <plugin>
@@ -262,11 +258,7 @@
         <!-- Transfer and run JAR with dependencies on remote Raspberry -->
         <profile>
             <id>remote-run</id>
-            <activation>
-                <property>
-                    <name>pi.ipnumber</name>
-                </property>
-            </activation>
+
             <build>
                 <plugins>
                     <plugin>

@@ -47,7 +47,7 @@ public class Ads1115_App implements Application {
         //start test
         System.out.println("Continuous slow read test started ...");
 
-        Ads1115 ads1115 = new Ads1115(pi4j, 0x1, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
+        Ads1115 ads1115 = new Ads1115(pi4j, 0x01, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
 
         // Register event handlers to print a message on value change
         ads1115.setConsumerSlowReadChannel0((value) -> System.out.println("The actual value from channel 0 is: " + String.format("%.3f", value) + "voltage."));
