@@ -58,6 +58,9 @@ public class Ads1115 extends I2CDevice {
     private final int configRegisterTemplate;
 
 
+    public Ads1115(Context pi4j){
+        this(pi4j, ADDRESS.GND, GAIN.GAIN_4_096V);
+    }
     /**
      *
      * Creates a new custom AD converter
@@ -65,8 +68,8 @@ public class Ads1115 extends I2CDevice {
      * @param pi4j    Pi4J context
      * @param gain    Custom gain amplifier
      */
-    public Ads1115(Context pi4j, int device, GAIN gain){
-        super(pi4j, device, "ADS1115");
+    public Ads1115(Context pi4j, ADDRESS device, GAIN gain){
+        super(pi4j, device.address, "ADS1115");
 
         this.pga = gain;
         this.dataRate = DR.SPS_128;
@@ -97,48 +100,6 @@ public class Ads1115 extends I2CDevice {
         }
     }
 
-    /**
-     * read last stored conversion from device
-     *
-     * @return last stored conversion
-     */
-    public int readConversionRegister() {
-        return i2c.readRegisterWord(CONVERSION_REGISTER);
-    }
-
-    /**
-     * read lower threshold from device
-     *
-     * @return lower threshold
-     */
-    public int readLoThreshRegister() {
-        return i2c.readRegisterWord(LO_THRESH_REGISTER);
-    }
-
-    /**
-     * read upper threshold from device
-     *
-     * @return upper threshold
-     */
-    public int readHiThreshRegister() {
-        return i2c.readRegisterWord(HI_THRESH_REGISTER);
-    }
-
-    /**
-     * write custom configuration to device
-     *
-     * @param config custom configuration
-     */
-    private int writeConfigRegister(int config) {
-        logDebug("start write configuration");
-        i2c.writeRegisterWord(CONFIG_REGISTER, config);
-        //wait until ad converter has stored new value in conversion register
-        //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
-        //round value up to wait long enough
-        delay((long) Math.ceil(2000.0 / dataRate.getSpS()));
-
-        return readConfigRegister();
-    }
 
     /**
      * Returns voltage value from specified channel
@@ -161,16 +122,7 @@ public class Ads1115 extends I2CDevice {
 
 
     /**
-     * start continuous reading
-     *
-     * @param threshold     threshold for trigger new value change event (+- voltage)
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      sampling rate of device
-     */
-
-
-    /**
-     * start slow continuous reading. In this mode, up to 4 devices can be connected to the analog to digital
+     * start continuous reading. In this mode, up to 4 devices can be connected to the analog to digital
      * converter. For each device a single read command is sent to the ad converter and waits for the response.
      * The maximum sampling frequency of the analog signals depends on how many devices are connected to the AD
      * converter at the same time.
@@ -179,10 +131,10 @@ public class Ads1115 extends I2CDevice {
      * (the delay of the bus is not included).
      * <p>
      * This leads to the following table for the maximum allowed readFrequency by a sampling rate of 128 sps:
-     * 1 channel in use -> readFrequency max 64Hz (min. response time = 16ms)
-     * 2 channel in use -> readFrequency max 32Hz (min. response time = 32ms)
-     * 3 channel in use -> readFrequency max 21Hz (min. response time = 48ms)
-     * 4 channel in use -> readFrequency max 16Hz (min. response time = 63ms)
+     * 1 channels in use -> readFrequency max 64Hz (min. response time = 16ms)
+     * 2 channels in use -> readFrequency max 32Hz (min. response time = 32ms)
+     * 3 channels in use -> readFrequency max 21Hz (min. response time = 48ms)
+     * 4 channels in use -> readFrequency max 16Hz (min. response time = 63ms)
      *
      * @param threshold     threshold for trigger new value change event (+- voltage)
      * @param readFrequency read frequency to get new value from device, must be lower than 1/2
@@ -195,12 +147,7 @@ public class Ads1115 extends I2CDevice {
             //set fast continuous reading active to lock slow continuous reading
             continuousReadingActive = true;
 
-            if(channelsInUse.size() == 1){
-                readTheOneAndOnlyChannel(threshold, readFrequency);
-            }
-            else {
-                readAllChannels(threshold, readFrequency);
-            }
+            readAllChannels(threshold, readFrequency);
 
             logDebug("Start fast continuous reading");
         }
@@ -219,29 +166,9 @@ public class Ads1115 extends I2CDevice {
                 case A3 -> MUX.AIN3_GND;
             };
             writeConfigRegister(configRegisterTemplate | mux.getMux() | MODE.SINGLE.getMode());
-
         });
         continuousReadingActive = false;
         logDebug("Continuous reading stopped");
-    }
-
-
-    /**
-     * Return GAIN object with bit structure for configuration and resolution (gain per bit)
-     *
-     * @return GAIN object
-     */
-    public GAIN getPga() {
-        return pga;
-    }
-
-    /**
-     * Return sampling rate from device
-     *
-     * @return sampling rate
-     */
-    public int getSamplingRate() {
-        return dataRate.getSpS();
     }
 
 
@@ -251,6 +178,54 @@ public class Ads1115 extends I2CDevice {
     @Override
     public void reset() {
         stopContinuousReading();
+    }
+
+    public double maxVoltage(){
+        return pga.gain;
+    }
+
+
+    /**
+     * read last stored conversion from device
+     *
+     * @return last stored conversion
+     */
+    private int readConversionRegister() {
+        return i2c.readRegisterWord(CONVERSION_REGISTER);
+    }
+
+    /**
+     * read lower threshold from device
+     *
+     * @return lower threshold
+     */
+    private int readLoThreshRegister() {
+        return i2c.readRegisterWord(LO_THRESH_REGISTER);
+    }
+
+    /**
+     * read upper threshold from device
+     *
+     * @return upper threshold
+     */
+    private int readHiThreshRegister() {
+        return i2c.readRegisterWord(HI_THRESH_REGISTER);
+    }
+
+    /**
+     * write custom configuration to device
+     *
+     * @param config custom configuration
+     */
+    private int writeConfigRegister(int config) {
+        logDebug("start write configuration");
+        i2c.writeRegisterWord(CONFIG_REGISTER, config);
+        //wait until ad converter has stored new value in conversion register
+        //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
+        //round value up to wait long enough
+        delay((long) Math.ceil(2000.0 / dataRate.getSpS()));
+
+        return readConfigRegister();
     }
 
     /**
@@ -320,60 +295,10 @@ public class Ads1115 extends I2CDevice {
         //read actual ad value from device
         int result = readConversionRegister();
         logDebug("readIn: " + config + ", raw " + result);
+
         return result;
     }
 
-    /**
-     * Sends configuration for continuous reading to device, updates actual value from analog input
-     * and triggers valueChange event
-     *
-     * @param threshold     threshold for trigger new value change event
-     * @param readFrequency read frequency to get new value from device, must be lower than
-     *                      the sampling rate of the device
-     */
-    private void readTheOneAndOnlyChannel(double threshold, int readFrequency) {
-        if (readFrequency < dataRate.getSpS()) {
-            logDebug("Start continuous reading");
-            //get mux from channel
-            Channel channel = channelsInUse.keySet().stream().toList().get(0);
-            MUX mux = switch (channel) {
-                case A0 -> MUX.AIN0_GND;
-                case A1 -> MUX.AIN1_GND;
-                case A2 -> MUX.AIN2_GND;
-                case A3 -> MUX.AIN3_GND;
-            };
-
-            //set configuration
-            writeConfigRegister(configRegisterTemplate | mux.getMux() | MODE.CONTINUOUS.getMode());
-            //start new thread for continuous reading
-            new Thread(() -> {
-                while (continuousReadingActive) {
-                    //start measuring time
-                    long startTime = System.nanoTime();
-
-                    int result = readConversionRegister();
-                    logDebug("Current value: " + result);
-                    //convert threshold voltage to digits
-                    int thresholdDigits = (int) (threshold / pga.gainPerBit);
-                    int oldValue = oldValues.get(channel);
-                    if (Math.abs(oldValue - result) > thresholdDigits) {
-                        logDebug("New event triggered on value change, old value: %d , new value: %d" + oldValue, result);
-                        oldValues.put(channel, result);
-                        channelsInUse.values().stream().toList().get(0).accept(pga.gainPerBit * (double) result);
-                    }
-                    //stop measuring time
-                    long stopTime = System.nanoTime();
-                    long delta = stopTime - startTime;
-                    long restDelay = (1 / readFrequency * 1000) - delta;
-                    restDelay = (restDelay > 0) ? restDelay : 0;
-                    //wait for rest of the cycle time
-                    delay(restDelay);
-                }
-            }).start();
-        } else {
-            throw new IllegalStateException("readFrequency to high");
-        }
-    }
 
     /**
      * Sends, for each channel, a request to device and wait for response. Enters all responses in actualValue array.

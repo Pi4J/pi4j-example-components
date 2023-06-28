@@ -20,7 +20,7 @@ public class JoystickAnalog_App implements Application {
     public void execute(Context pi4j) {
         System.out.println("Joystick test started ...");
 
-        Ads1115 ads1115 = new Ads1115(pi4j, Ads1115.ADDRESS.GND.getAddress(), Ads1115.GAIN.GAIN_4_096V);
+        Ads1115 ads1115 = new Ads1115(pi4j);
 
         //joystick with normalized axis from 0 to 1
         JoystickAnalog joystick = new JoystickAnalog(ads1115, Ads1115.Channel.A0, Ads1115.Channel.A1, true,

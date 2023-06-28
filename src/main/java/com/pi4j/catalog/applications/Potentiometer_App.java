@@ -16,25 +16,25 @@ public class Potentiometer_App implements Application {
     public void execute(Context pi4j) {
         System.out.println("Potentiometer test started ...");
 
-        Ads1115 ads1115 = new Ads1115(pi4j, Ads1115.ADDRESS.GND.getAddress(), Ads1115.GAIN.GAIN_4_096V);
+        Ads1115 ads1115 = new Ads1115(pi4j);
 
         Potentiometer poti = new Potentiometer(ads1115, Ads1115.Channel.A0);
 
         //read current value from poti one time
-        System.out.println("Current value of the poti is " + String.format("%.3f", poti.readCurrentVoltage()) + " voltage.");
+        System.out.println(String.format("Current value of the poti is %.3f V.", poti.readCurrentVoltage()));
 
         //read current value from the poti in percent one time
-        System.out.println("The potentiometer slider is currently at " + String.format("%.3f", poti.readNormalizedValue()) + " % of its full travel.");
+        System.out.println(String.format("The potentiometer slider is currently at %.3f %%", poti.readNormalizedValue()));
 
         // Register event handlers to print a message when potentiometer is moved
-        poti.onNormalizedValueChange((value) -> System.out.println("The potentiometer slider is currently at " + String.format("%.3f", value) + " % of its full travel."));
+        poti.onNormalizedValueChange((value) -> System.out.println(String.format("The potentiometer slider is currently at  %.3f  %% of its full travel.", value)));
 
         //start continuous reading with single shot in this mode you can connect up to 4 devices to the analog module
         ads1115.startContinuousReading(0.05, 10);
 
         // Wait while handling events before exiting
         System.out.println("Move the potentiometer to see it in action!");
-        delay(30_000);
+        delay(10_000);
 
         //stop continuous reading
         ads1115.stopContinuousReading();

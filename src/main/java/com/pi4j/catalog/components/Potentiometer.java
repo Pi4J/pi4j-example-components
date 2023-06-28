@@ -30,8 +30,8 @@ public class Potentiometer extends Component {
      */
     public Potentiometer(Ads1115 ads1115, Ads1115.Channel channel) {
         this.ads1115 = ads1115;
-        this.minValue = ads1115.getPga().gain() * 0.1;
-        this.maxValue = ads1115.getPga().gain();
+        this.minValue = ads1115.maxVoltage() * 0.1;
+        this.maxValue = ads1115.maxVoltage();
         this.channel = channel;
 
         logDebug("Build component potentiometer");

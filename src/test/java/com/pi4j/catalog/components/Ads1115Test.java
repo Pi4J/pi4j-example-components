@@ -46,7 +46,7 @@ public class Ads1115Test extends ComponentTest {
 
         when(mockI2C.writeRegisterWord(CONFIG_REGISTER, defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode())).thenReturn(answerSingleShotAIN0ConfigRegister);
 
-        ads1115 = new Ads1115(pi4j, Ads1115.ADDRESS.GND.getAddress(), Ads1115.GAIN.GAIN_4_096V);
+        ads1115 = new Ads1115(pi4j);
         mockI2C = ads1115.mock();
     }
 
