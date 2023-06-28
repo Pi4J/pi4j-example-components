@@ -54,11 +54,7 @@ public class LcdDisplay extends I2CDevice {
      * Display row offsets. Offset for up to 4 rows.
      */
     private static final byte[] LCD_ROW_OFFSETS = {0x00, 0x40, 0x14, 0x54};
-    /**
-     * The Default BUS and Device Address.
-     * On the PI, you can look it up with the Command 'sudo i2cdetect -y 1'
-     */
-    private static final int DEFAULT_BUS    = 0x1;
+
     private static final int DEFAULT_DEVICE = 0x27;
 
     /**
@@ -85,7 +81,7 @@ public class LcdDisplay extends I2CDevice {
      * @param pi4j Pi4J context
      */
     public LcdDisplay(Context pi4j){
-        this(pi4j, 2, 16, DEFAULT_BUS, DEFAULT_DEVICE);
+        this(pi4j, 2, 16, DEFAULT_DEVICE);
     }
 
     /**
@@ -96,7 +92,7 @@ public class LcdDisplay extends I2CDevice {
      * @param columns   Custom amount of chars on line
      */
     public LcdDisplay(Context pi4j, int rows, int columns){
-        this(pi4j, rows, columns, DEFAULT_BUS, DEFAULT_DEVICE);
+        this(pi4j, rows, columns, DEFAULT_DEVICE);
     }
 
     /**
@@ -105,17 +101,10 @@ public class LcdDisplay extends I2CDevice {
      * @param pi4j      Pi4J context
      * @param rows      Custom amount of display lines
      * @param columns   Custom amount of chars on line
-     * @param bus       Custom I2C bus address
      * @param device    Custom I2C device Address
      */
-    public LcdDisplay(Context pi4j, int rows, int columns, int bus, int device) {
-        super(pi4j,
-              I2C.newConfigBuilder(pi4j)
-                      .id("I2C-" + bus + "@" + device)
-                      .name("PCF8574AT backed LCD@" + device)
-                      .bus(bus)
-                      .device(device)
-                      .build());
+    public LcdDisplay(Context pi4j, int rows, int columns, int device) {
+        super(pi4j, device, "PCF8574AT backed LCD@");
         this.rows = rows;
         this.columns = columns;
     }
@@ -140,7 +129,6 @@ public class LcdDisplay extends I2CDevice {
 
         // Enable backlight
         setDisplayBacklight(true);
-        logDebug("LCD Display initialized");
     }
 
     /**

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import com.pi4j.plugin.mock.provider.i2c.MockI2C;
 
 import com.pi4j.catalog.ComponentTest;
+import com.pi4j.catalog.components.base.I2CDevice;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,7 +19,7 @@ public class LcdDisplayTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         lcd420Display = new LcdDisplay(pi4j, 4, 20);
-        lcd216Display = new LcdDisplay(pi4j, 2, 16, 0x2, 0x28);
+        lcd216Display = new LcdDisplay(pi4j, 2, 16, 0x28);
         i2c = lcd420Display.mock();
     }
 

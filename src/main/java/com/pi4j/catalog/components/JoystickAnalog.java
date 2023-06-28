@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import com.pi4j.catalog.components.base.Component;
 
 public class JoystickAnalog extends Component {
+    private final Ads1115 ads1115;
     /**
      * potentiometer x axis
      */
@@ -74,15 +75,15 @@ public class JoystickAnalog extends Component {
      * ads component needs to be created outside this clas, other channels may be used for other components.
      *
      * @param ads1115     ads object
-     * @param chanelXAxis analog potentiometer x-axis
-     * @param chanelYAxis analog potentiometer y-axis
-     * @param maxVoltage  max voltage expects on analog input x- and y-axis
+     * @param channelXAxis analog potentiometer x-axis
+     * @param channelYAxis analog potentiometer y-axis
      * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push        additional push button on joystick
      */
-    public JoystickAnalog(Ads1115 ads1115, int chanelXAxis, int chanelYAxis, double maxVoltage, boolean normalized0to1, SimpleButton push) {
-        this(new Potentiometer(ads1115, chanelXAxis, maxVoltage),
-             new Potentiometer(ads1115, chanelYAxis, maxVoltage),
+    public JoystickAnalog(Ads1115 ads1115, Ads1115.Channel channelXAxis, Ads1115.Channel channelYAxis, boolean normalized0to1, SimpleButton push) {
+        this(ads1115,
+             new Potentiometer(ads1115, channelXAxis),
+             new Potentiometer(ads1115, channelYAxis),
              normalized0to1,
              push);
     }
@@ -93,7 +94,8 @@ public class JoystickAnalog extends Component {
      * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push           simpleButton object for push button on joystick
      */
-    public JoystickAnalog(Potentiometer potentiometerX, Potentiometer potentiometerY, boolean normalized0to1, SimpleButton push) {
+    JoystickAnalog(Ads1115 ads1115, Potentiometer potentiometerX, Potentiometer potentiometerY, boolean normalized0to1, SimpleButton push) {
+        this.ads1115 = ads1115;
         this.x = potentiometerX;
         this.y = potentiometerY;
         this.push = push;
@@ -112,8 +114,8 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void xOnMove(Consumer<Double> task) {
-        x.setConsumerSlowReadChan((value) -> {
+    public void onHorizontalChange(Consumer<Double> task) {
+        x.onNormalizedValueChange((value) -> {
 
             value = value + xOffset;
             //check if min max value are ok
@@ -140,8 +142,8 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void yOnMove(Consumer<Double> task) {
-        y.setConsumerSlowReadChan((value) -> {
+    public void onVerticalChange(Consumer<Double> task) {
+        y.onNormalizedValueChange((value) -> {
             value = value + yOffset;
 
             //check if min max value are ok
@@ -169,7 +171,7 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void pushOnDown(Runnable task) {
+    public void onDown(Runnable task) {
         push.onDown(task);
     }
 
@@ -180,7 +182,7 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void pushOnUp(Runnable task) {
+    public void onUp(Runnable task) {
         push.onUp(task);
     }
 
@@ -191,7 +193,7 @@ public class JoystickAnalog extends Component {
      *
      * @param task Event handler to call or null to disable
      */
-    public void pushWhilePressed(Runnable task, Duration whilePressedDelay) {
+    public void whilePressed(Runnable task, Duration whilePressedDelay) {
         push.whilePressed(task, whilePressedDelay);
     }
 
@@ -202,24 +204,23 @@ public class JoystickAnalog extends Component {
      * @param readFrequency update frequency to read new value from ad converter
      */
     public void start(double threshold, int readFrequency) {
-        x.startSlowContinuousReading(threshold, readFrequency);
-        y.startSlowContinuousReading(threshold, readFrequency);
+        ads1115.startContinuousReading(threshold, readFrequency);
     }
 
     /**
      * Stop reading of joystick value. If triggered no new value from joystick can be read.
      */
     public void stop() {
-        x.stopSlowContinuousReading();
-        y.stopSlowContinuousReading();
+        ads1115.stopContinuousReading();
     }
 
     /**
      * disables all the handlers on joystick events
      */
     public void deregisterAll() {
-        x.deregisterAll();
-        y.deregisterAll();
+        ads1115.reset();
+        x.reset();
+        y.reset();
         push.reset();
     }
 
@@ -227,8 +228,8 @@ public class JoystickAnalog extends Component {
      * calibrates the center position of the joystick
      */
     public void calibrateJoystick() {
-        xOffset = NORMALIZED_CENTER_POSITION - x.singleShotGetNormalizedValue();
-        yOffset = NORMALIZED_CENTER_POSITION - y.singleShotGetNormalizedValue();
+        xOffset = NORMALIZED_CENTER_POSITION - x.readNormalizedValue();
+        yOffset = NORMALIZED_CENTER_POSITION - y.readNormalizedValue();
     }
 
     /**

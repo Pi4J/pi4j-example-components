@@ -27,53 +27,23 @@ public class PotentiometerTest extends ComponentTest {
 
         //set mock function ads1115
         //function returns voltage
-        when(mockAds1115.singleShotAIn0()).thenReturn(voltageFromAdConverter);
+        when(mockAds1115.readValue(Ads1115.Channel.A0)).thenReturn(voltageFromAdConverter);
         when(mockAds1115.getPga()).thenReturn(Ads1115.GAIN.GAIN_4_096V);
         //when(mockAds1115.setConsumerFastRead()).thenReturn();
         //when(mockAds1115.setConsumerSlowReadChannel0()).thenReturn();
 
         //create potentiometer with mock ads1115 class
-        potentiometer = new Potentiometer(mockAds1115, 0,3.3);
+        potentiometer = new Potentiometer(mockAds1115, Ads1115.Channel.A0);
     }
 
 
     @Test
     public void testSingleShotGetVoltage(){
-        Assertions.assertEquals(voltageFromAdConverter, potentiometer.singleShotGetVoltage());
+        Assertions.assertEquals(voltageFromAdConverter, potentiometer.readCurrentVoltage());
     }
 
-    @Test
-    public void testSingleShotGetNormalizedValue(){
-        Assertions.assertEquals(voltageFromAdConverter/potentiometer.getMaxValue() , potentiometer.singleShotGetNormalizedValue());
-    }
 
-    @Test
-    public void testStartSlowContinuousReading(){
-        potentiometer.startFastContinuousReading(0.05, 10);
 
-        Assertions.assertThrows(IllegalStateException.class, ()-> potentiometer.startSlowContinuousReading(0.05, 10));
-
-        potentiometer.stopFastContinuousReading();
-
-        potentiometer.startSlowContinuousReading(0.05,10);
-
-        potentiometer.stopSlowContinuousReading();
-
-    }
-
-    @Test
-    public void testStartFastContiniousReading(){
-        potentiometer.startSlowContinuousReading(0.05, 10);
-
-        Assertions.assertThrows(IllegalStateException.class, ()-> potentiometer.startFastContinuousReading(0.05, 10));
-
-        potentiometer.stopSlowContinuousReading();
-
-        potentiometer.startFastContinuousReading(0.05,10);
-
-        potentiometer.stopFastContinuousReading();
-
-    }
 
 
 
