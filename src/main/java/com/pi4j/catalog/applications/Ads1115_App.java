@@ -14,13 +14,13 @@ public class Ads1115_App implements Application {
     public void execute(Context pi4j) {
         System.out.println("ADS1115 test started ...");
         //System.out.println("read all channels in single mode");
-        singleRead(pi4j);
+        //singleRead(pi4j);
 
         System.out.println("read all channels in continuous mode");
         //continuousSlowRead(pi4j);
 
         //System.out.println("read one channel in fast continuous mode");
-        //continuousFastRead(pi4j);
+        continuousFastRead(pi4j);
 
         System.out.println("ADS1115 test done");
     }

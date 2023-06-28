@@ -91,6 +91,7 @@ public class Ads1115 extends I2CDevice {
                 throw new IllegalStateException("Can't add a new onValueChange while continuous reading is active");
             }
             channelsInUse.put(channel, onChange);
+            oldValues.put(channel, -1);
         } else {
             channelsInUse.remove(channel);
         }
