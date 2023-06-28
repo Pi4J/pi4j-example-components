@@ -1,24 +1,25 @@
 package com.pi4j.catalog.components.base;
 
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public abstract class Component {
     /**
      * Logger instance
      */
-    private final Logger logger;
+    private static final Logger logger = Logger.getGlobal();
 
     protected Component(){
-        logger = LogManager.getLogManager().getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);
+        Level appropriateLevel = Level.FINE;
 
-        //set appropriate log level
-        logger.setLevel(Level.INFO);
+        logger.setLevel(appropriateLevel);
+        ConsoleHandler handler = new ConsoleHandler();
+
+        handler.setLevel(appropriateLevel);
+        logger.addHandler(handler);
     }
 
     /**
-     * Override this method to cleanup all used resources
+     * Override this method to clean up all used resources
      */
     public void reset(){
         //nothing to do by default

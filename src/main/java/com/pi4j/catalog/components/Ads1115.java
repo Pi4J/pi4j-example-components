@@ -1,6 +1,5 @@
 package com.pi4j.catalog.components;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -117,7 +116,10 @@ public class Ads1115 extends I2CDevice {
             case A3 -> MUX.AIN3_GND;
         };
 
-        return pga.gainPerBit * readSingleShot(mux);
+        double voltage = pga.gainPerBit * readSingleShot(mux);
+        logDebug("current value of channel %s: %.2f", channel, voltage);
+
+        return voltage;
     }
 
 
@@ -180,10 +182,6 @@ public class Ads1115 extends I2CDevice {
         stopContinuousReading();
     }
 
-    public double maxVoltage(){
-        return pga.gain;
-    }
-
 
     /**
      * read last stored conversion from device
@@ -218,7 +216,6 @@ public class Ads1115 extends I2CDevice {
      * @param config custom configuration
      */
     private int writeConfigRegister(int config) {
-        logDebug("start write configuration");
         i2c.writeRegisterWord(CONFIG_REGISTER, config);
         //wait until ad converter has stored new value in conversion register
         //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
@@ -234,48 +231,48 @@ public class Ads1115 extends I2CDevice {
      * @return configuration from device
      */
     private int readConfigRegister() {
-        String[] osInfo   = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
-
-        String[] muxInfo  = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
-
-        String[] pgaInfo  = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
-
-        String[] modeInfo = {"0 : Continuous-conversion mode\n", "1 : Single-shot mode or power-down state\n"};
-
-        String[] drInfo   = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
-
-        String[] compModeInfo = {"0 : Traditional comparator (default)\n", "1 : Window comparator\n"};
-
-        String[] compPolInfo  = {"0 : Active low (default)\n", "1 : Active high\n"};
-
-        String[] compLatInfo  = {"0 : Non latching comparator\n", "1 : Latching comparator\n"};
-
-        String[] compQueInfo  = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
+//        String[] osInfo   = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
+//
+//        String[] muxInfo  = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
+//
+//        String[] pgaInfo  = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
+//
+//        String[] modeInfo = {"0 : Continuous-conversion mode\n", "1 : Single-shot mode or power-down state\n"};
+//
+//        String[] drInfo   = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
+//
+//        String[] compModeInfo = {"0 : Traditional comparator (default)\n", "1 : Window comparator\n"};
+//
+//        String[] compPolInfo  = {"0 : Active low (default)\n", "1 : Active high\n"};
+//
+//        String[] compLatInfo  = {"0 : Non latching comparator\n", "1 : Latching comparator\n"};
+//
+//        String[] compQueInfo  = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
 
         //get configuration from device
         int result = i2c.readRegisterWord(CONFIG_REGISTER);
 
         //create logger message
         //check os
-        String loggerMessage = (osInfo[result >> 15]) +
-                //check mux
-                muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12] +
-                //check pga
-                pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9] +
-                //check mode
-                modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8] +
-                //check dr
-                drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5] +
-                //check comp mode
-                compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4] +
-                //check comp pol
-                compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3] +
-                //check comp lat
-                compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2] +
-                //check comp que
-                compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()];
-
-        logDebug(loggerMessage);
+//        String loggerMessage = (osInfo[result >> 15]) +
+//                //check mux
+//                muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12] +
+//                //check pga
+//                pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9] +
+//                //check mode
+//                modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8] +
+//                //check dr
+//                drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5] +
+//                //check comp mode
+//                compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4] +
+//                //check comp pol
+//                compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3] +
+//                //check comp lat
+//                compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2] +
+//                //check comp que
+//                compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()];
+//
+//        logDebug(loggerMessage);
 
         return result;
     }
@@ -294,7 +291,6 @@ public class Ads1115 extends I2CDevice {
             throw new ConfigException("Configuration not correctly written to device.");
         //read actual ad value from device
         int result = readConversionRegister();
-        logDebug("readIn: " + config + ", raw " + result);
 
         return result;
     }

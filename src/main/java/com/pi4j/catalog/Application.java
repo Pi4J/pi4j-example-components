@@ -50,15 +50,4 @@ public interface Application {
         }
     }
 
-    /**
-     * Logger instance
-     */
-    Logger logger = Logger.getLogger("Pi4J-App");
-
-    default void logInfo(String msg){
-        logger.info(() -> msg);
-    }
-    default void logError(String msg){
-        logger.severe(() -> msg);
-    }
 }

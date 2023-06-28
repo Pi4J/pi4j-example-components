@@ -28,7 +28,6 @@ public class PotentiometerTest extends ComponentTest {
         //set mock function ads1115
         //function returns voltage
         when(mockAds1115.readValue(Ads1115.Channel.A0)).thenReturn(voltageFromAdConverter);
-        when(mockAds1115.maxVoltage()).thenReturn(3.3);
         //when(mockAds1115.setConsumerFastRead()).thenReturn();
         //when(mockAds1115.setConsumerSlowReadChannel0()).thenReturn();
 

@@ -30,11 +30,11 @@ public class Potentiometer extends Component {
      */
     public Potentiometer(Ads1115 ads1115, Ads1115.Channel channel) {
         this.ads1115 = ads1115;
-        this.minValue = ads1115.maxVoltage() * 0.1;
-        this.maxValue = ads1115.maxVoltage();
+        this.minValue = 0.2;
+        this.maxValue = 3.0;
         this.channel = channel;
 
-        logDebug("Build component potentiometer");
+        logDebug("Component potentiometer initialized");
     }
 
     /**
@@ -55,7 +55,7 @@ public class Potentiometer extends Component {
      * @return normalized value
      */
     public double readNormalizedValue() {
-        return readCurrentVoltage() / maxValue;
+        return normalizeVoltage(readCurrentVoltage());
     }
 
     /**
@@ -68,8 +68,7 @@ public class Potentiometer extends Component {
     public void onNormalizedValueChange(Consumer<Double> onChange) {
         ads1115.onValueChange(channel, (voltage) -> {
             updateMinMaxValue(voltage);
-            double normalizedValue = voltage / maxValue;
-            onChange.accept(normalizedValue);
+            onChange.accept(normalizeVoltage(voltage));
         });
     }
 
@@ -86,13 +85,17 @@ public class Potentiometer extends Component {
      * Check if new value is bigger than current max value or lower than min value
      * In this case update min or max value
      *
-     * @param result value to check against min Max value
+     * @param voltage value to check against min Max value
      */
-    private void updateMinMaxValue(double result) {
-        if (result < minValue) {
-            minValue = result;
-        } else if (result > maxValue) {
-            maxValue = result;
+    private void updateMinMaxValue(double voltage) {
+        if (voltage < minValue) {
+            minValue = voltage;
+        } else if (voltage > maxValue) {
+            maxValue = voltage;
         }
+    }
+
+    private double normalizeVoltage(double voltage) {
+        return voltage / (maxValue - minValue);
     }
 }
