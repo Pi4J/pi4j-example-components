@@ -27,6 +27,8 @@ public class Ads1115 extends I2CDevice {
      * Hi_thresh set the high threshold values used for the comparator function
      */
     private static final int HI_THRESH_REGISTER = 0x03;
+
+    private final Context pi4j;
     /**
      * programmable gain amplifier
      */
@@ -34,21 +36,15 @@ public class Ads1115 extends I2CDevice {
     /**
      * sampling rate of device
      */
-    private final DR dataRate;
+    private final DataRate dataRate;
 
     /**
-     * old value from last successful read of conversion register (raw data)
+     * old values from last successful read of conversion register (raw data)
      */
     private final Map<Channel, Integer> oldValues = new HashMap<>();
 
-    /**
-     * number of channels controlled by ad converter
-     */
     private final Map<Channel, Consumer<Double>> channelsInUse = new HashMap<>();
 
-    /**
-     * continuous reading active
-     */
     private boolean continuousReadingActive;
 
     /**
@@ -69,17 +65,22 @@ public class Ads1115 extends I2CDevice {
      */
     public Ads1115(Context pi4j, ADDRESS device, GAIN gain){
         super(pi4j, device.address, "ADS1115");
+        this.pi4j = pi4j;
 
         this.pga = gain;
-        this.dataRate = DR.SPS_128;
+        this.dataRate = DataRate.SPS_128;
 
-        int os       = OS.WRITE_START.getOs();
+        int os       = OperationalStatus.WRITE_START.getOs();
         int compMode = COMP_MODE.TRAD_COMP.getCompMode();
         int compPol  = COMP_POL.ACTIVE_LOW.getCompPol();
         int compLat  = COMP_LAT.NON_LATCH.getLatching();
         int compQue  = COMP_QUE.DISABLE_COMP.getCompQue();
 
         configRegisterTemplate = os | pga.gain | dataRate.getConf() | compMode | compPol | compLat | compQue;
+    }
+
+    Context getPi4j() {
+        return pi4j;
     }
 
     @Override
@@ -109,14 +110,8 @@ public class Ads1115 extends I2CDevice {
         if (continuousReadingActive) {
             throw new IllegalStateException("Continuous measuring active");
         }
-        MUX mux = switch (channel) {
-            case A0 -> MUX.AIN0_GND;
-            case A1 -> MUX.AIN1_GND;
-            case A2 -> MUX.AIN2_GND;
-            case A3 -> MUX.AIN3_GND;
-        };
 
-        double voltage = pga.gainPerBit * readSingleShot(mux);
+        double voltage = pga.gainPerBit * readSingleShot(channel);
         logDebug("current value of channel %s: %.2f", channel, voltage);
 
         return voltage;
@@ -161,13 +156,13 @@ public class Ads1115 extends I2CDevice {
     public void stopContinuousReading() {
         // write single shot configuration to stop reading process in device
         channelsInUse.forEach((channel, onValueChange) -> {
-            MUX mux = switch (channel) {
-                case A0 -> MUX.AIN0_GND;
-                case A1 -> MUX.AIN1_GND;
-                case A2 -> MUX.AIN2_GND;
-                case A3 -> MUX.AIN3_GND;
+            MultiplexerConfig mux = switch (channel) {
+                case A0 -> MultiplexerConfig.AIN0_GND;
+                case A1 -> MultiplexerConfig.AIN1_GND;
+                case A2 -> MultiplexerConfig.AIN2_GND;
+                case A3 -> MultiplexerConfig.AIN3_GND;
             };
-            writeConfigRegister(configRegisterTemplate | mux.getMux() | MODE.SINGLE.getMode());
+            writeConfigRegister(configRegisterTemplate | mux.getMux() | OperationMode.SINGLE.getMode());
         });
         continuousReadingActive = false;
         logDebug("Continuous reading stopped");
@@ -280,19 +275,25 @@ public class Ads1115 extends I2CDevice {
     /**
      * Sends a request to device and wait for response
      *
-     * @return int conversion register
+     * @return value from conversion register
      */
-    private synchronized int readSingleShot(MUX mux) {
-        int config = configRegisterTemplate | mux.getMux() | MODE.SINGLE.getMode();
+    private synchronized int readSingleShot(Channel channel) {
+        MultiplexerConfig mux = switch (channel) {
+            case A0 -> MultiplexerConfig.AIN0_GND;
+            case A1 -> MultiplexerConfig.AIN1_GND;
+            case A2 -> MultiplexerConfig.AIN2_GND;
+            case A3 -> MultiplexerConfig.AIN3_GND;
+        };
+        int config = configRegisterTemplate | mux.getMux() | OperationMode.SINGLE.getMode();
         //write configuration to device
         int confCheck = writeConfigRegister(config);
         //check if configuration is correct written on device, ignore first bit (os)
-        if ((confCheck & OS.CLR_CURRENT_CONF_PARAM.getOs()) != (config & OS.CLR_CURRENT_CONF_PARAM.getOs()))
+        if ((confCheck & OperationalStatus.CLR_CURRENT_CONF_PARAM.getOs()) != (config & OperationalStatus.CLR_CURRENT_CONF_PARAM.getOs()))
             throw new ConfigException("Configuration not correctly written to device.");
-        //read actual ad value from device
-        int result = readConversionRegister();
 
-        return result;
+        //read actual ad value from device
+
+        return readConversionRegister();
     }
 
 
@@ -318,13 +319,7 @@ public class Ads1115 extends I2CDevice {
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
 
                     channelsInUse.forEach((channel, onValueChange) -> {
-                        MUX mux = switch (channel) {
-                            case A0 -> MUX.AIN0_GND;
-                            case A1 -> MUX.AIN1_GND;
-                            case A2 -> MUX.AIN2_GND;
-                            case A3 -> MUX.AIN3_GND;
-                        };
-                        int newValue = readSingleShot(mux);
+                        int newValue = readSingleShot(channel);
                         logDebug("Current value channel %s: %d", channel, newValue);
 
                         int oldValue = oldValues.get(channel);
@@ -335,7 +330,6 @@ public class Ads1115 extends I2CDevice {
                         }
                     });
 
-                    //stop measuring time
                     long stopTime = System.nanoTime();
                     long delta = stopTime - startTime;
                     long restDelay = (1 / readFrequency * 1000) - delta;
@@ -717,7 +711,7 @@ public class Ads1115 extends I2CDevice {
      * {@link #SPS_475}
      * {@link #SPS_860}
      */
-    public enum DR {
+    public enum DataRate {
         /**
          * 8 sampling per second
          */
@@ -777,7 +771,7 @@ public class Ads1115 extends I2CDevice {
          *
          * @param sps sampling rate for configuration
          */
-        DR(int conf, int sps) {
+        DataRate(int conf, int sps) {
             this.conf = conf;
             this.sps = sps;
         }
@@ -809,7 +803,7 @@ public class Ads1115 extends I2CDevice {
      * {@link #CONTINUOUS}
      * {@link #SINGLE}
      */
-    public enum MODE {
+    public enum OperationMode {
         /**
          * Continuous-conversion mode
          */
@@ -837,7 +831,7 @@ public class Ads1115 extends I2CDevice {
          *
          * @param mode operation mode for configuration
          */
-        MODE(int mode) {
+        OperationMode(int mode) {
             this.mode = mode;
         }
 
@@ -847,7 +841,7 @@ public class Ads1115 extends I2CDevice {
          * @return configured operation mode
          */
         public int getMode() {
-            return this.mode;
+            return mode;
         }
     }
 
@@ -936,7 +930,7 @@ public class Ads1115 extends I2CDevice {
      * {@link #AIN2_GND}
      * {@link #AIN3_GND}
      */
-    public enum MUX {
+    public enum MultiplexerConfig {
         /**
          * 000 : AINP = AIN0 and AINN = AIN1
          */
@@ -988,7 +982,7 @@ public class Ads1115 extends I2CDevice {
          *
          * @param mux Input multiplexer configuration
          */
-        MUX(int mux) {
+        MultiplexerConfig(int mux) {
             this.mux = mux;
         }
 
@@ -998,7 +992,7 @@ public class Ads1115 extends I2CDevice {
          * @return Input multiplexer configuration
          */
         public int getMux() {
-            return this.mux;
+            return mux;
         }
     }
 
@@ -1012,7 +1006,7 @@ public class Ads1115 extends I2CDevice {
      * {@link #READ_CONV}
      * {@link #READ_NO_CONV}
      */
-    public enum OS {
+    public enum OperationalStatus {
         /**
          * When writing: start a single conversion (when in power-down state)
          */
@@ -1044,7 +1038,7 @@ public class Ads1115 extends I2CDevice {
          *
          * @param os parameter
          */
-        OS(int os) {
+        OperationalStatus(int os) {
             this.os = os;
         }
 
@@ -1054,7 +1048,7 @@ public class Ads1115 extends I2CDevice {
          * @return os configuration parameter
          */
         public int getOs() {
-            return this.os;
+            return os;
         }
     }
 }

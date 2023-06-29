@@ -80,13 +80,13 @@ public class Ads1115_App implements Application {
 
     private void continuousReadChannel0(Context pi4j) {
         //start test
-        System.out.println("Continuous fast read test started ...");
+        System.out.println("Continuous read  started ...");
 
         Ads1115 ads1115 = new Ads1115(pi4j);
 
-        // Register event handlers to print a message on value change
+        // Register event handler to print a message on value change
         ads1115.onValueChange(Ads1115.Channel.A0, (value) -> {
-            System.out.println("The actual value from fast read channel is: " + String.format("%.3f", value) + "voltage.");
+            System.out.println("Value changed, now it's : " + String.format("%.2f", value) + "V.");
         });
 
         ads1115.startContinuousReading(0.1, 10);

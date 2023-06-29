@@ -4,8 +4,13 @@ import java.time.Duration;
 import java.util.function.Consumer;
 
 import com.pi4j.catalog.components.base.Component;
+import com.pi4j.catalog.components.base.PIN;
 
 public class JoystickAnalog extends Component {
+    public enum Range {
+        ZERO_TO_ONE, MINUS_ONE_TO_ONE
+    }
+
     private final Ads1115 ads1115;
     /**
      * potentiometer x axis
@@ -19,18 +24,6 @@ public class JoystickAnalog extends Component {
      * button push
      */
     private final SimpleButton push;
-    /**
-     * default channel for potentiometer x-axis
-     */
-    private static final int DEFAULT_CHANNEL_POTENTIOMETER_X = 0;
-    /**
-     * default channel for potentiometer x-axis
-     */
-    private static final int DEFAULT_CHANNEL_POTENTIOMETER_Y = 1;
-    /**
-     * default max voltage for raspberry pi
-     */
-    private static final double DEFAULT_MAX_VOLTAGE = 3.3;
     /**
      * default normalization if true -> normalization from 0 to 1
      * if false -> normalization from -1 to 1
@@ -48,10 +41,7 @@ public class JoystickAnalog extends Component {
      * offset center y-axis
      */
     private double yOffset = 0.0;
-    /**
-     * if true normalized axis from 0 to 1 center is 0.5, if false normalized axis from -1 to 1 center is 0
-     */
-    private final boolean normalized0to1;
+
     /**
      * minimal normalized value on x axis
      */
@@ -74,37 +64,35 @@ public class JoystickAnalog extends Component {
      * Builds a new JoystickAnalog component with custom input for x-, y-axis, custom pin for push button.
      * ads component needs to be created outside this clas, other channels may be used for other components.
      *
-     * @param ads1115     ads object
+     * @param ads1115      ads object
      * @param channelXAxis analog potentiometer x-axis
      * @param channelYAxis analog potentiometer y-axis
-     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
-     * @param push        additional push button on joystick
+     * @param pin          additional push button on joystick
      */
-    public JoystickAnalog(Ads1115 ads1115, Ads1115.Channel channelXAxis, Ads1115.Channel channelYAxis, boolean normalized0to1, SimpleButton push) {
+    public JoystickAnalog(Ads1115 ads1115, Ads1115.Channel channelXAxis, Ads1115.Channel channelYAxis, PIN pin) {
         this(ads1115,
              new Potentiometer(ads1115, channelXAxis),
              new Potentiometer(ads1115, channelYAxis),
-             normalized0to1,
-             push);
+             pin != null ? new SimpleButton(ads1115.getPi4j(), pin, true) : null);
     }
 
     /**
      * @param potentiometerX potentiometer object for x-axis
      * @param potentiometerY potentiometer object for y-axis
-     * @param normalized0to1 normalization axis if true -> normalization from 0 to 1 if false -> normalization from -1 to 1
      * @param push           simpleButton object for push button on joystick
      */
-    JoystickAnalog(Ads1115 ads1115, Potentiometer potentiometerX, Potentiometer potentiometerY, boolean normalized0to1, SimpleButton push) {
+    JoystickAnalog(Ads1115 ads1115, Potentiometer potentiometerX, Potentiometer potentiometerY, SimpleButton push) {
         this.ads1115 = ads1115;
-        this.x = potentiometerX;
-        this.y = potentiometerY;
-        this.push = push;
-        this.normalized0to1 = normalized0to1;
+        this.x       = potentiometerX;
+        this.y       = potentiometerY;
+        this.push    = push;
 
         xMinNormValue = 0.1;
         xMaxNormValue = 0.9;
         yMinNormValue = 0.1;
         yMaxNormValue = 0.9;
+
+        calibrateJoystick();
     }
 
     /**
@@ -112,9 +100,9 @@ public class JoystickAnalog extends Component {
      * This event gets triggered whenever the x-axis of the joystick is moving.
      * Only a single event handler can be registered at once.
      *
-     * @param task Event handler to call or null to disable
+     * @param onChange Event handler to call or null to disable
      */
-    public void onHorizontalChange(Consumer<Double> task) {
+    public void onHorizontalChange(Consumer<Double> onChange) {
         x.onNormalizedValueChange((value) -> {
 
             value = value + xOffset;
@@ -128,10 +116,7 @@ public class JoystickAnalog extends Component {
                 value = 1 + (xMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - xMaxNormValue) / 2;
             }
 
-            if (!normalized0to1) {
-                value = rescaleValue(value);
-            }
-            task.accept(value);
+            onChange.accept(rescaleValue(value));
         });
     }
 
@@ -140,9 +125,9 @@ public class JoystickAnalog extends Component {
      * This event gets triggered whenever the y-axis of the joystick is moving.
      * Only a single event handler can be registered at once.
      *
-     * @param task Event handler to call or null to disable
+     * @param onChange Event handler to call or null to disable
      */
-    public void onVerticalChange(Consumer<Double> task) {
+    public void onVerticalChange(Consumer<Double> onChange) {
         y.onNormalizedValueChange((value) -> {
             value = value + yOffset;
 
@@ -156,11 +141,7 @@ public class JoystickAnalog extends Component {
                 value = 1 + (yMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - yMaxNormValue) / 2;
             }
 
-            if (!normalized0to1) {
-                value = rescaleValue(value);
-            }
-
-            task.accept(value);
+            onChange.accept(rescaleValue(value));
         });
     }
 
@@ -172,6 +153,9 @@ public class JoystickAnalog extends Component {
      * @param task Event handler to call or null to disable
      */
     public void onDown(Runnable task) {
+        if(push == null){
+            throw new IllegalStateException("no button set, you can't register an event");
+        }
         push.onDown(task);
     }
 
@@ -183,6 +167,9 @@ public class JoystickAnalog extends Component {
      * @param task Event handler to call or null to disable
      */
     public void onUp(Runnable task) {
+        if(push == null){
+            throw new IllegalStateException("no button set, you can't register an event");
+        }
         push.onUp(task);
     }
 
@@ -194,6 +181,9 @@ public class JoystickAnalog extends Component {
      * @param task Event handler to call or null to disable
      */
     public void whilePressed(Runnable task, Duration whilePressedDelay) {
+        if(push == null){
+            throw new IllegalStateException("no button set, you can't register an event");
+        }
         push.whilePressed(task, whilePressedDelay);
     }
 
@@ -217,7 +207,8 @@ public class JoystickAnalog extends Component {
     /**
      * disables all the handlers on joystick events
      */
-    public void deregisterAll() {
+    @Override
+    public void reset() {
         ads1115.reset();
         x.reset();
         y.reset();
@@ -227,22 +218,11 @@ public class JoystickAnalog extends Component {
     /**
      * calibrates the center position of the joystick
      */
-    public void calibrateJoystick() {
+    private void calibrateJoystick() {
         xOffset = NORMALIZED_CENTER_POSITION - x.readNormalizedValue();
         yOffset = NORMALIZED_CENTER_POSITION - y.readNormalizedValue();
     }
 
-    /**
-     * returns xOffset
-     * @return double xOffset
-     */
-    public double getX_Offset(){return xOffset;}
-
-    /**
-     * returns yOffset
-     * @return double yOffset
-     */
-    public double getY_Offset(){return yOffset;}
 
     /**
      * Changes the output value from 0 to 1 to -1 to 1

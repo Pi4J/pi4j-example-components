@@ -1,7 +1,6 @@
 package com.pi4j.catalog.components;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -30,21 +29,21 @@ public class Ads1115Test extends ComponentTest {
     public void setUp() {
 
         //setup mocks
-        defaultConfigRegister = Ads1115.OS.WRITE_START.getOs()
+        defaultConfigRegister = Ads1115.OperationalStatus.WRITE_START.getOs()
                 | Ads1115.GAIN.GAIN_4_096V.gain()
-                | Ads1115.DR.SPS_128.getConf()
+                | Ads1115.DataRate.SPS_128.getConf()
                 | Ads1115.COMP_MODE.TRAD_COMP.getCompMode()
                 | Ads1115.COMP_POL.ACTIVE_LOW.getCompPol()
                 | Ads1115.COMP_LAT.NON_LATCH.getLatching()
                 | Ads1115.COMP_QUE.DISABLE_COMP.getCompQue();
 
         answerSingleShotAIN0ConfigRegister = defaultConfigRegister
-                & Ads1115.OS.CLR_CURRENT_CONF_PARAM.getOs()
-                | Ads1115.OS.READ_NO_CONV.getOs()
-                | Ads1115.MUX.AIN0_GND.getMux()
-                | Ads1115.MODE.SINGLE.getMode();
+                & Ads1115.OperationalStatus.CLR_CURRENT_CONF_PARAM.getOs()
+                | Ads1115.OperationalStatus.READ_NO_CONV.getOs()
+                | Ads1115.MultiplexerConfig.AIN0_GND.getMux()
+                | Ads1115.OperationMode.SINGLE.getMode();
 
-        when(mockI2C.writeRegisterWord(CONFIG_REGISTER, defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode())).thenReturn(answerSingleShotAIN0ConfigRegister);
+        when(mockI2C.writeRegisterWord(CONFIG_REGISTER, defaultConfigRegister | Ads1115.MultiplexerConfig.AIN0_GND.getMux() | Ads1115.OperationMode.SINGLE.getMode())).thenReturn(answerSingleShotAIN0ConfigRegister);
 
         ads1115 = new Ads1115(pi4j);
         mockI2C = ads1115.mock();
