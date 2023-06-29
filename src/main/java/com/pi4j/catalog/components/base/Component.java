@@ -1,6 +1,8 @@
 package com.pi4j.catalog.components.base;
 
-import java.util.logging.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class Component {
     /**
@@ -9,7 +11,7 @@ public abstract class Component {
     private static final Logger logger = Logger.getGlobal();
 
     protected Component(){
-        Level appropriateLevel = Level.FINE;
+        Level appropriateLevel = Level.INFO;
 
         logger.setLevel(appropriateLevel);
         ConsoleHandler handler = new ConsoleHandler();

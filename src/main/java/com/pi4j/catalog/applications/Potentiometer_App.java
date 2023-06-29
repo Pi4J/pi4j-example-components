@@ -21,24 +21,31 @@ public class Potentiometer_App implements Application {
         Potentiometer poti = new Potentiometer(ads1115, Ads1115.Channel.A0);
 
         //read current value from poti one time
-        System.out.println(String.format("Current value of the poti is %.2f V.", poti.readCurrentVoltage()));
+        System.out.println(String.format("P0 raw value is %.2f V", poti.readCurrentVoltage()));
 
         //read current value from the poti in percent one time
-        System.out.println(String.format("The potentiometer slider is currently at %.2f %%", poti.readNormalizedValue()));
+        System.out.println(String.format("P0 normalized value is %.2f %%", poti.readNormalizedValue()));
 
         // Register event handlers to print a message when potentiometer is moved
-        poti.onNormalizedValueChange((value) -> System.out.println(String.format("The potentiometer slider is currently at  %.2f  %% of its full travel.", value)));
+        poti.onNormalizedValueChange((value) -> System.out.println(String.format("P0 slider is at %.2f %%", value)));
 
-        //start continuous reading with single shot in this mode you can connect up to 4 devices to the analog module
+        //you can attach a second potentiometer to another channel, if you like
+//        Potentiometer potiWithCenterPosition = new Potentiometer(ads1115, Ads1115.Channel.A1, Potentiometer.Range.MINUS_ONE_TO_ONE);
+//        potiWithCenterPosition.onNormalizedValueChange((value) -> System.out.println(String.format("P1 slider is at %.2f %%", value)));
+
+        //you have to start the continuous reading on ADC (because you can use up to 4 channels and all of them need to be fully configured before starting to read the values)
         ads1115.startContinuousReading(0.1, 10);
 
-        // Wait while handling events before exiting
         System.out.println("Move the potentiometer to see it in action!");
+        // Wait while handling events before exiting
         delay(15_000);
 
-        //stop continuous reading
         ads1115.stopContinuousReading();
 
-        System.out.println("Potentiometer test done");
+        System.out.println("No new values should be reported");
+        delay(5_000);
+
+        ads1115.reset();
+        System.out.println("Test done\n\n\n");
     }
 }

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import com.pi4j.config.exception.ConfigException;
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 
@@ -45,6 +44,8 @@ public class Ads1115 extends I2CDevice {
 
     private final Map<Channel, Consumer<Double>> channelsInUse = new HashMap<>();
 
+    private final Map<Channel, RawValueRange> valueRanges = new HashMap<>();
+
     private boolean continuousReadingActive;
 
     /**
@@ -70,7 +71,7 @@ public class Ads1115 extends I2CDevice {
         this.pga = gain;
         this.dataRate = DataRate.SPS_128;
 
-        int os       = OperationalStatus.WRITE_START.getOs();
+        int os       = OperationalStatus.WRITE_START.getOperationalStatus();
         int compMode = COMP_MODE.TRAD_COMP.getCompMode();
         int compPol  = COMP_POL.ACTIVE_LOW.getCompPol();
         int compLat  = COMP_LAT.NON_LATCH.getLatching();
@@ -100,6 +101,13 @@ public class Ads1115 extends I2CDevice {
         }
     }
 
+    public double maxRawValue(Channel channel){
+        return getRange(channel).maxRawValue;
+    }
+
+    public double minRawValue(Channel channel){
+        return getRange(channel).minRawValue;
+    }
 
     /**
      * Returns voltage value from specified channel
@@ -111,7 +119,12 @@ public class Ads1115 extends I2CDevice {
             throw new IllegalStateException("Continuous measuring active");
         }
 
-        double voltage = pga.gainPerBit * readSingleShot(channel);
+        double voltage = pga.gainPerBit * readSingleValue(channel);
+
+        RawValueRange range = getRange(channel);
+        range.maxRawValue = Math.max(range.maxRawValue, voltage);
+        range.minRawValue = Math.min(range.minRawValue, voltage);
+
         logDebug("current value of channel %s: %.2f", channel, voltage);
 
         return voltage;
@@ -139,14 +152,14 @@ public class Ads1115 extends I2CDevice {
      */
     public void startContinuousReading(double threshold, int readFrequency) {
         if (continuousReadingActive) {
-            throw new IllegalStateException("slow reading already active");
+            throw new IllegalStateException("continuous reading already active");
         } else {
             //set fast continuous reading active to lock slow continuous reading
             continuousReadingActive = true;
 
             readAllChannels(threshold, readFrequency);
 
-            logDebug("Start fast continuous reading");
+            logDebug("Start continuous reading");
         }
     }
 
@@ -155,6 +168,7 @@ public class Ads1115 extends I2CDevice {
      */
     public void stopContinuousReading() {
         // write single shot configuration to stop reading process in device
+        continuousReadingActive = false;
         channelsInUse.forEach((channel, onValueChange) -> {
             MultiplexerConfig mux = switch (channel) {
                 case A0 -> MultiplexerConfig.AIN0_GND;
@@ -164,7 +178,6 @@ public class Ads1115 extends I2CDevice {
             };
             writeConfigRegister(configRegisterTemplate | mux.getMux() | OperationMode.SINGLE.getMode());
         });
-        continuousReadingActive = false;
         logDebug("Continuous reading stopped");
     }
 
@@ -175,6 +188,8 @@ public class Ads1115 extends I2CDevice {
     @Override
     public void reset() {
         stopContinuousReading();
+        channelsInUse.clear();
+        oldValues.clear();
     }
 
 
@@ -187,23 +202,6 @@ public class Ads1115 extends I2CDevice {
         return i2c.readRegisterWord(CONVERSION_REGISTER);
     }
 
-    /**
-     * read lower threshold from device
-     *
-     * @return lower threshold
-     */
-    private int readLoThreshRegister() {
-        return i2c.readRegisterWord(LO_THRESH_REGISTER);
-    }
-
-    /**
-     * read upper threshold from device
-     *
-     * @return upper threshold
-     */
-    private int readHiThreshRegister() {
-        return i2c.readRegisterWord(HI_THRESH_REGISTER);
-    }
 
     /**
      * write custom configuration to device
@@ -277,7 +275,7 @@ public class Ads1115 extends I2CDevice {
      *
      * @return value from conversion register
      */
-    private synchronized int readSingleShot(Channel channel) {
+    private synchronized int readSingleValue(Channel channel) {
         MultiplexerConfig mux = switch (channel) {
             case A0 -> MultiplexerConfig.AIN0_GND;
             case A1 -> MultiplexerConfig.AIN1_GND;
@@ -287,12 +285,13 @@ public class Ads1115 extends I2CDevice {
         int config = configRegisterTemplate | mux.getMux() | OperationMode.SINGLE.getMode();
         //write configuration to device
         int confCheck = writeConfigRegister(config);
-        //check if configuration is correct written on device, ignore first bit (os)
-        if ((confCheck & OperationalStatus.CLR_CURRENT_CONF_PARAM.getOs()) != (config & OperationalStatus.CLR_CURRENT_CONF_PARAM.getOs()))
-            throw new ConfigException("Configuration not correctly written to device.");
+        //check if configuration is written correctly on device, ignore first bit (os)
+        int os = OperationalStatus.CLR_CURRENT_CONF_PARAM.getOperationalStatus();
+        if ((confCheck & os) != (config & os)) {
+            logError("Configuration not correctly written to device.");
+        }
 
         //read actual ad value from device
-
         return readConversionRegister();
     }
 
@@ -319,7 +318,7 @@ public class Ads1115 extends I2CDevice {
                     int thresholdDigits = (int) (threshold / pga.gainPerBit);
 
                     channelsInUse.forEach((channel, onValueChange) -> {
-                        int newValue = readSingleShot(channel);
+                        int newValue = readSingleValue(channel);
                         logDebug("Current value channel %s: %d", channel, newValue);
 
                         int oldValue = oldValues.get(channel);
@@ -341,6 +340,15 @@ public class Ads1115 extends I2CDevice {
         } else {
             throw new IllegalStateException("readFrequency too high");
         }
+    }
+
+    private RawValueRange getRange(Channel channel){
+        return valueRanges.computeIfAbsent(channel, (c) -> new RawValueRange());
+    }
+
+    private class RawValueRange{
+        double minRawValue = 0.1;
+        double maxRawValue = 3.2;
     }
 
     public enum Channel {
@@ -1047,7 +1055,7 @@ public class Ads1115 extends I2CDevice {
          *
          * @return os configuration parameter
          */
-        public int getOs() {
+        public int getOperationalStatus() {
             return os;
         }
     }

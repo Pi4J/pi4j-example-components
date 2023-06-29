@@ -6,10 +6,24 @@ import java.util.function.Consumer;
 import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.base.PIN;
 
+/**
+ * An analog joystick needs to use an analog-digital convertor (ADC) to be attached to RaspPi.
+ * <p>
+ * In this implementation we use an 'Ads115' and attach two 'Potentiometer', using 2 of the ADC channels,
+ * and one 'SimpleButton', connected to one of the digital pins, to it.
+ * <p>
+ * We use the terms 'normalized value' and 'raw value'.
+ * <ul>
+ *     <li>Normalized values are between -1 and 1. 0 means that joystick is in home position</li>
+ *     <li>Raw value is the measured voltage</li>
+ * </ul>
+ */
 public class JoystickAnalog extends Component {
-    public enum Range {
-        ZERO_TO_ONE, MINUS_ONE_TO_ONE
-    }
+    /**
+     * normalized center position
+     */
+    private final double NORMALIZED_CENTER_POSITION = 0.5;
+
 
     private final Ads1115 ads1115;
     /**
@@ -22,25 +36,25 @@ public class JoystickAnalog extends Component {
     private final Potentiometer y;
     /**
      * button push
+     *
+     * Can be 'null' if joystick doesn't have button functionality or if you don't want to use it
      */
     private final SimpleButton push;
+
     /**
-     * default normalization if true -> normalization from 0 to 1
-     * if false -> normalization from -1 to 1
+     * deviation (in Volt) of x-axis if joystick is in home position
+     * <P>
+     * Ideally the joystick's value should be half of the maximum voltage when in home position.
+     * But there are always deviations.
      */
-    private static final boolean DEFAULT_NORMALIZATION = true;
+    private double deviationX = 0.0;
     /**
-     * normalized center position
+     * deviation (in Volt) of y-axis if joystick is in home position
+     * <P>
+     * Ideally the joystick's value should be half of the maximum voltage when in home position.
+     * But there are always deviations.
      */
-    private final double NORMALIZED_CENTER_POSITION = 0.5;
-    /**
-     * offset center x-axis
-     */
-    private double xOffset = 0.0;
-    /**
-     * offset center y-axis
-     */
-    private double yOffset = 0.0;
+    private double deviationY = 0.0;
 
     /**
      * minimal normalized value on x axis
@@ -103,9 +117,9 @@ public class JoystickAnalog extends Component {
      * @param onChange Event handler to call or null to disable
      */
     public void onHorizontalChange(Consumer<Double> onChange) {
-        x.onNormalizedValueChange((value) -> {
+        x.onNormalizedValueChange((raw) -> {
 
-            value = value + xOffset;
+            double value = raw + deviationX;
             //check if min max value are ok
             if (value < xMinNormValue) xMinNormValue = value;
             if (value > xMaxNormValue) xMaxNormValue = value;
@@ -129,7 +143,7 @@ public class JoystickAnalog extends Component {
      */
     public void onVerticalChange(Consumer<Double> onChange) {
         y.onNormalizedValueChange((value) -> {
-            value = value + yOffset;
+            value = value + deviationY;
 
             //check if min max value are ok
             if (value < yMinNormValue) yMinNormValue = value;
@@ -219,8 +233,8 @@ public class JoystickAnalog extends Component {
      * calibrates the center position of the joystick
      */
     private void calibrateJoystick() {
-        xOffset = NORMALIZED_CENTER_POSITION - x.readNormalizedValue();
-        yOffset = NORMALIZED_CENTER_POSITION - y.readNormalizedValue();
+        deviationX = NORMALIZED_CENTER_POSITION - x.readNormalizedValue();
+        deviationY = NORMALIZED_CENTER_POSITION - y.readNormalizedValue();
     }
 
 

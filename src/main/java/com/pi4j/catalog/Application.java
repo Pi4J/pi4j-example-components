@@ -1,7 +1,5 @@
 package com.pi4j.catalog;
 
-import java.util.logging.Logger;
-
 import com.pi4j.context.Context;
 
 /**

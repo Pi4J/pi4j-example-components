@@ -2,7 +2,6 @@ package com.pi4j.catalog.components;
 
 import com.pi4j.context.Context;
 import com.pi4j.io.pwm.Pwm;
-import com.pi4j.io.pwm.PwmConfig;
 
 import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.base.PwmActuator;

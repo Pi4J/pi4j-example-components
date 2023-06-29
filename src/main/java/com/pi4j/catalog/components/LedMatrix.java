@@ -3,7 +3,6 @@ package com.pi4j.catalog.components;
 import java.util.Arrays;
 
 import com.pi4j.context.Context;
-import com.pi4j.io.spi.Spi;
 
 import com.pi4j.catalog.components.base.Component;
 

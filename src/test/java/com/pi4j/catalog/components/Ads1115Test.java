@@ -29,7 +29,7 @@ public class Ads1115Test extends ComponentTest {
     public void setUp() {
 
         //setup mocks
-        defaultConfigRegister = Ads1115.OperationalStatus.WRITE_START.getOs()
+        defaultConfigRegister = Ads1115.OperationalStatus.WRITE_START.getOperationalStatus()
                 | Ads1115.GAIN.GAIN_4_096V.gain()
                 | Ads1115.DataRate.SPS_128.getConf()
                 | Ads1115.COMP_MODE.TRAD_COMP.getCompMode()
@@ -38,8 +38,8 @@ public class Ads1115Test extends ComponentTest {
                 | Ads1115.COMP_QUE.DISABLE_COMP.getCompQue();
 
         answerSingleShotAIN0ConfigRegister = defaultConfigRegister
-                & Ads1115.OperationalStatus.CLR_CURRENT_CONF_PARAM.getOs()
-                | Ads1115.OperationalStatus.READ_NO_CONV.getOs()
+                & Ads1115.OperationalStatus.CLR_CURRENT_CONF_PARAM.getOperationalStatus()
+                | Ads1115.OperationalStatus.READ_NO_CONV.getOperationalStatus()
                 | Ads1115.MultiplexerConfig.AIN0_GND.getMux()
                 | Ads1115.OperationMode.SINGLE.getMode();
 
