@@ -14,7 +14,7 @@ import com.pi4j.catalog.components.base.PIN;
 public class LedButton_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        System.out.println("LED button app started ...");
+        System.out.println("LED button demo started ...");
 
         // Initialize the button component
         final LedButton ledButton = new LedButton(pi4j, PIN.D26, Boolean.FALSE, PIN.PWM19);
@@ -41,6 +41,6 @@ public class LedButton_App implements Application {
         // Unregister all event handlers to exit this application in a clean way
         ledButton.reset();
 
-        System.out.println("LED button app done.");
+        System.out.println("LED button demo done.");
     }
 }

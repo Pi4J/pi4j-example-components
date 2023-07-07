@@ -15,7 +15,7 @@ import com.pi4j.catalog.components.base.PIN;
 public class SimpleLed_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        System.out.println("Simple LED app started ...");
+        System.out.println("Simple LED demo started ...");
 
         // Create a new SimpleLED component
         SimpleLed led = new SimpleLed(pi4j, PIN.D26);
@@ -36,7 +36,7 @@ public class SimpleLed_App implements Application {
         System.out.println("Reset LED.");
         delay(2000);
 
-        System.out.println("Simple LED app done.");
+        System.out.println("Simple LED demo done.");
     }
 }
 

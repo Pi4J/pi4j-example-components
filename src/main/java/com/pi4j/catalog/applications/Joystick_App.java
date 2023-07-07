@@ -10,14 +10,14 @@ import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the Joystick by registering actions for each position of the joystick
- * <P>
+ * <p>
  * see <a href="https://pi4j.com/examples/components/joystick/">Description on Pi4J website</a>
  */
 public class Joystick_App implements Application {
     @Override
     public void execute(Context pi4j) {
 
-        System.out.println("Joystick app started ...");
+        System.out.println("Joystick demo started ...");
         final var joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.PWM13, PIN.PWM19, PIN.D26);
 
         //Register event handlers to print a message when pressed (onDown) and (onUp)
@@ -43,6 +43,6 @@ public class Joystick_App implements Application {
         // Unregister all event handlers to exit this application in a clean way
         joystick.reset();
 
-        System.out.println("Joystick app done.");
+        System.out.println("Joystick demo done.");
     }
 }

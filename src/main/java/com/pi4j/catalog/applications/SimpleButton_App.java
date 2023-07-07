@@ -17,7 +17,7 @@ public class SimpleButton_App implements Application {
 
     @Override
     public void execute(Context pi4j) {
-        System.out.println("Simple button app started ...");
+        System.out.println("Simple button demo started ...");
 
         // Initialize the button component
         final var button = new SimpleButton(pi4j, PIN.D26, Boolean.FALSE);
@@ -39,6 +39,6 @@ public class SimpleButton_App implements Application {
         button.onUp(null);
         */
 
-        System.out.println("Simple button app done.");
+        System.out.println("Simple button demo done.");
     }
 }

@@ -15,7 +15,7 @@ public abstract class I2CDevice extends Component {
     /**
      * The PI4J I2C component
      */
-    protected final I2C i2c;
+    private final I2C i2c;
 
 
     protected I2CDevice(Context pi4j, int device, String name){
@@ -31,11 +31,33 @@ public abstract class I2CDevice extends Component {
 
 
     /**
-     * Write a single command
+     * send a single command to device
      */
     protected void executeCommand(byte cmd) {
         i2c.write(cmd);
         delay(0, 100_000);
+    }
+
+    protected int readRegister(int register) {
+        return i2c.readRegisterWord(register);
+    }
+
+    /**
+     * send custom configuration to device
+     *
+     * @param config custom configuration
+     */
+    protected void writeRegister(int register, int config) {
+        i2c.writeRegisterWord(register, config);
+    }
+
+    /**
+     * send some data to device
+     *
+     * @param data
+     */
+    protected void write(byte data){
+        i2c.write(data);
     }
 
     /**

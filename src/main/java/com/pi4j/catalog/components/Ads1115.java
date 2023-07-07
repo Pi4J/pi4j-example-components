@@ -199,7 +199,7 @@ public class Ads1115 extends I2CDevice {
      * @return last stored conversion
      */
     private int readConversionRegister() {
-        return i2c.readRegisterWord(CONVERSION_REGISTER);
+        return readRegister(CONVERSION_REGISTER);
     }
 
 
@@ -209,7 +209,7 @@ public class Ads1115 extends I2CDevice {
      * @param config custom configuration
      */
     private int writeConfigRegister(int config) {
-        i2c.writeRegisterWord(CONFIG_REGISTER, config);
+        writeRegister(CONFIG_REGISTER, config);
         //wait until ad converter has stored new value in conversion register
         //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
         //round value up to wait long enough
@@ -243,7 +243,7 @@ public class Ads1115 extends I2CDevice {
 //        String[] compQueInfo  = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
 
         //get configuration from device
-        int result = i2c.readRegisterWord(CONFIG_REGISTER);
+        int result = readRegister(CONFIG_REGISTER);
 
         //create logger message
         //check os

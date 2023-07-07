@@ -302,9 +302,10 @@ public class LcdDisplay extends I2CDevice {
      * Clocks EN to latch command
      */
     private void lcd_strobe(byte data) {
-        i2c.write((byte) (data | En | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
+        byte backlight = this.backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT;
+        write((byte) (data | En | backlight));
         delay(0, 500_000);
-        i2c.write((byte) ((data & ~En) | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
+        write((byte) ((data & ~En) | backlight));
         delay(0, 100_000);
     }
 
@@ -438,7 +439,7 @@ public class LcdDisplay extends I2CDevice {
      * @param data the byte that is sent
      */
     private void writeFourBits(byte data) {
-        i2c.write((byte) (data | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
+        write((byte) (data | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
         lcd_strobe(data);
     }
 

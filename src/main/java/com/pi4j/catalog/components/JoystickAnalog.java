@@ -19,11 +19,6 @@ import com.pi4j.catalog.components.base.PIN;
  * </ul>
  */
 public class JoystickAnalog extends Component {
-    /**
-     * normalized center position
-     */
-    private final double NORMALIZED_CENTER_POSITION = 0.5;
-
 
     private final Ads1115 ads1115;
     /**
@@ -41,37 +36,14 @@ public class JoystickAnalog extends Component {
      */
     private final SimpleButton push;
 
-    /**
-     * deviation (in Volt) of x-axis if joystick is in home position
-     * <P>
-     * Ideally the joystick's value should be half of the maximum voltage when in home position.
-     * But there are always deviations.
-     */
-    private double deviationX = 0.0;
-    /**
-     * deviation (in Volt) of y-axis if joystick is in home position
-     * <P>
-     * Ideally the joystick's value should be half of the maximum voltage when in home position.
-     * But there are always deviations.
-     */
-    private double deviationY = 0.0;
+    private final double normThreshold;
 
-    /**
-     * minimal normalized value on x axis
-     */
-    private double xMinNormValue;
-    /**
-     * maximal normalized value on x axis
-     */
-    private double xMaxNormValue;
-    /**
-     * minimal normalized value on y axis
-     */
-    private double yMinNormValue;
-    /**
-     * maximal normalized value on y axis
-     */
-    private double yMaxNormValue;
+    private double xActualValue;
+
+    private double yActualValue;
+
+    private double xLastNotifiedValue;
+    private double yLastNotifiedValue;
 
 
     /**
@@ -85,9 +57,11 @@ public class JoystickAnalog extends Component {
      */
     public JoystickAnalog(Ads1115 ads1115, Ads1115.Channel channelXAxis, Ads1115.Channel channelYAxis, PIN pin) {
         this(ads1115,
-             new Potentiometer(ads1115, channelXAxis),
-             new Potentiometer(ads1115, channelYAxis),
+             new Potentiometer(ads1115, channelXAxis, Potentiometer.Range.MINUS_ONE_TO_ONE),
+             new Potentiometer(ads1115, channelYAxis, Potentiometer.Range.MINUS_ONE_TO_ONE),
+             0.05,
              pin != null ? new SimpleButton(ads1115.getPi4j(), pin, true) : null);
+
     }
 
     /**
@@ -95,68 +69,40 @@ public class JoystickAnalog extends Component {
      * @param potentiometerY potentiometer object for y-axis
      * @param push           simpleButton object for push button on joystick
      */
-    JoystickAnalog(Ads1115 ads1115, Potentiometer potentiometerX, Potentiometer potentiometerY, SimpleButton push) {
+    JoystickAnalog(Ads1115 ads1115, Potentiometer potentiometerX, Potentiometer potentiometerY, double normThreshold, SimpleButton push) {
         this.ads1115 = ads1115;
         this.x       = potentiometerX;
         this.y       = potentiometerY;
         this.push    = push;
-
-        xMinNormValue = 0.1;
-        xMaxNormValue = 0.9;
-        yMinNormValue = 0.1;
-        yMaxNormValue = 0.9;
-
-        calibrateJoystick();
+        this.normThreshold = normThreshold;
     }
 
-    /**
-     * Sets or disables the handler for a value change event.
-     * This event gets triggered whenever the x-axis of the joystick is moving.
-     * Only a single event handler can be registered at once.
-     *
-     * @param onChange Event handler to call or null to disable
-     */
-    public void onHorizontalChange(Consumer<Double> onChange) {
-        x.onNormalizedValueChange((raw) -> {
+    public void onMove(PositionConsumer onMove, Runnable onCenter){
+        x.onNormalizedValueChange((xPos) -> {
+            xActualValue = xPos;
+            notifyIfNeeded(onMove, onCenter);
+        });
 
-            double value = raw + deviationX;
-            //check if min max value are ok
-            if (value < xMinNormValue) xMinNormValue = value;
-            if (value > xMaxNormValue) xMaxNormValue = value;
-            //scale axis from 0 to 1
-            if (value < NORMALIZED_CENTER_POSITION) {
-                value = (value - xMinNormValue) / (NORMALIZED_CENTER_POSITION - xMinNormValue) / 2;
-            } else if (value > NORMALIZED_CENTER_POSITION) {
-                value = 1 + (xMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - xMaxNormValue) / 2;
-            }
-
-            onChange.accept(rescaleValue(value));
+        y.onNormalizedValueChange((yPos) -> {
+            yActualValue = yPos;
+            notifyIfNeeded(onMove, onCenter);
         });
     }
 
-    /**
-     * Sets or disables the handler for a value change event.
-     * This event gets triggered whenever the y-axis of the joystick is moving.
-     * Only a single event handler can be registered at once.
-     *
-     * @param onChange Event handler to call or null to disable
-     */
-    public void onVerticalChange(Consumer<Double> onChange) {
-        y.onNormalizedValueChange((value) -> {
-            value = value + deviationY;
+    private synchronized void notifyIfNeeded(PositionConsumer onMove, Runnable onCenter){
+        if(xActualValue == 0 && yActualValue == 0){
+            onCenter.run();
+        }
+        else {
+            double distance = Math.sqrt(Math.pow(xActualValue - xLastNotifiedValue, 2) + Math.pow(yActualValue - yLastNotifiedValue, 2));
 
-            //check if min max value are ok
-            if (value < yMinNormValue) yMinNormValue = value;
-            if (value > yMaxNormValue) yMaxNormValue = value;
-            //scale axis from 0 to 1
-            if (value < NORMALIZED_CENTER_POSITION) {
-                value = (value - yMinNormValue) / (NORMALIZED_CENTER_POSITION - yMinNormValue) / 2;
-            } else if (value > NORMALIZED_CENTER_POSITION) {
-                value = 1 + (yMaxNormValue - value) / (NORMALIZED_CENTER_POSITION - yMaxNormValue) / 2;
+            if(distance > normThreshold){
+                xLastNotifiedValue = xActualValue;
+                yLastNotifiedValue = yActualValue;
+
+                onMove.accept(xLastNotifiedValue, yLastNotifiedValue);
             }
-
-            onChange.accept(rescaleValue(value));
-        });
+        }
     }
 
     /**
@@ -202,23 +148,6 @@ public class JoystickAnalog extends Component {
     }
 
     /**
-     * Start reading of joystick value. Needs to be triggered before any value can be read.
-     *
-     * @param threshold     delta between old and new value to trigger new event (+- voltage)
-     * @param readFrequency update frequency to read new value from ad converter
-     */
-    public void start(double threshold, int readFrequency) {
-        ads1115.startContinuousReading(threshold, readFrequency);
-    }
-
-    /**
-     * Stop reading of joystick value. If triggered no new value from joystick can be read.
-     */
-    public void stop() {
-        ads1115.stopContinuousReading();
-    }
-
-    /**
      * disables all the handlers on joystick events
      */
     @Override
@@ -229,22 +158,9 @@ public class JoystickAnalog extends Component {
         push.reset();
     }
 
-    /**
-     * calibrates the center position of the joystick
-     */
-    private void calibrateJoystick() {
-        deviationX = NORMALIZED_CENTER_POSITION - x.readNormalizedValue();
-        deviationY = NORMALIZED_CENTER_POSITION - y.readNormalizedValue();
+    @FunctionalInterface
+    public interface PositionConsumer{
+        void accept(double xPos, double YPos);
     }
 
-
-    /**
-     * Changes the output value from 0 to 1 to -1 to 1
-     *
-     * @param in original output value between 0 and 1
-     * @return new output value between -1 and 1
-     */
-    private double rescaleValue(double in) {
-        return (in - NORMALIZED_CENTER_POSITION) * 2;
-    }
 }
