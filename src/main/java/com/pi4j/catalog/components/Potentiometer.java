@@ -81,7 +81,7 @@ public class Potentiometer extends Component {
 
     @Override
     public void reset() {
-        ads1115.reset();
+        ads1115.resetChannel(channel);
     }
 
     private double normalizeVoltage(double voltage) {

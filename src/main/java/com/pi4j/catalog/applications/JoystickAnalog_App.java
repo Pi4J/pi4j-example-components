@@ -25,15 +25,15 @@ public class JoystickAnalog_App implements Application {
         JoystickAnalog joystick = new JoystickAnalog(ads1115, Ads1115.Channel.A0, Ads1115.Channel.A1, PIN.D26);
 
         //register event handlers
-        joystick.onMove((xPos, yPos) -> System.out.println(String.format("Current value of joystick axis is: %.2f, %.2f", xPos, yPos)),
+        joystick.onMove((xPos, yPos) -> System.out.println(String.format("Current position of joystick is: %.2f, %.2f", xPos, yPos)),
                         () -> System.out.println("Joystick in home position"));
 
         joystick.onDown      (() -> System.out.println("Pressing the button"));
         joystick.onUp        (() -> System.out.println("Stopped pressing."));
-        joystick.whilePressed(() -> System.out.println("Button is still pressed."), Duration.ofSeconds(1));
+        joystick.whilePressed(() -> System.out.println("Button is still pressed."), Duration.ofMillis(500));
 
         //start continuous reading
-        ads1115.startContinuousReading(0.05, 10);
+        ads1115.startContinuousReading(0.1);
 
         System.out.println("Move the joystick to see it in action!");
 

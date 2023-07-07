@@ -34,7 +34,7 @@ public class Potentiometer_App implements Application {
 //        potiWithCenterPosition.onNormalizedValueChange((value) -> System.out.println(String.format("P1 slider is at %.2f %%", value)));
 
         //you have to start continuous reading on ADC (because you can use up to 4 channels and all of them need to be fully configured before starting to read the values)
-        ads1115.startContinuousReading(0.1, 10);
+        ads1115.startContinuousReading(0.1);
 
         System.out.println("Move the potentiometer to see it in action!");
         // Wait while handling events before exiting

@@ -32,6 +32,7 @@
           <option name="profilesMap">
             <map>
               <entry key="debug" value="true" />
+              <entry key="remote-run" value="true" />
             </map>
           </option>
           <option name="resolveToWorkspace" value="false" />

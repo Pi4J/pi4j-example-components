@@ -1,7 +1,6 @@
 package com.pi4j.catalog.components;
 
 import java.time.Duration;
-import java.util.function.Consumer;
 
 import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.base.PIN;
@@ -17,6 +16,7 @@ import com.pi4j.catalog.components.base.PIN;
  *     <li>Normalized values are between -1 and 1. 0 means that joystick is in home position</li>
  *     <li>Raw value is the measured voltage</li>
  * </ul>
+ *
  */
 public class JoystickAnalog extends Component {
 
@@ -24,11 +24,11 @@ public class JoystickAnalog extends Component {
     /**
      * potentiometer x axis
      */
-    private final Potentiometer x;
+    private final Potentiometer xAxis;
     /**
      * potentiometer y axis
      */
-    private final Potentiometer y;
+    private final Potentiometer yAxis;
     /**
      * button push
      *
@@ -39,11 +39,10 @@ public class JoystickAnalog extends Component {
     private final double normThreshold;
 
     private double xActualValue;
-
     private double yActualValue;
 
-    private double xLastNotifiedValue;
-    private double yLastNotifiedValue;
+    private double xLastNotifiedValue = 999;
+    private double yLastNotifiedValue = 999;
 
 
     /**
@@ -61,7 +60,6 @@ public class JoystickAnalog extends Component {
              new Potentiometer(ads1115, channelYAxis, Potentiometer.Range.MINUS_ONE_TO_ONE),
              0.05,
              pin != null ? new SimpleButton(ads1115.getPi4j(), pin, true) : null);
-
     }
 
     /**
@@ -70,28 +68,33 @@ public class JoystickAnalog extends Component {
      * @param push           simpleButton object for push button on joystick
      */
     JoystickAnalog(Ads1115 ads1115, Potentiometer potentiometerX, Potentiometer potentiometerY, double normThreshold, SimpleButton push) {
-        this.ads1115 = ads1115;
-        this.x       = potentiometerX;
-        this.y       = potentiometerY;
-        this.push    = push;
+        this.ads1115       = ads1115;
+        this.xAxis         = potentiometerX;
+        this.yAxis         = potentiometerY;
+        this.push          = push;
         this.normThreshold = normThreshold;
     }
 
     public void onMove(PositionConsumer onMove, Runnable onCenter){
-        x.onNormalizedValueChange((xPos) -> {
+        xAxis.onNormalizedValueChange((xPos) -> {
             xActualValue = xPos;
             notifyIfNeeded(onMove, onCenter);
         });
 
-        y.onNormalizedValueChange((yPos) -> {
-            yActualValue = yPos;
+        yAxis.onNormalizedValueChange((yPos) -> {
+            yActualValue = -yPos;
             notifyIfNeeded(onMove, onCenter);
         });
     }
 
     private synchronized void notifyIfNeeded(PositionConsumer onMove, Runnable onCenter){
-        if(xActualValue == 0 && yActualValue == 0){
-            onCenter.run();
+        final double homeArea = 0.1;
+        if (Math.abs(xActualValue) <= homeArea && Math.abs(yActualValue) <= homeArea) {
+            xLastNotifiedValue = xActualValue;
+            yLastNotifiedValue = yActualValue;
+            if (onCenter != null) {
+                onCenter.run();
+            }
         }
         else {
             double distance = Math.sqrt(Math.pow(xActualValue - xLastNotifiedValue, 2) + Math.pow(yActualValue - yLastNotifiedValue, 2));
@@ -100,7 +103,9 @@ public class JoystickAnalog extends Component {
                 xLastNotifiedValue = xActualValue;
                 yLastNotifiedValue = yActualValue;
 
-                onMove.accept(xLastNotifiedValue, yLastNotifiedValue);
+                if(onMove != null){
+                    onMove.accept(xLastNotifiedValue, yLastNotifiedValue);
+                }
             }
         }
     }
@@ -152,9 +157,9 @@ public class JoystickAnalog extends Component {
      */
     @Override
     public void reset() {
-        ads1115.reset();
-        x.reset();
-        y.reset();
+        ads1115.stopContinuousReading();
+        xAxis.reset();
+        yAxis.reset();
         push.reset();
     }
 

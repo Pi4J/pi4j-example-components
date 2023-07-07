@@ -60,7 +60,7 @@ public class Ads1115_App implements Application {
         ads1115.onValueChange(Ads1115.Channel.A3, (value) -> System.out.println(String.format("The actual value from channel 3 is: %.2f V", value)));
 
         //start continuous measuring
-        ads1115.startContinuousReading(0.1, 10);
+        ads1115.startContinuousReading(0.1);
 
         // Wait while handling events before exiting
         delay(30000);
@@ -88,7 +88,7 @@ public class Ads1115_App implements Application {
             System.out.println("Value changed, now it's : " + String.format("%.2f", value) + "V.");
         });
 
-        ads1115.startContinuousReading(0.1, 10);
+        ads1115.startContinuousReading(0.1);
 
         // Wait while handling events before exiting
         delay(30000);
