@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -38,7 +40,7 @@ public class Ads1115_App implements Application {
             double aIn3 = adc.readValue(Ads1115.Channel.A3);
             System.out.println("[" + i + "] Voltages: a0=" + String.format("%.3f", aIn0) + " V, a1=" + String.format("%.3f", aIn1) + " V, a2=" + String.format("%.3f", aIn2) + " V, a3=" + String.format("%.3f", aIn3) + " V");
             //wait for next read
-            delay(1000);
+            delay(Duration.ofSeconds(1));
         }
 
         pi4j.shutdown();
@@ -63,7 +65,7 @@ public class Ads1115_App implements Application {
         ads1115.startContinuousReading(0.1);
 
         // Wait while handling events before exiting
-        delay(30000);
+        delay(Duration.ofSeconds(30));
 
         //stop continuous measuring
         ads1115.stopContinuousReading();
@@ -91,7 +93,7 @@ public class Ads1115_App implements Application {
         ads1115.startContinuousReading(0.1);
 
         // Wait while handling events before exiting
-        delay(30000);
+        delay(Duration.ofSeconds(30));
 
         //deregister all handlers
         ads1115.reset();

@@ -35,7 +35,7 @@ public class SimpleButton extends DigitalSensor {
     /**
      * Timer while button is pressed
      */
-    private long whilePressedDelay;
+    private Duration whilePressedDelay;
 
     /**
      * what needs to be done while button is pressed (and whilePressed is != null)
@@ -172,7 +172,7 @@ public class SimpleButton extends DigitalSensor {
      */
     public void whilePressed(Runnable task, Duration delay) {
         whileDown = task;
-        whilePressedDelay = delay.toMillis();
+        whilePressedDelay = delay;
         if(executor != null){
             executor.shutdownNow();
         }

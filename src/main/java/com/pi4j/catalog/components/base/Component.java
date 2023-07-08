@@ -1,5 +1,6 @@
 package com.pi4j.catalog.components.base;
 
+import java.time.Duration;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,15 +46,11 @@ public abstract class Component {
      * Utility function to sleep for the specified amount of milliseconds.
      * An {@link InterruptedException} will be caught and ignored while setting the interrupt flag again.
      *
-     * @param milliseconds Time in milliseconds to sleep
+     * @param duration Time to sleep
      */
-    protected void delay(long milliseconds) {
-        delay(milliseconds, 0);
-    }
-
-    protected void delay(long milliseconds, int nanoseconds){
+    protected void delay(Duration duration) {
         try {
-            Thread.sleep(milliseconds, nanoseconds);
+            Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

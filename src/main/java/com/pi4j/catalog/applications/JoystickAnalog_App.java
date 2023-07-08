@@ -22,7 +22,7 @@ public class JoystickAnalog_App implements Application {
         Ads1115 ads1115 = new Ads1115(pi4j);
 
         //joystick with normalized axis from -1 to 1
-        JoystickAnalog joystick = new JoystickAnalog(ads1115, Ads1115.Channel.A0, Ads1115.Channel.A1, PIN.D26);
+        JoystickAnalog joystick = new JoystickAnalog(ads1115, Ads1115.Channel.A0, Ads1115.Channel.A1, PIN.D26, true);
 
         //register event handlers
         joystick.onMove((xPos, yPos) -> System.out.println(String.format("Current position of joystick is: %.2f, %.2f", xPos, yPos)),
@@ -32,13 +32,13 @@ public class JoystickAnalog_App implements Application {
         joystick.onUp        (() -> System.out.println("Stopped pressing."));
         joystick.whilePressed(() -> System.out.println("Button is still pressed."), Duration.ofMillis(500));
 
-        //start continuous reading
+        //start continuous reading after all ADC channels are configured
         ads1115.startContinuousReading(0.1);
 
         System.out.println("Move the joystick to see it in action!");
 
         //wait while handling events before exiting
-        delay(30_000);
+        delay(Duration.ofSeconds(30));
 
         //stop continuous reading
         joystick.reset();

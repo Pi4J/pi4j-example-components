@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -44,13 +46,13 @@ public class Buzzer_App implements Application {
         //playing the melody once, then shutting down for a second
         System.out.println("playing melody once");
         buzzer.playMelody(60, melody);
-        delay(1000);
+        delay(Duration.ofSeconds(1));
 
         //playing the melody 5 times repeatedly
         System.out.println("playing melody 5 times");
         System.out.println("playing in a different thread, so the app is moving on");
         buzzer.playMelody(60, 5, melody);
         System.out.println("waiting for melody to finish");
-        delay(3000);
+        delay(Duration.ofSeconds(3));
     }
 }

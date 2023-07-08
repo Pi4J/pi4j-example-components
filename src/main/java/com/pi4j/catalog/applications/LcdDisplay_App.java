@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -28,7 +30,7 @@ public class LcdDisplay_App implements Application {
         lcd.displayText("   Line 4", 4);
 
         // Wait a little to have some time to read it
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         // Clear the display to start next parts
         lcd.clearDisplay();
@@ -38,15 +40,15 @@ public class LcdDisplay_App implements Application {
         lcd.displayText("Boohoo that's so simple to use!");
 
         // Delay again
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         // Of course, it is also possible to write with newLine Chars
         lcd.displayText("Some big text \nwith some new Lines \n just for testing");
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         // Of course, it is also possible to write long text
         lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         // Clear the display to start next parts
         lcd.clearDisplay();
@@ -61,7 +63,7 @@ public class LcdDisplay_App implements Application {
         lcd.writeCharacter('\2', 2, 1);
         lcd.writeCharacter('\3', 1, 2);
         lcd.writeCharacter('\4', 2, 2);
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         // Turn off the backlight makes the display appear turned off
         lcd.setDisplayBacklight(false);

@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 import com.pi4j.io.serial.FlowControl;
 import com.pi4j.io.serial.Parity;
@@ -51,7 +53,7 @@ public class SerialGps_App implements Application {
         console.print("Waiting till serial port is open");
         while (!serial.isOpen()) {
             console.print(".");
-            delay(250);
+            delay(Duration.ofMillis(250));
         }
         console.println("");
         console.println("Serial port is open");
@@ -66,7 +68,7 @@ public class SerialGps_App implements Application {
         serialReaderThread.start();
 
         while (serial.isOpen()) {
-            delay(500);
+            delay(Duration.ofMillis(500));
         }
 
         serialReader.stopReading();

@@ -1,5 +1,7 @@
 package com.pi4j.catalog;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 /**
@@ -38,11 +40,11 @@ public interface Application {
      * Utility function to sleep for the specified amount of milliseconds.
      * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
      *
-     * @param milliseconds Time in milliseconds to sleep
+     * @param duration Time to sleep
      */
-    default void delay(long milliseconds) {
+    default void delay(Duration duration) {
         try {
-            Thread.sleep(milliseconds);
+            Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

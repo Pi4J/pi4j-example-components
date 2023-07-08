@@ -1,5 +1,6 @@
 package com.pi4j.catalog.components;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -171,7 +172,7 @@ public class Ads1115 extends I2CDevice {
     @Override
     public void reset() {
         stopContinuousReading();
-        delay(channelsInUse.size() * 16L);
+        delay(Duration.ofMillis(channelsInUse.size() * 16L));
         channelsInUse.clear();
         oldVoltages.clear();
     }
@@ -198,7 +199,7 @@ public class Ads1115 extends I2CDevice {
         writeRegister(CONFIG_REGISTER, configRegisterTemplate | mpc.getMux() | OperationMode.SINGLE.getMode());
         //wait until ad converter has stored new value in conversion register
         //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
-        delay((long) (2000.0 / dataRate.getSpS()));
+        delay(Duration.ofMillis((long) (2000.0 / dataRate.getSpS())));
 
         //now we can read the channel value from conversion register
         int registeredValue = readRegister(CONVERSION_REGISTER);
@@ -248,7 +249,7 @@ public class Ads1115 extends I2CDevice {
                 long restDelay = elapsedNanos - readFrequency;
 
                 //wait for rest of the cycle time
-                delay(((restDelay > 0) ? restDelay : 0) / 1_000_000L);
+                delay(Duration.ofMillis(((restDelay > 0) ? restDelay : 0) / 1_000_000L));
             }
         }).start();
     }

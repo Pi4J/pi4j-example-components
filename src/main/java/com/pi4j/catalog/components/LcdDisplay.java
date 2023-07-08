@@ -1,5 +1,7 @@
 package com.pi4j.catalog.components;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 
@@ -152,7 +154,7 @@ public class LcdDisplay extends I2CDevice {
      */
     public void moveCursorHome() {
         writeCommand(LCD_RETURN_HOME);
-        delay(3);
+        delay(Duration.ofMillis(3));
     }
 
     /**
@@ -304,9 +306,9 @@ public class LcdDisplay extends I2CDevice {
     private void lcd_strobe(byte data) {
         byte backlight = this.backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT;
         write((byte) (data | En | backlight));
-        delay(0, 500_000);
+        delay(Duration.ofNanos(500_000));
         write((byte) ((data & ~En) | backlight));
-        delay(0, 100_000);
+        delay(Duration.ofNanos(100_000));
     }
 
     /**
@@ -314,7 +316,7 @@ public class LcdDisplay extends I2CDevice {
      */
     public void moveCursorRight() {
         executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_RIGHT));
-        delay(1);
+        delay(Duration.ofMillis(1));
     }
 
     /**
@@ -322,7 +324,7 @@ public class LcdDisplay extends I2CDevice {
      */
     public void moveCursorLeft() {
         executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_LEFT));
-        delay(1);
+        delay(Duration.ofMillis(1));
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -25,17 +27,17 @@ public class LedMatrix_App implements Application {
         System.out.println("Setting all LEDs to Red.");
         ledMatrix.setMatrixColor(LedStrip.PixelColor.RED);
         ledMatrix.render();
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         System.out.println("setting the second strip to green");
         ledMatrix.setStripColor(1, LedStrip.PixelColor.GREEN);
         ledMatrix.render();
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         System.out.println("Setting the third led of the third strip to Yellow");
         ledMatrix.setPixelColor(2, 2, LedStrip.PixelColor.YELLOW);
         ledMatrix.render();
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         ledMatrix.close();
 

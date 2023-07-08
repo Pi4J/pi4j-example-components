@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -25,24 +27,24 @@ public class LedStrip_App implements Application {
         System.out.println("setting the LEDs to RED");
         ledStrip.setStripColor(LedStrip.PixelColor.RED);
         ledStrip.render();
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         System.out.println("setting the LEDs to Light Blue");
         ledStrip.setStripColor(LedStrip.PixelColor.LIGHT_BLUE);
         ledStrip.render();
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         System.out.println("setting the first led to Purple");
         ledStrip.setPixelColor(0, LedStrip.PixelColor.PURPLE);
         ledStrip.render();
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         System.out.println("setting the brightness to full and just show the first led as White");
         ledStrip.allOff();
         ledStrip.setBrightness(1);
         ledStrip.setPixelColor(0, LedStrip.PixelColor.WHITE);
         ledStrip.render();
-        delay(3000);
+        delay(Duration.ofSeconds(3));
 
         //finishing and closing
         ledStrip.close();

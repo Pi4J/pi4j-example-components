@@ -1,5 +1,6 @@
 package com.pi4j.catalog.components;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -67,7 +68,7 @@ public class Buzzer extends PwmActuator {
 
             // If the duration is larger than zero, the tone should be automatically stopped after the given duration.
             if (duration > 0) {
-                delay(duration);
+                delay(Duration.ofMillis(duration));
                 off();
             }
         } else {
@@ -154,7 +155,7 @@ public class Buzzer extends PwmActuator {
      */
     public void pause(int duration) {
         off();
-        delay(duration);
+        delay(Duration.ofMillis(duration));
     }
 
     /**

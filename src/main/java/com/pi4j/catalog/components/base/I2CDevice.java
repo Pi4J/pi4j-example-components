@@ -1,5 +1,7 @@
 package com.pi4j.catalog.components.base;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.plugin.mock.provider.i2c.MockI2C;
@@ -35,7 +37,7 @@ public abstract class I2CDevice extends Component {
      */
     protected void executeCommand(byte cmd) {
         i2c.write(cmd);
-        delay(0, 100_000);
+        delay(Duration.ofNanos(100_000));
     }
 
     protected int readRegister(int register) {

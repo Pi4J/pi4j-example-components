@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -22,7 +24,7 @@ public class LedButton_App implements Application {
         // Turn on the LED to have a defined state
         ledButton.ledOn();
         //see the LED for a Second
-        delay(1000);
+        delay(Duration.ofSeconds(1));
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
         ledButton.onDown(() -> System.out.println("Pressing the Button"));
@@ -35,7 +37,7 @@ public class LedButton_App implements Application {
         // in the meantime, the Button can still be pressed, as we only freeze the main thread
         for (int i = 0; i < 15; i++) {
             System.out.println(ledButton.toggleLed());
-            delay(1000);
+            delay(Duration.ofSeconds(1));
         }
 
         // Unregister all event handlers to exit this application in a clean way

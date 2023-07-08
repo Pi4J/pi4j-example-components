@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -33,7 +35,7 @@ public class Camera_App implements Application {
         camera.takeStill(config);
 
         System.out.println("Waiting for camera to take pic");
-        delay(4000);
+        delay(Duration.ofSeconds(4));
 
         System.out.println("Taking a video for 3 seconds");
         var vidconfig = Camera.VidConfig.Builder.newInstance()

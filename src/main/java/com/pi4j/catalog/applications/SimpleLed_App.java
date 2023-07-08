@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -23,18 +25,18 @@ public class SimpleLed_App implements Application {
         // Turn on the LED to have a defined state
         System.out.println("Turn on LED.");
         led.on();
-        delay(1000);
+        delay(Duration.ofSeconds(1));
 
         // Make a flashing light by toggling the LED every second
         for (int i = 0; i < 10; i++) {
             System.out.println("Current LED state is " + led.toggle() +".");
-            delay(1000);
+            delay(Duration.ofSeconds(1));
         }
 
         // That's it so reset all and quit
         led.reset();
         System.out.println("Reset LED.");
-        delay(2000);
+        delay(Duration.ofSeconds(2));
 
         System.out.println("Simple LED demo done.");
     }

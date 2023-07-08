@@ -1,5 +1,7 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
@@ -38,12 +40,12 @@ public class Potentiometer_App implements Application {
 
         System.out.println("Move the potentiometer to see it in action!");
         // Wait while handling events before exiting
-        delay(15_000);
+        delay(Duration.ofSeconds(15));
 
         ads1115.stopContinuousReading();
 
         System.out.println("No new values should be reported");
-        delay(5_000);
+        delay(Duration.ofSeconds(5));
 
         ads1115.reset();
         System.out.println("Demo done\n\n\n");

@@ -38,7 +38,7 @@ public class Joystick_App implements Application {
 
         // Wait for 15 seconds while handling events before exiting
         System.out.println("Press the button to see it in action!");
-        delay(15_000);
+        delay(Duration.ofSeconds(15));
 
         // Unregister all event handlers to exit this application in a clean way
         joystick.reset();
