@@ -3,6 +3,8 @@ package com.pi4j.catalog.components;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 import com.pi4j.plugin.mock.provider.pwm.MockPwm;
 
 import com.pi4j.catalog.ComponentTest;
@@ -26,7 +28,7 @@ public class BuzzerComponentTest extends ComponentTest {
     @Test
     public void testPlayTone() {
         // when
-        buzzer.playTone(1000);
+        buzzer.on(1000);
 
         // then
         assertTrue(pwm.isOn());
@@ -36,7 +38,7 @@ public class BuzzerComponentTest extends ComponentTest {
     @Test
     public void testPlayToneWithDuration() {
         // when
-        buzzer.playTone(1000, 10);
+        buzzer.playTone(1000, Duration.ofMillis(10));
 
         // then
         assertTrue(pwm.isOff());
@@ -47,7 +49,7 @@ public class BuzzerComponentTest extends ComponentTest {
     public void testPlayToneWithInterrupt() {
         // when
         Thread.currentThread().interrupt();
-        buzzer.playTone(1000, 5000);
+        buzzer.playTone(1000, Duration.ofSeconds(5));
 
         // then
         assertTrue(pwm.isOff());
@@ -56,7 +58,7 @@ public class BuzzerComponentTest extends ComponentTest {
     @Test
     public void testPlaySilence() {
         // given
-        buzzer.playTone(1000);
+        buzzer.on(1000);
 
         // when
         buzzer.off();
@@ -68,11 +70,11 @@ public class BuzzerComponentTest extends ComponentTest {
     @Test
     public void testPlaySilenceInterrupt() {
         // given
-        buzzer.playTone(1000);
+        buzzer.on(1000);
 
         // when
         Thread.currentThread().interrupt();
-        buzzer.pause(5000);
+        buzzer.silence(Duration.ofSeconds(5));
 
         // then
         assertTrue(pwm.isOff());

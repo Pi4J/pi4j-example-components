@@ -1,8 +1,8 @@
 package com.pi4j.catalog.components;
 
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
+import java.util.concurrent.*;
 
 import com.pi4j.context.Context;
 import com.pi4j.io.pwm.Pwm;
@@ -14,10 +14,11 @@ import com.pi4j.catalog.components.base.PwmActuator;
 public class Buzzer extends PwmActuator {
 
     /**
-     * the Thread, that plays the melodies.
+     * Melodies are played in separate threads.
      */
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private Runnable playWorker = () -> {};
+    private final ExecutorService melodyPlayer = Executors.newSingleThreadExecutor();
+
+    private Future<?> currentMelody;
 
     /**
      * Creates a new buzzer component with a custom BCM pin.
@@ -36,73 +37,62 @@ public class Buzzer extends PwmActuator {
                       .shutdown(0)
                       .build());
         logDebug("Created new Buzzer Component");
+        off();
     }
+
 
     /**
      * Plays a tone with the given frequency in Hz indefinitely.
      * This method is non-blocking and returns immediately.
-     * A frequency of zero causes the buzzer to play silence.
      *
      * @param frequency Frequency in Hz
      */
-    public void playTone(int frequency) {
-        logDebug("Play tone %d Hz (forever)", frequency);
-        playTone(frequency, 0);
+    public void on(int frequency) {
+        logDebug("Buzzer is on %d Hz", frequency);
+        // Activate the PWM with a duty cycle of 50% and the given frequency in Hz.
+        // This causes the buzzer to be on for half of the time during each cycle, resulting in the desired frequency.
+        pwm.on(50, frequency);
     }
 
     /**
      * Plays a tone with the given frequency in Hz for a specific duration.
      * This method is blocking and will sleep until the specified duration has passed.
-     * A frequency of zero causes the buzzer to play silence.
-     * A duration of zero to play the tone indefinitely and return immediately.
      *
      * @param frequency Frequency in Hz
      * @param duration  Duration in milliseconds
      */
-    public void playTone(int frequency, int duration) {
-        if (frequency > 0) {
-            logDebug("Play tone %d Hz for %d ms", frequency, duration);
-            // Activate the PWM with a duty cycle of 50% and the given frequency in Hz.
-            // This causes the buzzer to be on for half of the time during each cycle, resulting in the desired frequency.
-            pwm.on(50, frequency);
-
-            // If the duration is larger than zero, the tone should be automatically stopped after the given duration.
-            if (duration > 0) {
-                delay(Duration.ofMillis(duration));
-                off();
-            }
-        } else {
-            off();
-        }
+    public void playTone(int frequency, Duration duration) {
+        on(frequency);
+        delay(duration);
+        off();
     }
 
     /**
      * Silences the buzzer and returns immediately.
      */
     public void off() {
-        logDebug("set buzzer off");
         pwm.off();
+        logDebug("Buzzer off");
+    }
+
+    @Override
+    public void reset() {
+        off();
+        if(currentMelody != null){
+            currentMelody.cancel(true);
+        }
+        melodyPlayer.shutdownNow();
     }
 
     /**
      * plays a defined Melody out of Sounds, which are compromised from
      * a frequency and an amount of beats
      *
-     * @param tempo  how fast should it be played
+     * @param tempo  how long lasts a single beat, a higher value means 'slower'
      * @param sounds the defined sounds, can be an Array
      */
-    public void playMelody(int tempo, Sound... sounds){
-        //named thread to set it as Daemon and start it
-        playWorker = () -> {
-            //to begin the melody, we first wait for 8 beats to pass
-            pause(tempo * 8);
-            for (Sound s : sounds) {
-                playNote(s.note, tempo, s.beats);
-            }
-            //when the melody is finished, we turn it off
-            off();
-        };
-        executor.submit(playWorker);
+    public void playMelody(int tempo, List<Sound> sounds){
+        playMelody(tempo, 1, sounds);
     }
 
     /**
@@ -113,22 +103,31 @@ public class Buzzer extends PwmActuator {
      * @param repetitions how much it should be played
      * @param sounds      the defined sounds, can be an Array
      */
-    public void playMelody(int tempo, int repetitions, Sound... sounds){
-        //named thread to set it as Daemon and start it
-        playWorker = () -> {
+    public void playMelody(int tempo, int repetitions, List<Sound> sounds){
+        if(currentMelody != null){
+            currentMelody.cancel(true);
+        }
+        Runnable playWorker = () -> {
             for (int i = 0; i < repetitions; i++) {
                 //to begin the melody, we first wait for 8 beats to pass
                 //we can't just call the other playMelody, as it would always
                 //wait for the 8 beats to finish between each repetition
-                pause(tempo * 8);
+                silence(Duration.ofMillis(tempo * 8L));
+
                 for (Sound s : sounds) {
-                    playNote(s.note, tempo, s.beats);
+                    if(!Thread.currentThread().isInterrupted()){
+                        playNote(s.note, tempo, s.beats);
+                    }
+                    else {
+                       break;
+                    }
                 }
                 //when the melody is finished, we turn it off
+                currentMelody = null;
                 off();
             }
         };
-        executor.submit(playWorker);
+        currentMelody = melodyPlayer.submit(playWorker);
     }
 
     /**
@@ -140,10 +139,10 @@ public class Buzzer extends PwmActuator {
      */
     public void playNote(Note note, int tempo, int beats) {
         logDebug("Play note %s for %d beats", note, beats);
-        playTone(note.frequency, tempo * beats);
+        playTone(note.frequency, Duration.ofMillis((long) tempo * beats));
         //playSilence is used, because if the Note is not long enough,
         //the component wouldn't have enough time to change frequency
-        pause(20);
+        silence(Duration.ofMillis(20));
     }
 
 
@@ -153,13 +152,23 @@ public class Buzzer extends PwmActuator {
      *
      * @param duration Duration in milliseconds
      */
-    public void pause(int duration) {
+    public void silence(Duration duration) {
         off();
-        delay(Duration.ofMillis(duration));
+        delay(duration);
+    }
+
+    public void awaitEndOfMelody() {
+        if(currentMelody != null){
+            try {
+                currentMelody.get();
+            } catch (InterruptedException | ExecutionException e) {
+               // nothing to do
+            }
+        }
     }
 
     /**
-     * A note you can play. https://en.wikipedia.org/wiki/Musical_note
+     * A note you can play. See <a href="https://en.wikipedia.org/wiki/Musical_note">musical note.</a>
      */
     public enum Note {
         B0(31),
@@ -253,15 +262,12 @@ public class Buzzer extends PwmActuator {
         DS8(4978),
         PAUSE(0);
 
-        private int frequency;
+        private final int frequency;
 
         Note(int frequency) {
             this.frequency = frequency;
         }
 
-        public int getFrequency() {
-            return frequency;
-        }
     }
 
     /**
