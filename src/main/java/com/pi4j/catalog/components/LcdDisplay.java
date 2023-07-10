@@ -90,8 +90,8 @@ public class LcdDisplay extends I2CDevice {
      * Creates a new LCDDisplay component with custom rows and columns
      *
      * @param pi4j      Pi4J context
-     * @param rows      Custom amount of display lines
-     * @param columns   Custom amount of chars on line
+     * @param rows      amount of display lines
+     * @param columns   amount of chars on each line
      */
     public LcdDisplay(Context pi4j, int rows, int columns){
         this(pi4j, rows, columns, DEFAULT_DEVICE);
@@ -101,12 +101,12 @@ public class LcdDisplay extends I2CDevice {
      * Creates a new LCDDisplay component with custom rows and columns
      *
      * @param pi4j      Pi4J context
-     * @param rows      Custom amount of display lines
-     * @param columns   Custom amount of chars on line
-     * @param device    Custom I2C device Address
+     * @param rows      amount of display lines
+     * @param columns   amount of chars on each line
+     * @param device    I2C device address
      */
     public LcdDisplay(Context pi4j, int rows, int columns, int device) {
-        super(pi4j, device, "PCF8574AT backed LCD@");
+        super(pi4j, device, "PCF8574AT backed LCD");
         this.rows = rows;
         this.columns = columns;
     }
@@ -145,8 +145,8 @@ public class LcdDisplay extends I2CDevice {
      * Clear the LCD and set cursor to home
      */
     public void clearDisplay() {
-        writeCommand(LCD_CLEAR_DISPLAY);
         moveCursorHome();
+        writeCommand(LCD_CLEAR_DISPLAY);
     }
 
     /**
@@ -165,54 +165,53 @@ public class LcdDisplay extends I2CDevice {
     }
 
     /**
-     * Write a Line of Text on the LCD Display
+     * Write a line of text on the LCD
      *
      * @param text Text to display
      * @param line Select Line of Display
      */
     public void displayText(String text, int line) {
-        if (text.length() > columns) {
-            throw new IllegalArgumentException("Too long text. Only " + columns + " characters possible");
-        }
-        if (line > rows || line < 1) {
-            throw new IllegalArgumentException("Wrong line id. Only " + rows + " lines possible");
-        }
+        displayText(text, line, 0);
+    }
 
-        clearLine(line);
-        moveCursorHome();
-        displayLine(text, LCD_ROW_OFFSETS[line - 1]);
+    public void centerText(String text, int line){
+        displayText(text, line, (int) ((columns - text.length()) * 0.5));
     }
 
     /**
-     * Write a Line of Text on the LCD Display
+     * Write a line of text on the LCD
      *
-     * @param text     Text to display
-     * @param line     Select Line of Display
-     * @param position Select position on line
+     * @param text     text to display
+     * @param line     line number
+     * @param position start position
      */
     public void displayText(String text, int line, int position) {
-        if (position > columns) {
-            throw new IllegalArgumentException("Too long text. Only " + columns + " characters possible");
-        }
-        if (line > rows || line < 1) {
-            throw new IllegalArgumentException("Wrong line id. Only " + rows + " lines possible");
+        if (text.length() + position > columns) {
+            logInfo("Text '%s' too long, cut to %d characters", text, (columns - position));
+            text = text.substring(0, (columns - position));
         }
 
         clearLine(line);
-        setCursorToPosition(position, line);
-        for (char character: text.toCharArray()) {
-            writeCharacter(character);
+
+        if (line > rows || line < 1) {
+            logError("Wrong line id '%d'. Only %d lines possible", line, rows);
+        }
+        else {
+            setCursorToPosition(line, position);
+            for (char character: text.toCharArray()) {
+                writeCharacter(character);
+            }
         }
     }
 
     /**
-     * Write Text on the LCD Display
+     * Write text on the LCD
      *
      * @param text Text to display
      */
     public void displayText(String text) {
         if (text.length() > (rows * columns)) {
-            throw new IllegalArgumentException("Too long text. Only " + rows * columns + " characters allowed");
+            logInfo("Text too long. Only %d characters can be displayed", (rows * columns));
         }
 
         // Clean and prepare to write some text
@@ -223,53 +222,46 @@ public class LcdDisplay extends I2CDevice {
         }
         clearDisplay();
 
-        // Iterate through lines and characters and write them to the display
         for (int i = 0; i < text.length(); i++) {
-            // line break in text found
-            if (text.charAt(i) == '\n' && currentLine < rows) {
-                currentLine++;
-                //if a space comes after newLine, it is omitted
-                if (i+1 >= text.length()) return;
-                if (text.charAt(i + 1) == ' ') i++;
-                continue;
+            if (currentLine > rows - 1) {
+                break;
             }
-
-            // Write character to array
-            lines[currentLine] += (char) text.charAt(i);
-
-            if (lines[currentLine].length() == columns && currentLine < rows) {
+            if (text.charAt(i) == '\n' || lines[currentLine].length() == columns) {
                 currentLine++;
-                //if a space comes after newLine, it is omitted
-                if (i+1 >= text.length()) return;
-                if (text.charAt(i + 1) == ' ') i++;
+                if (text.charAt(i + 1) == ' ') {
+                    i++;
+                }
+            } else {
+                // Write character to line
+                lines[currentLine] += text.charAt(i);
             }
         }
 
         //display the created Rows
         for (int j = 0; j < rows; j++) {
-            displayLine(lines[j], LCD_ROW_OFFSETS[j]);
+            displayText(lines[j], j+1);
         }
     }
 
     /**
-     * write a character to lcd
+     * write a character to LCD
      *
-     * @param charvalue of the char that is written
+     * @param character  char that is written
      */
-    public void writeCharacter(char charvalue) {
-        writeSplitCommand((byte) charvalue, Rs);
+    public void writeCharacter(char character) {
+        writeSplitCommand((byte) character, Rs);
     }
 
     /**
      * write a character to lcd
      *
-     * @param charvalue of the char that is written
-     * @param line      ROW-position, Range 1 - ROWS
-     * @param column    Column-position, Range 0 - COLUMNS-1
+     * @param character char that is written
+     * @param line   ROW-position, Range 1 - ROWS
+     * @param pos    Column-position, Range 0 - COLUMNS-1
      */
-    public void writeCharacter(char charvalue, int column, int line) {
-        setCursorToPosition(column, line);
-        writeSplitCommand((byte) charvalue, Rs);
+    public void writeCharacter(char character, int line, int pos) {
+        setCursorToPosition(line, pos);
+        writeSplitCommand((byte) character, Rs);
     }
 
     /**
@@ -281,7 +273,6 @@ public class LcdDisplay extends I2CDevice {
     private void displayLine(String text, int pos) {
         writeCommand((byte) (0x80 + pos));
 
-        if (text == null || text.isEmpty()) return;
         for (int i = 0; i < text.length(); i++) {
             writeCharacter(text.charAt(i));
         }
@@ -299,6 +290,11 @@ public class LcdDisplay extends I2CDevice {
         displayLine(" ".repeat(columns), LCD_ROW_OFFSETS[line - 1]);
     }
 
+    @Override
+    public void reset() {
+        clearDisplay();
+        off();
+    }
 
     /**
      * Clocks EN to latch command
@@ -311,37 +307,22 @@ public class LcdDisplay extends I2CDevice {
         delay(Duration.ofNanos(100_000));
     }
 
-    /**
-     * Moves the cursor 1 character right
-     */
-    public void moveCursorRight() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_RIGHT));
-        delay(Duration.ofMillis(1));
-    }
-
-    /**
-     * Moves the cursor 1 character left
-     */
-    public void moveCursorLeft() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_LEFT));
-        delay(Duration.ofMillis(1));
-    }
 
     /**
      * Sets the cursor to a target destination
      *
-     * @param digit Selects the character of the line. Range: 0 - Columns-1
-     * @param line  Selects the line of the display. Range: 1 - ROWS
+     * @param line Selects the line of the display. Range: 1 - ROWS
+     * @param pos  Selects the character of the line. Range: 0 - Columns-1
      */
-    public void setCursorToPosition(int digit, int line) {
+    public void setCursorToPosition(int line, int pos) {
         if (line > rows || line < 1) {
             throw new IllegalArgumentException("Line out of range. Display has only " + rows + "x" + columns + " Characters!");
         }
 
-        if (digit < 0 || digit > columns) {
+        if (pos < 0 || pos > columns) {
             throw new IllegalArgumentException("Line out of range. Display has only " + rows + "x" + columns + " Characters!");
         }
-        writeCommand((byte) (LCD_SET_DDRAM_ADDR | digit + LCD_ROW_OFFSETS[line - 1]));
+        writeCommand((byte) (LCD_SET_DDRAM_ADDR | pos + LCD_ROW_OFFSETS[line - 1]));
     }
 
     /**
@@ -350,7 +331,7 @@ public class LcdDisplay extends I2CDevice {
      * @param line Sets the cursor to this line. Only Range 1 - lines allowed.
      */
     public void setCursorToLine(int line) {
-        setCursorToPosition(0, line);
+        setCursorToPosition(line, 0);
     }
 
     /**
@@ -380,20 +361,6 @@ public class LcdDisplay extends I2CDevice {
         }
 
         executeCommand(LCD_DISPLAY_CONTROL, this.displayControl);
-    }
-
-    /**
-     * Moves the whole displayed text one character right
-     */
-    public void moveDisplayRight() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_DISPLAY_MOVE | LCD_MOVE_RIGHT));
-    }
-
-    /**
-     * Moves the whole displayed text one character right
-     */
-    public void moveDisplayLeft() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_DISPLAY_MOVE | LCD_MOVE_LEFT));
     }
 
     /**
@@ -444,8 +411,6 @@ public class LcdDisplay extends I2CDevice {
         write((byte) (data | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
         lcd_strobe(data);
     }
-
-
 
 
 }
