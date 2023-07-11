@@ -14,9 +14,14 @@ public class PwmActuator extends Component {
 
     protected PwmActuator(Context pi4J, PwmConfig config) {
         if(AVAILABLE_PWM_PINS.stream().noneMatch(p -> p.getPin() == config.address().intValue())){
-            throw new IllegalArgumentException("Pin " + config.address().intValue() + "is not a PWM Pin");
+            throw new IllegalArgumentException("Pin " + config.address().intValue() + " is not a PWM Pin");
         }
         pwm = pi4J.create(config);
+    }
+
+    @Override
+    public void reset() {
+        pwm.off();
     }
 
     // --------------- for testing --------------------

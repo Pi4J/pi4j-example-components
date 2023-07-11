@@ -1,7 +1,11 @@
 package com.pi4j.catalog.components;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 import com.pi4j.io.pwm.Pwm;
+import com.pi4j.io.pwm.PwmPolarity;
+import com.pi4j.io.pwm.PwmType;
 
 import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.base.PwmActuator;
@@ -97,6 +101,7 @@ public class ServoMotor extends PwmActuator {
                 .id("BCM-" + address)
                 .name("Servo Motor " + address)
                 .address(address.getPin())
+                .pwmType(PwmType.HARDWARE)
                 .frequency(frequency)
                 .initial(0)
                 .shutdown(0)
@@ -105,6 +110,13 @@ public class ServoMotor extends PwmActuator {
         this.maxAngle = maxAngle;
         this.minDutyCycle = minDutyCycle;
         this.maxDutyCycle = maxDutyCycle;
+    }
+
+    @Override
+    public void reset() {
+        setAngle(0);
+        delay(Duration.ofSeconds(1));
+        super.reset();
     }
 
     /**
@@ -212,7 +224,7 @@ public class ServoMotor extends PwmActuator {
      * @param outputEnd   Maximum value for output
      * @return Mapped input value
      */
-    private static float mapRange(float input, float inputStart, float inputEnd, float outputStart, float outputEnd) {
+    private float mapRange(float input, float inputStart, float inputEnd, float outputStart, float outputEnd) {
         // Automatically swap minimum/maximum of input if inverted
         if (inputStart > inputEnd) {
             final float tmp = inputEnd;
@@ -229,16 +241,11 @@ public class ServoMotor extends PwmActuator {
 
         // Automatically clamp the input value and calculate the mapped value
         final float clampedInput = Math.min(inputEnd, Math.max(inputStart, input));
-        return outputStart + ((outputEnd - outputStart) / (inputEnd - inputStart)) * (clampedInput - inputStart);
+
+        //this set the max to the left and min to the right
+        //return outputStart + ((outputEnd - outputStart) / (inputEnd - inputStart)) * (clampedInput - inputStart);
+
+        return outputEnd - ((outputEnd - outputStart) / (inputEnd - inputStart)) * (clampedInput - inputStart);
     }
-
-    /**
-     * shutting down the component
-     */
-    public void off(){
-        this.pwm.off();
-    }
-
-
 
 }
