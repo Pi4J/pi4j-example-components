@@ -1,26 +1,31 @@
 package com.pi4j.catalog.components.base;
 
 import java.time.Duration;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.logging.*;
 
 public abstract class Component {
     /**
      * Logger instance
      */
-    private static final Logger logger = Logger.getGlobal();
+    private static final Logger logger = Logger.getLogger("Pi4J Components");
 
-    protected Component(){
+    static {
         Level appropriateLevel = Level.INFO;
+        //Level appropriateLevel = Level.FINE; //use if 'debug'
 
         System.setProperty("java.util.logging.SimpleFormatter.format",
-                           "%4$s: %5$s [%1$tl:%1$tM:%1$tS %1$Tp]%n");
+                "%4$s: %5$s [%1$tl:%1$tM:%1$tS %1$Tp]%n");
 
         logger.setLevel(appropriateLevel);
+        logger.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(appropriateLevel);
         logger.addHandler(handler);
+    }
+
+    protected Component(){
+
     }
 
     /**

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import com.pi4j.plugin.mock.provider.i2c.MockI2C;
 
 import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.base.I2CDevice;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,11 +31,11 @@ public class LcdDisplayTest extends ComponentTest {
         assertThrows(IllegalArgumentException.class, () -> lcd216Display.displayText(text));
 
         for (int i : new int[]{0, 1, 2, 3}) {
-            assertThrows(IllegalArgumentException.class, () -> lcd216Display.displayText(text, i));
+            assertThrows(IllegalArgumentException.class, () -> lcd216Display.displayLineOfText(text, i));
         }
 
         for (int i : new int[]{0, 1, 2, 3, 4, 5}) {
-            assertThrows(IllegalArgumentException.class, () -> lcd420Display.displayText(text, i));
+            assertThrows(IllegalArgumentException.class, () -> lcd420Display.displayLineOfText(text, i));
         }
 
     }
@@ -48,8 +47,8 @@ public class LcdDisplayTest extends ComponentTest {
 
         // then
         assertDoesNotThrow(() -> {
-            lcd216Display.displayText(text, 1);
-            lcd216Display.displayText(text, 2);
+            lcd216Display.displayLineOfText(text, 1);
+            lcd216Display.displayLineOfText(text, 2);
             lcd216Display.displayText(text);
         });
 

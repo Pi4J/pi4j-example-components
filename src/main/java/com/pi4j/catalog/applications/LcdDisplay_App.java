@@ -16,23 +16,24 @@ public class LcdDisplay_App implements Application {
     @Override
     public void execute(Context pi4j) {
         //Create a Component, with amount of ROWS and COLUMNS of the Device
-        LcdDisplay lcd = new LcdDisplay(pi4j, 2, 16);
+
+        //LcdDisplay lcd = new LcdDisplay(pi4j); //2x16 is default
+        LcdDisplay lcd = new LcdDisplay(pi4j, 4, 20);
+
         System.out.println("Here we go.. let's have some fun with that LCD Display!");
 
-
-        // Write text to the lines separate
-        lcd.displayText("Hello", 1);
-        lcd.displayText("World!", 2, 3);
+        // Write text to specific position
+        lcd.displayLineOfText("Hello" , 0);
+        lcd.displayLineOfText("World!", 1, 3);
 
         // Wait a little to have some time to read it
         delay(Duration.ofSeconds(3));
 
         lcd.clearDisplay();
 
-        lcd.centerText("Hi", 1);
+        lcd.centerTextInLine("Hi", 0);
 
         delay(Duration.ofSeconds(1));
-
 
         // To write some text there are different methods. The simplest one is this one which automatically inserts
         // linebreaks if needed.
@@ -42,12 +43,12 @@ public class LcdDisplay_App implements Application {
         delay(Duration.ofSeconds(3));
 
         // Of course, it is also possible to write with newLine Chars
-        lcd.displayText("Some big text \n with a new line\n not displayed any more");
-        delay(Duration.ofSeconds(3));
+        lcd.displayText("Some big text \nwith a new line\nonly displayed on 4 row LCD");
+        delay(Duration.ofSeconds(4));
 
         // Of course, it is also possible to write long text
         lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
-        delay(Duration.ofSeconds(3));
+        delay(Duration.ofSeconds(4));
 
         // Clear the display to start next parts
         lcd.clearDisplay();
@@ -58,11 +59,22 @@ public class LcdDisplay_App implements Application {
 
         // Now all characters are ready. Just draw them on the right place by moving the cursor and writing the
         // created characters to specific positions
-        lcd.writeCharacter('\1', 1, 1);
-        lcd.writeCharacter('\2', 1, 2);
-        lcd.writeCharacter('\3', 2, 1);
-        lcd.writeCharacter('\4', 2, 2);
+        lcd.writeCharacter('\1', 0, 1);
+        lcd.writeCharacter('\2', 0, 2);
+        lcd.writeCharacter('\3', 1, 1);
+        lcd.writeCharacter('\4', 1, 2);
+
         delay(Duration.ofSeconds(3));
+
+        for (int i = 0; i < 5; i++) {
+            lcd.scrollRight();
+            delay(Duration.ofSeconds(1));
+        }
+
+        for (int i = 0; i < 5; i++) {
+            lcd.scrollLeft();
+            delay(Duration.ofSeconds(1));
+        }
 
         // Turn off the backlight makes the display appear turned off
         lcd.reset();

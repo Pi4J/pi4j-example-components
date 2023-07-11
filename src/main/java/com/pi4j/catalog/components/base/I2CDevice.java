@@ -35,7 +35,7 @@ public abstract class I2CDevice extends Component {
     /**
      * send a single command to device
      */
-    protected void executeCommand(byte cmd) {
+    protected void sendCommand(byte cmd) {
         i2c.write(cmd);
         delay(Duration.ofNanos(100_000));
     }
@@ -68,8 +68,8 @@ public abstract class I2CDevice extends Component {
      * @param command Select the LCD Command
      * @param data    Setup command data
      */
-    protected void executeCommand(byte command, byte data) {
-        executeCommand((byte) (command | data));
+    protected void sendCommand(byte command, byte data) {
+        sendCommand((byte) (command | data));
     }
 
     protected abstract void init(I2C i2c);
