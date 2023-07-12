@@ -55,9 +55,10 @@ public abstract class Component {
      */
     protected void delay(Duration duration) {
         try {
-            long millis = duration.toMillis();
-            int nanos = (int) (duration.toNanos() - (millis * 1_000_000));
-            Thread.sleep(millis, nanos);
+            long nanos = duration.toNanos();
+            long millis = nanos / 1_000_000;
+            int remainingNanos = (int) (nanos % 1_000_000);
+            Thread.currentThread().sleep(millis, remainingNanos);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

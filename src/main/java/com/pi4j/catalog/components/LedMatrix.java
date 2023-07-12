@@ -79,7 +79,7 @@ public class LedMatrix extends Component {
      * Setting all LEDs off and closing the strip
      */
     public void close() {
-        ledStrip.close();
+        ledStrip.reset();
     }
 
     /**
@@ -231,6 +231,6 @@ public class LedMatrix extends Component {
      * @param brightness new max. brightness, range 0 - 1
      */
     public void setBrightness(double brightness) {
-        ledStrip.setBrightness(brightness);
+        ledStrip.setMaxBrightness(brightness);
     }
 }
