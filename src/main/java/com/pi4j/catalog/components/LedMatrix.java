@@ -1,5 +1,6 @@
 package com.pi4j.catalog.components;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import com.pi4j.context.Context;
@@ -214,7 +215,7 @@ public class LedMatrix extends Component {
                 ledStrip.setPixelColor(counter++, anInt);
             }
         }
-        ledStrip.render();
+        ledStrip.render(Duration.ZERO);
     }
 
     /**

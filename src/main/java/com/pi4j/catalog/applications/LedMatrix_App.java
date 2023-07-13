@@ -25,17 +25,17 @@ public class LedMatrix_App implements Application {
         LedMatrix ledMatrix = new LedMatrix(pi4j, Rows, Columns, brightness);
 
         System.out.println("Setting all LEDs to Red.");
-        ledMatrix.setMatrixColor(LedStrip.PixelColor.RED);
+        ledMatrix.setMatrixColor(LedStrip.LedPixelColor.RED);
         ledMatrix.render();
         delay(Duration.ofSeconds(3));
 
         System.out.println("setting the second strip to green");
-        ledMatrix.setStripColor(1, LedStrip.PixelColor.GREEN);
+        ledMatrix.setStripColor(1, LedStrip.LedPixelColor.GREEN);
         ledMatrix.render();
         delay(Duration.ofSeconds(3));
 
         System.out.println("Setting the third led of the third strip to Yellow");
-        ledMatrix.setPixelColor(2, 2, LedStrip.PixelColor.YELLOW);
+        ledMatrix.setPixelColor(2, 2, LedStrip.LedPixelColor.YELLOW);
         ledMatrix.render();
         delay(Duration.ofSeconds(3));
 

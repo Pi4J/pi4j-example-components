@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import com.pi4j.context.Context;
 import com.pi4j.io.spi.Spi;
+import com.pi4j.io.spi.SpiBus;
 import com.pi4j.io.spi.SpiMode;
 
 import com.pi4j.catalog.components.base.SpiDevice;
@@ -20,7 +21,7 @@ public class LedStrip extends SpiDevice {
     /**
      * Default brightness
      */
-    private static final float DEFAULT_BRIGHTNESS = 0.3f;
+    private static final float DEFAULT_BRIGHTNESS = 0.2f;
     /**
      * Default frequency of a WS2812 Neopixel Strip
      */
@@ -40,10 +41,7 @@ public class LedStrip extends SpiDevice {
      * The array of all pixels
      */
     private final int[] ledColors;
-    /**
-     * The raw-data of all pixels, each int of LEDs is split into bits and converted to bytes to write
-     */
-    private final byte[] pixelRaw;
+
     /**
      * After each rendering we need to wait before we can render again
      */
@@ -74,31 +72,39 @@ public class LedStrip extends SpiDevice {
     public LedStrip(Context pi4j, int numLEDs, double maxBrightness, int channel) {
         super(pi4j,
               Spi.newConfigBuilder(pi4j)
-                        .id("SPI 1")
+                        .id("SPI-" + channel)
+                        .bus(SpiBus.BUS_1)
                         .name("LED Strip")
                         .address(channel)
-                        .mode(SpiMode.MODE_0)
                         .baud(8 * DEFAULT_FREQUENCY) //bit-banging from Bit to SPI-Byte
                         .build());
         if (numLEDs < 1 || maxBrightness < 0 || maxBrightness > 1 || channel < 0 || channel > 1) {
             throw new IllegalArgumentException("Illegal Constructor");
         }
-        this.numLEDs       = numLEDs;
-        this.ledColors     = new int[numLEDs];
-        this.maxBrightness = maxBrightness;
+        this.numLEDs   = numLEDs;
+        this.ledColors = new int[numLEDs];
 
-        // 3 Color channels per led, at 8 bytes each
-        int numberOfBitsForLeds = 3 * 8 *  numLEDs;
+        waitTime = Duration.ofMillis(numLEDs * 3L);
 
-        // add 2 reset bytes; the raw bytes that get sent to LED strip
-        pixelRaw = new byte[numberOfBitsForLeds + 2];
+        setMaxBrightness(0.01);
+        blink(LedPixelColor.ORANGE, Duration.ofMillis(200), 2);
 
-        waitTime = Duration.ofMillis(numLEDs * 35L);
+        setMaxBrightness(maxBrightness);
 
-        allOff();
-        render();
+        logDebug("LED strip with %d LEDs", numLEDs);
+    }
 
-        logDebug("LED strip with %d LEDs",numLEDs);
+    public void blink(int color, Duration pulse, int times){
+        alternate(color, 0, pulse, times);
+    }
+
+    public void alternate(int firstColor, int secondColor, Duration pulse, int times){
+        for(int i=0; i<times; i++){
+            setStripColor(firstColor);
+            render(pulse);
+            setStripColor(secondColor);
+            render(pulse);
+        }
     }
 
     /**
@@ -107,7 +113,7 @@ public class LedStrip extends SpiDevice {
     @Override
     public void reset() {
         allOff();
-        render();
+        render(Duration.ZERO);
         super.reset();
     }
 
@@ -137,7 +143,7 @@ public class LedStrip extends SpiDevice {
      * @param color the color that is set
      */
     public void setPixelColor(int pixel, int color) {
-        ledColors[pixel] = PixelColor.scaleColorToBrightness(color, maxBrightness);
+        ledColors[pixel] = LedPixelColor.scaleColorToBrightness(color, maxBrightness);
     }
 
     /**
@@ -146,7 +152,8 @@ public class LedStrip extends SpiDevice {
      * @param color the color that is set
      */
     public void setStripColor(int color) {
-        Arrays.fill(ledColors, PixelColor.scaleColorToBrightness(color, maxBrightness));
+        int dimmedColor = LedPixelColor.scaleColorToBrightness(color, maxBrightness);
+        Arrays.fill(ledColors, dimmedColor);
     }
 
     /**
@@ -185,9 +192,14 @@ public class LedStrip extends SpiDevice {
      * _________________... | / __________________... | / / ___________________... |
      * / / / GRB,GRB,GRB,GRB,...
      */
-    public void render() {
+    public void render(Duration additionalWaitingTime) {
         //beginning at 1, because the first byte is a reset
         int counter = 1;
+        /**
+         * The raw-data of all pixels, each int of LEDs is split into bits and converted to bytes to write
+         */
+       final int numberOfBitsForLeds = 3 * 8 *  numLEDs;
+       final byte[] pixelRaw = new byte[numberOfBitsForLeds + 2];
         for (int i = 0; i < numLEDs; i++) {
             // Calculating GRB from RGB
             for (int j = 15; j >= 8; j--) {
@@ -221,26 +233,14 @@ public class LedStrip extends SpiDevice {
 
         logDebug("Finished rendering of LED strip");
 
-        delay(waitTime);
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds. An {@link InterruptedException} will be caught and ignored while setting the
-     * interrupt flag again.
-     */
-    private void sleep(long millis, int nanos) {
-        try {
-            Thread.sleep(millis, nanos);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        delay(waitTime.plus(additionalWaitingTime));
     }
 
     /**
      * Helper Class specific for LED strips and matrices
      * can calculate different colors, and gets the individual color channels
      */
-    public class PixelColor {
+    public class LedPixelColor {
         public static final int WHITE      = 0xFFFFFF;
         public static final int RED        = 0xFF0000;
         public static final int ORANGE     = 0xFFA500;
@@ -286,9 +286,9 @@ public class LedStrip extends SpiDevice {
         }
 
         public static int scaleColorToBrightness(int color, double brightness){
-            color = PixelColor.setRedComponent  (color, (int) (PixelColor.getRedComponent  (color) * brightness));
-            color = PixelColor.setGreenComponent(color, (int) (PixelColor.getGreenComponent(color) * brightness));
-            color = PixelColor.setBlueComponent (color, (int) (PixelColor.getBlueComponent (color) * brightness));
+            color = LedPixelColor.setRedComponent  (color, (int) (LedPixelColor.getRedComponent  (color) * brightness));
+            color = LedPixelColor.setGreenComponent(color, (int) (LedPixelColor.getGreenComponent(color) * brightness));
+            color = LedPixelColor.setBlueComponent (color, (int) (LedPixelColor.getBlueComponent (color) * brightness));
 
             return color;
         }

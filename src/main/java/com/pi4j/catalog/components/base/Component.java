@@ -47,6 +47,10 @@ public abstract class Component {
         logger.fine(() -> String.format(msg, args));
     }
 
+    protected void logException(String msg, Throwable exception){
+        logger.log(Level.SEVERE, msg, exception);
+    }
+
     /**
      * Utility function to sleep for the specified amount of milliseconds.
      * An {@link InterruptedException} will be caught and ignored while setting the interrupt flag again.

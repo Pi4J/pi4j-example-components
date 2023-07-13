@@ -12,8 +12,10 @@ public class SpiDevice extends Component {
      * The PI4J SPI
      */
     private final Spi spi;
+    private final Context pi4j;
 
     protected SpiDevice(Context pi4j, SpiConfig config){
+        this.pi4j = pi4j;
         spi = pi4j.create(config);
         //give SPI some time to initialize
         delay(Duration.ofSeconds(3));
@@ -28,6 +30,7 @@ public class SpiDevice extends Component {
     public void reset() {
         super.reset();
         spi.close();
+        spi.shutdown(pi4j);
         logDebug("SPI closed");
     }
 

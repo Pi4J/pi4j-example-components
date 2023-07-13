@@ -27,20 +27,20 @@ public class LedStripTest extends ComponentTest {
     public void testSetPixelColor() {
         //when
         strip.allOff();
-        strip.setPixelColor(1, LedStrip.PixelColor.YELLOW);
+        strip.setPixelColor(1, LedStrip.LedPixelColor.YELLOW);
 
         //then
-        assertEquals(LedStrip.PixelColor.YELLOW, strip.getPixelColor(1));
+        assertEquals(LedStrip.LedPixelColor.YELLOW, strip.getPixelColor(1));
     }
 
     @Test
     public void testSetStripColor() {
         //when
         strip.allOff();
-        strip.setStripColor(LedStrip.PixelColor.YELLOW);
+        strip.setStripColor(LedStrip.LedPixelColor.YELLOW);
 
         //then
-        assertEquals(LedStrip.PixelColor.YELLOW, strip.getPixelColor(5));
+        assertEquals(LedStrip.LedPixelColor.YELLOW, strip.getPixelColor(5));
     }
 
     @Test
@@ -51,26 +51,26 @@ public class LedStripTest extends ComponentTest {
     @Test
     public void testGetPixelChannels() {
         //when
-        int red = LedStrip.PixelColor.RED;
-        int blue = LedStrip.PixelColor.BLUE;
-        int green = LedStrip.PixelColor.GREEN;
-        int white = LedStrip.PixelColor.WHITE;
+        int red = LedStrip.LedPixelColor.RED;
+        int blue = LedStrip.LedPixelColor.BLUE;
+        int green = LedStrip.LedPixelColor.GREEN;
+        int white = LedStrip.LedPixelColor.WHITE;
 
         //then
-        assertEquals(LedStrip.PixelColor.getRedComponent(red), 255);
-        assertEquals(LedStrip.PixelColor.getGreenComponent(red), 0);
-        assertEquals(LedStrip.PixelColor.getBlueComponent(red), 0);
+        assertEquals(LedStrip.LedPixelColor.getRedComponent(red), 255);
+        assertEquals(LedStrip.LedPixelColor.getGreenComponent(red), 0);
+        assertEquals(LedStrip.LedPixelColor.getBlueComponent(red), 0);
 
-        assertEquals(LedStrip.PixelColor.getRedComponent(green), 0);
-        assertEquals(LedStrip.PixelColor.getGreenComponent(green), 255);
-        assertEquals(LedStrip.PixelColor.getBlueComponent(green), 0);
+        assertEquals(LedStrip.LedPixelColor.getRedComponent(green), 0);
+        assertEquals(LedStrip.LedPixelColor.getGreenComponent(green), 255);
+        assertEquals(LedStrip.LedPixelColor.getBlueComponent(green), 0);
 
-        assertEquals(LedStrip.PixelColor.getRedComponent(blue), 0);
-        assertEquals(LedStrip.PixelColor.getGreenComponent(blue), 0);
-        assertEquals(LedStrip.PixelColor.getBlueComponent(blue), 255);
+        assertEquals(LedStrip.LedPixelColor.getRedComponent(blue), 0);
+        assertEquals(LedStrip.LedPixelColor.getGreenComponent(blue), 0);
+        assertEquals(LedStrip.LedPixelColor.getBlueComponent(blue), 255);
 
-        assertEquals(255, LedStrip.PixelColor.getRedComponent(white));
-        assertEquals(255, LedStrip.PixelColor.getGreenComponent(white));
-        assertEquals(255, LedStrip.PixelColor.getBlueComponent(white));
+        assertEquals(255, LedStrip.LedPixelColor.getRedComponent(white));
+        assertEquals(255, LedStrip.LedPixelColor.getGreenComponent(white));
+        assertEquals(255, LedStrip.LedPixelColor.getBlueComponent(white));
     }
 }
