@@ -39,7 +39,6 @@ public class SerialGps extends Component {
     private void handleNewData(String line) {
         String[] data = line.split(",");
         if (data[0].equals("$GPGLL")) {
-            System.out.println(line);
             double latitude = 0;
             if(!data[1].isEmpty()){
                 int degree = Integer.parseInt(data[1].substring(0, 2));
