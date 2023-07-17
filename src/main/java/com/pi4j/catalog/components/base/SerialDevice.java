@@ -37,6 +37,7 @@ public class SerialDevice extends Component {
                 .device("/dev/ttyS0")
                 .build());
         this.onNewData = onNewData;
+        //todo: Check if this is really necessary
         serial.open();
         // Wait till the serial port is open
         while (!serial.isOpen()) {
@@ -95,7 +96,7 @@ public class SerialDevice extends Component {
                         }
                     }
                 } else {
-                    Thread.sleep(10);
+                    Thread.sleep(100);
                 }
             }
         } catch (Exception e) {

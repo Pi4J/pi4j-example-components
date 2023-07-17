@@ -89,11 +89,14 @@ public class SerialGps extends Component {
                 satelliteString = satelliteString.substring(0, satelliteString.indexOf('.'));
             }
             numberOfSatellites = satelliteString.isEmpty() ? 0 : Integer.parseInt(satelliteString);
+            if(numberOfSatellites == 0){
+                logInfo("no satellites in view");
+            }
             logDebug("Number of satellites in use: %d", numberOfSatellites);
             handlePosition(data[2], data[3], data[4], data[5]);
             handleAltitude(data[9]);
         } catch (Exception e) {
-            logError("unknown NMEA sentence: '$GPGGA, %s'", String.join(",", data));
+            logError("unknown NMEA sentence: '%s'", String.join(",", data));
         }
     }
 
