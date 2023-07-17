@@ -23,17 +23,17 @@ public class Potentiometer_App implements Application {
         Potentiometer poti = new Potentiometer(ads1115, Ads1115.Channel.A0);
 
         //read current value from poti one time
-        System.out.println(String.format("P0 raw value is %.2f V", poti.readCurrentVoltage()));
+        System.out.printf("P0 raw value is %.2f V%n", poti.readCurrentVoltage());
 
         //read current value from the poti in percent one time
-        System.out.println(String.format("P0 normalized value is %.2f %%", poti.readNormalizedValue()));
+        System.out.printf("P0 normalized value is %.2f %%%n", poti.readNormalizedValue());
 
         // Register event handlers to print a message when potentiometer is moved
-        poti.onNormalizedValueChange((value) -> System.out.println(String.format("P0 slider is at %.2f %%", value)));
+        poti.onNormalizedValueChange((value) -> System.out.printf("P0 slider is at %.2f %%%n", value));
 
         //you can attach a second potentiometer to another channel, if you like:
 //        Potentiometer potiWithCenterPosition = new Potentiometer(ads1115, Ads1115.Channel.A1, Potentiometer.Range.MINUS_ONE_TO_ONE);
-//        potiWithCenterPosition.onNormalizedValueChange((value) -> System.out.println(String.format("P1 slider is at %.2f %%", value)));
+//        potiWithCenterPosition.onNormalizedValueChange((value) -> System.out.printf("P1 slider is at %.2f %%", value)));
 
         //you have to start continuous reading on ADC (because you can use up to 4 channels and all of them need to be fully configured before starting to read the values)
         ads1115.startContinuousReading(0.1);

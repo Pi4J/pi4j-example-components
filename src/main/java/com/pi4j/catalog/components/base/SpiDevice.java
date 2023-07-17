@@ -17,9 +17,7 @@ public class SpiDevice extends Component {
     protected SpiDevice(Context pi4j, SpiConfig config){
         this.pi4j = pi4j;
         spi = pi4j.create(config);
-        //give SPI some time to initialize
-        delay(Duration.ofSeconds(3));
-        logDebug("SPI is ready");
+        logDebug("SPI is open");
     }
 
     protected void sendToSerialDevice(byte[] data) {

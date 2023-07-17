@@ -11,6 +11,9 @@ import com.pi4j.io.serial.Parity;
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.StopBits;
 
+/**
+ *
+ */
 public class SerialDevice extends Component {
     /**
      * The PI4J Serial

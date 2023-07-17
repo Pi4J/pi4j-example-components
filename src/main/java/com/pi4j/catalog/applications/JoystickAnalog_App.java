@@ -25,7 +25,7 @@ public class JoystickAnalog_App implements Application {
         JoystickAnalog joystick = new JoystickAnalog(ads1115, Ads1115.Channel.A0, Ads1115.Channel.A1, PIN.D26, true);
 
         //register event handlers
-        joystick.onMove((xPos, yPos) -> System.out.println(String.format("Current position of joystick is: %.2f, %.2f", xPos, yPos)),
+        joystick.onMove((xPos, yPos) -> System.out.printf("Current position of joystick is: %.2f, %.2f%n", xPos, yPos),
                         () -> System.out.println("Joystick in home position"));
 
         joystick.onDown      (() -> System.out.println("Pressing the button"));

@@ -12,6 +12,10 @@ import com.pi4j.catalog.components.base.SpiDevice;
 
 /**
  * Creates an SPI Control for a Neopixel LED Strip
+ * <p>
+ * When using Pi4J-OS-Image (highly recommended), use GPIO#20 (SPI1 MOSI) for the LED strip data connection
+ * <p>
+ * In PI4J-OS-Image both SPI and UART are enabled and SPI uses bus#1 (if UART is disabled switch to GPIO#10 (SPI0 MOSI) and SPI bus#0.
  */
 public class LedStrip extends SpiDevice {
     /**
@@ -42,10 +46,6 @@ public class LedStrip extends SpiDevice {
      */
     private final int[] ledColors;
 
-    /**
-     * After each rendering we need to wait before we can render again
-     */
-    private final Duration waitTime;
     /**
      * Brightness value between 0 and 1
      */
@@ -83,8 +83,6 @@ public class LedStrip extends SpiDevice {
         }
         this.numLEDs   = numLEDs;
         this.ledColors = new int[numLEDs];
-
-        waitTime = Duration.ofMillis(numLEDs * 3L);
 
         setMaxBrightness(0.01);
         blink(LedPixelColor.ORANGE, Duration.ofMillis(200), 2);
@@ -192,10 +190,10 @@ public class LedStrip extends SpiDevice {
      * _________________... | / __________________... | / / ___________________... |
      * / / / GRB,GRB,GRB,GRB,...
      */
-    public void render(Duration additionalWaitingTime) {
+    public void render(Duration idlePeriod) {
         //beginning at 1, because the first byte is a reset
         int counter = 1;
-        /**
+        /*
          * The raw-data of all pixels, each int of LEDs is split into bits and converted to bytes to write
          */
        final int numberOfBitsForLeds = 3 * 8 *  numLEDs;
@@ -233,7 +231,7 @@ public class LedStrip extends SpiDevice {
 
         logDebug("Finished rendering of LED strip");
 
-        delay(waitTime.plus(additionalWaitingTime));
+        delay(idlePeriod);
     }
 
     /**

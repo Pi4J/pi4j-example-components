@@ -10,36 +10,45 @@ import com.pi4j.catalog.components.LedStrip;
 
 /**
  * This example shows how to use the LEDMatrix component by setting the LEDs on the strips to different colors
- * <P>
+ * <p>
  * see <a href="https://pi4j.com/examples/components/ledmatrix/">Description on Pi4J website</a>
  */
 public class LedMatrix_App implements Application {
     @Override
     public void execute(Context pi4j) {
         System.out.println("LED matrix app started ...");
-        int Rows = 3;
-        int Columns = 4;
-        double brightness = 0.5;
+        int rows = 2;
+        int columns = 5;
 
         System.out.println("Initialising the matrix");
-        LedMatrix ledMatrix = new LedMatrix(pi4j, Rows, Columns, brightness);
+        LedMatrix ledMatrix = new LedMatrix(pi4j, rows, columns);
 
-        System.out.println("Setting all LEDs to Red.");
+        System.out.println("whole matrix Red.");
         ledMatrix.setMatrixColor(LedStrip.LedPixelColor.RED);
-        ledMatrix.render();
-        delay(Duration.ofSeconds(3));
+        ledMatrix.render(Duration.ofSeconds(3));
 
-        System.out.println("setting the second strip to green");
-        ledMatrix.setStripColor(1, LedStrip.LedPixelColor.GREEN);
-        ledMatrix.render();
-        delay(Duration.ofSeconds(3));
+        System.out.println("First row is GREEN");
+        ledMatrix.allOff();
+        ledMatrix.setRowColor(0, LedStrip.LedPixelColor.GREEN);
+        ledMatrix.render(Duration.ofSeconds(3));
 
-        System.out.println("Setting the third led of the third strip to Yellow");
-        ledMatrix.setPixelColor(2, 2, LedStrip.LedPixelColor.YELLOW);
-        ledMatrix.render();
-        delay(Duration.ofSeconds(3));
+        System.out.println("Second row is GREEN");
+        ledMatrix.allOff();
+        ledMatrix.setRowColor(1, LedStrip.LedPixelColor.GREEN);
+        ledMatrix.render(Duration.ofSeconds(3));
 
-        ledMatrix.close();
+        System.out.println("Second column is BLUE");
+        ledMatrix.allOff();
+        ledMatrix.setColumnColor(1, LedStrip.LedPixelColor.BLUE);
+        ledMatrix.render(Duration.ofSeconds(3));
+
+        System.out.println("Third led of the first and second row is YELLOW");
+        ledMatrix.allOff();
+        ledMatrix.setPixelColor(0, 2, LedStrip.LedPixelColor.YELLOW);
+        ledMatrix.setPixelColor(1, 2, LedStrip.LedPixelColor.YELLOW);
+        ledMatrix.render(Duration.ofSeconds(3));
+
+        ledMatrix.reset();
 
         System.out.println("LED matrix app done.");
     }

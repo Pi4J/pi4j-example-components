@@ -10,17 +10,18 @@ import com.pi4j.catalog.components.SerialGps;
 public class SerialGps_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        //there's nothing special about the GPS module. It just sends some data via the serial port
-        //We can use the standard 'SerialDevice' and configure it with the appropr
+        System.out.println("GPS demo started");
         SerialGps gps = new SerialGps(pi4j,
-                (geoPosition) -> System.out.println(geoPosition.dms()));
+                (geoPosition) -> System.out.printf("Position: %.6f, %.6f; DMS: %s%n", geoPosition.latitude(), geoPosition.longitude(), geoPosition.dms() ),
+                (altitude)    -> System.out.printf("Altitude: %.1fm%n", altitude));
 
         gps.start();
 
-        delay(Duration.ofSeconds(10));
+        //provide geopositions for 15 sec
+        delay(Duration.ofSeconds(15));
 
         gps.reset();
 
-        System.out.println("Serial is no longer open");
+        System.out.println("GPS demo finished");
     }
 }

@@ -38,7 +38,7 @@ public class Ads1115_App implements Application {
             double aIn1 = adc.readValue(Ads1115.Channel.A1);
             double aIn2 = adc.readValue(Ads1115.Channel.A2);
             double aIn3 = adc.readValue(Ads1115.Channel.A3);
-            System.out.println("[" + i + "] Voltages: a0=" + String.format("%.3f", aIn0) + " V, a1=" + String.format("%.3f", aIn1) + " V, a2=" + String.format("%.3f", aIn2) + " V, a3=" + String.format("%.3f", aIn3) + " V");
+            System.out.printf("[" + i + "] Voltages: a0=%.3f V, a1=%.3 V, a2=%.3f V, a3=%.3f V", aIn0, aIn1, aIn2, aIn3);
             //wait for next read
             delay(Duration.ofSeconds(1));
         }
@@ -56,10 +56,10 @@ public class Ads1115_App implements Application {
         Ads1115 ads1115 = new Ads1115(pi4j);
 
         // Register event handlers to print a message on value change
-        ads1115.onValueChange(Ads1115.Channel.A0, (value) -> System.out.println(String.format("The actual value from channel 0 is: %.2f V", value)));
-        ads1115.onValueChange(Ads1115.Channel.A1, (value) -> System.out.println(String.format("The actual value from channel 1 is: %.2f V", value)));
-        ads1115.onValueChange(Ads1115.Channel.A2, (value) -> System.out.println(String.format("The actual value from channel 2 is: %.2f V", value)));
-        ads1115.onValueChange(Ads1115.Channel.A3, (value) -> System.out.println(String.format("The actual value from channel 3 is: %.2f V", value)));
+        ads1115.onValueChange(Ads1115.Channel.A0, (value) -> System.out.printf("The actual value from channel 0 is: %.2f V%n", value));
+        ads1115.onValueChange(Ads1115.Channel.A1, (value) -> System.out.printf("The actual value from channel 1 is: %.2f V%n", value));
+        ads1115.onValueChange(Ads1115.Channel.A2, (value) -> System.out.printf("The actual value from channel 2 is: %.2f V%n", value));
+        ads1115.onValueChange(Ads1115.Channel.A3, (value) -> System.out.printf("The actual value from channel 3 is: %.2f V%n", value));
 
         //start continuous measuring
         ads1115.startContinuousReading(0.1);
@@ -87,7 +87,7 @@ public class Ads1115_App implements Application {
 
         // Register event handler to print a message on value change
         ads1115.onValueChange(Ads1115.Channel.A0, (value) -> {
-            System.out.println("Value changed, now it's : " + String.format("%.2f", value) + "V.");
+            System.out.println("Value changed, now it's : %.2f V");
         });
 
         ads1115.startContinuousReading(0.1);

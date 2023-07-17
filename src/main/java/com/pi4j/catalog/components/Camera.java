@@ -10,8 +10,8 @@ import com.pi4j.catalog.components.base.Component;
 /**
  * FHNW implementation of a camera, works with the raspberry-pi v2 camera module and
  * the Pi4J-Basic-OS image on the raspberry-pi.
- * maybe works on other camera-modules too, but is not yet tested.
- *
+ * Maybe works on other camera-modules too, but is not yet tested.
+ * <p>
  * It uses the libcamera-still and libcamera-vid bash commands. those are pre-installed
  * on all raspbian-versions after Buster.
  */
@@ -27,7 +27,7 @@ public class Camera extends Component {
 
     /**
      * Takes a picture and saves it to the default Pictures folder
-     *
+     * <p>
      * If a file already exists, the code will break. better use useDate while taking pictures
      */
     public void takeStill() {
@@ -54,11 +54,14 @@ public class Camera extends Component {
 
     /**
      * Takes a video and saves it to the default Videos folder
-     *
+     * <p>
      * If a file already exists, the code will break. better use useDate while taking videos
      */
     public void takeVid() {
-        takeVid(VidConfig.Builder.newInstance().outputPath("/home/pi/Videos/video.h264").recordTime(5000).build());
+        takeVid(VidConfig.Builder.newInstance()
+                .outputPath("/home/pi/Videos/video.h264")
+                .recordTime(5000)
+                .build());
     }
 
     /**
@@ -88,8 +91,7 @@ public class Camera extends Component {
     private void callBash(ProcessBuilder processBuilder) throws IOException, InterruptedException {
         Process process = processBuilder.start();
 
-        BufferedReader reader =
-                new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
         String line;
         while ((line = reader.readLine()) != null) {
@@ -98,9 +100,9 @@ public class Camera extends Component {
 
         //exitCode 0 = No Errors
         int exitCode = process.waitFor();
-        if(exitCode != 0){
+        if (exitCode != 0) {
             System.out.println("\nCamera exited with error code : " + exitCode);
-        }else{
+        } else {
             System.out.println("\nCamera finished successfully");
         }
     }
@@ -109,7 +111,7 @@ public class Camera extends Component {
      * testing, if camera is installed on raspberrypi, and if the bash commands
      * will work
      */
-    private void init(){
+    private void init() {
         logDebug("initialisation of camera");
 
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -180,26 +182,43 @@ public class Camera extends Component {
      * Builder Pattern to create a config for a single Picture
      */
     public static class PicConfig {
-        /** where should it be saved and what's the filename?*/
+        /**
+         * where should it be saved and what's the filename?
+         */
         public final String outputPath;
-        /** using datetime as filename?
+        /**
+         * using datetime as filename?
          * if yes, then the outputPath should be a path, not a file
          */
         public final boolean useDate;
-        /** a delay, before taking a picture */
+        /**
+         * a delay, before taking a picture
+         */
         public final int delay;
-        /** output width of the picture */
+        /**
+         * output width of the picture
+         */
         public final int width;
-        /** output height of the picture */
+        /**
+         * output height of the picture
+         */
         public final int height;
-        /** the quality of the picture, ranging from 0 to 100
-         * where 100 is the best quality of the picture, with no blurring*/
+        /**
+         * the quality of the picture, ranging from 0 to 100
+         * where 100 is the best quality of the picture, with no blurring
+         */
         public final int quality;
-        /** The format of the output */
+        /**
+         * The format of the output
+         */
         public final PicEncoding encoding;
-        /** when true, there is no preview on the raspberry-pi */
+        /**
+         * when true, there is no preview on the raspberry-pi
+         */
         public final boolean disablePreview;
-        /** when true, the preview is in fullscreen */
+        /**
+         * when true, the preview is in fullscreen
+         */
         public final boolean allowFullscreenPreview;
 
         /**
@@ -207,7 +226,7 @@ public class Camera extends Component {
          *
          * @param builder builder with the defined options
          */
-        private PicConfig(Builder builder){
+        private PicConfig(Builder builder) {
             this.outputPath = builder.outputPath;
             this.useDate = builder.useDate;
             this.delay = builder.delay;
@@ -224,45 +243,56 @@ public class Camera extends Component {
          *
          * @return a string that can be called from the bash
          */
-        public String asCommand(){
+        public String asCommand() {
             StringBuilder command = new StringBuilder("libcamera-still");
-            if (useDate){
+            if (useDate) {
                 command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "jpg").append("'");
-            }else{
-                command.append(" -o '").append(outputPath).append("'");}
-            if (delay != 0){
-                command.append(" -t ").append(delay);}
-            if (width != 0){
-                command.append(" --width ").append(width);}
-            if (height != 0){
-                command.append(" --height ").append(height);}
-            if (quality != 0){
-                command.append(" -q ").append(quality);}
-            if (encoding != null){
-                command.append(" --encoding ").append(encoding.getEncoding());}
-            if (disablePreview){command.append(" -n");}
-            if (allowFullscreenPreview && !disablePreview){command.append(" -f");}
+            } else {
+                command.append(" -o '").append(outputPath).append("'");
+            }
+            if (delay != 0) {
+                command.append(" -t ").append(delay);
+            }
+            if (width != 0) {
+                command.append(" --width ").append(width);
+            }
+            if (height != 0) {
+                command.append(" --height ").append(height);
+            }
+            if (quality != 0) {
+                command.append(" -q ").append(quality);
+            }
+            if (encoding != null) {
+                command.append(" --encoding ").append(encoding.getEncoding());
+            }
+            if (disablePreview) {
+                command.append(" -n");
+            }
+            if (allowFullscreenPreview && !disablePreview) {
+                command.append(" -f");
+            }
+
             return command.toString();
         }
 
         /**
          * Builder Pattern, to create a config for a single picture
-         *
+         * <p>
          * A Config is buildable like this:
          * var config = Camera.PicConfig.Builder.newInstance()
-         *                 .outputPath("/home/pi/Pictures/")
-         *                 .delay(3000)
-         *                 .disablePreview(true)
-         *                 .encoding(Camera.PicEncoding.PNG)
-         *                 .useDate(true)
-         *                 .quality(93)
-         *                 .width(1280)
-         *                 .height(800)
-         *                 .build();
-         *
+         * .outputPath("/home/pi/Pictures/")
+         * .delay(3000)
+         * .disablePreview(true)
+         * .encoding(Camera.PicEncoding.PNG)
+         * .useDate(true)
+         * .quality(93)
+         * .width(1280)
+         * .height(800)
+         * .build();
+         * <p>
          * Every property can be added or not.
          */
-        public static class Builder{
+        public static class Builder {
             private String outputPath;
             private boolean useDate;
             private int delay;
@@ -273,54 +303,54 @@ public class Camera extends Component {
             private boolean disablePreview;
             private boolean allowFullscreenPreview;
 
-            public static Builder newInstance(){
+            public static Builder newInstance() {
                 return new Builder();
             }
 
-            public Builder outputPath(String outputPath){
+            public Builder outputPath(String outputPath) {
                 this.outputPath = outputPath;
                 return this;
             }
 
-            public Builder useDate(boolean useDate){
+            public Builder useDate(boolean useDate) {
                 this.useDate = useDate;
                 return this;
             }
 
-            public Builder delay(int delay){
+            public Builder delay(int delay) {
                 this.delay = delay;
                 return this;
             }
 
-            public Builder width(int width){
+            public Builder width(int width) {
                 this.width = width;
                 return this;
             }
 
-            public Builder height(int height){
+            public Builder height(int height) {
                 this.height = height;
                 return this;
             }
 
-            public Builder quality(int quality){
-                if(quality < 0 || quality > 100){
+            public Builder quality(int quality) {
+                if (quality < 0 || quality > 100) {
                     throw new IllegalArgumentException("quality must be between 0 and 100");
                 }
                 this.quality = quality;
                 return this;
             }
 
-            public Builder encoding(PicEncoding encoding){
+            public Builder encoding(PicEncoding encoding) {
                 this.encoding = encoding;
                 return this;
             }
 
-            public Builder disablePreview(boolean disablePreview){
+            public Builder disablePreview(boolean disablePreview) {
                 this.disablePreview = disablePreview;
                 return this;
             }
 
-            public Builder allowFullscreenPreview(boolean allowFullscreenPreview){
+            public Builder allowFullscreenPreview(boolean allowFullscreenPreview) {
                 this.allowFullscreenPreview = allowFullscreenPreview;
                 return this;
             }
@@ -335,15 +365,22 @@ public class Camera extends Component {
      * Builder Pattern to create a config for a video
      */
     public static class VidConfig {
-        /** where should it be saved and what's the filename?*/
+        /**
+         * where should it be saved and what's the filename?
+         */
         public final String outputPath;
-        /** using datetime as filename?
+        /**
+         * using datetime as filename?
          * if yes, then the outputPath should be a path, not a file
          */
         public final boolean useDate;
-        /** the length in milliseconds, how long the camera is actively filming */
+        /**
+         * the length in milliseconds, how long the camera is actively filming
+         */
         public final int recordTime;
-        /** the output-format of the video-file */
+        /**
+         * the output-format of the video-file
+         */
         public final VidEncoding encoding;
 
         /**
@@ -351,7 +388,7 @@ public class Camera extends Component {
          *
          * @param builder builder with the defined options
          */
-        private VidConfig(Builder builder){
+        private VidConfig(Builder builder) {
             this.outputPath = builder.outputPath;
             this.recordTime = builder.recordTime;
             this.encoding = builder.encoding;
@@ -363,55 +400,57 @@ public class Camera extends Component {
          *
          * @return a string that can be called from the bash
          */
-        public String asCommand(){
+        public String asCommand() {
             StringBuilder command = new StringBuilder("libcamera-vid -t " + recordTime);
-            if (useDate){
+            if (useDate) {
                 command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "h264").append("'");
-            }else{
-                command.append(" -o '").append(outputPath).append("'");}
-            if(encoding != null){
-                command.append(" --codec ").append(encoding.getEncoding());}
+            } else {
+                command.append(" -o '").append(outputPath).append("'");
+            }
+            if (encoding != null) {
+                command.append(" --codec ").append(encoding.getEncoding());
+            }
             return command.toString();
         }
 
         /**
          * Builder Pattern, to create a config for a video
-         *
+         * <p>
          * A Config is buildable like this:
          * var vidconfig = Camera.VidConfig.Builder.newInstance()
-         *                 .outputPath("/home/pi/Videos/")
-         *                 .recordTime(3000)
-         *                 .useDate(true)
-         *                 .build();
-         *
+         * .outputPath("/home/pi/Videos/")
+         * .recordTime(3000)
+         * .useDate(true)
+         * .build();
+         * <p>
          * Every Property can be added or not.
          */
-        public static class Builder{
+        public static class Builder {
             private String outputPath;
             private int recordTime;
             private VidEncoding encoding;
             private boolean useDate;
 
-            public static Builder newInstance(){
+            public static Builder newInstance() {
                 return new Builder();
             }
 
-            public Builder outputPath(String outputPath){
+            public Builder outputPath(String outputPath) {
                 this.outputPath = outputPath;
                 return this;
             }
 
-            public Builder recordTime(int recordTime){
+            public Builder recordTime(int recordTime) {
                 this.recordTime = recordTime;
                 return this;
             }
 
-            public Builder encoding(VidEncoding encoding){
+            public Builder encoding(VidEncoding encoding) {
                 this.encoding = encoding;
                 return this;
             }
 
-            public Builder useDate(boolean useDate){
+            public Builder useDate(boolean useDate) {
                 this.useDate = useDate;
                 return this;
             }
