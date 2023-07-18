@@ -24,28 +24,28 @@ public class LedMatrix_App implements Application {
         LedMatrix ledMatrix = new LedMatrix(pi4j, rows, columns);
 
         System.out.println("whole matrix Red.");
-        ledMatrix.setMatrixColor(LedStrip.LedPixelColor.RED);
+        ledMatrix.setMatrixColor(LedStrip.LedColor.RED);
         ledMatrix.render(Duration.ofSeconds(3));
 
         System.out.println("First row is GREEN");
         ledMatrix.allOff();
-        ledMatrix.setRowColor(0, LedStrip.LedPixelColor.GREEN);
+        ledMatrix.setRowColor(0, LedStrip.LedColor.GREEN);
         ledMatrix.render(Duration.ofSeconds(3));
 
         System.out.println("Second row is GREEN");
         ledMatrix.allOff();
-        ledMatrix.setRowColor(1, LedStrip.LedPixelColor.GREEN);
+        ledMatrix.setRowColor(1, LedStrip.LedColor.GREEN);
         ledMatrix.render(Duration.ofSeconds(3));
 
         System.out.println("Second column is BLUE");
         ledMatrix.allOff();
-        ledMatrix.setColumnColor(1, LedStrip.LedPixelColor.BLUE);
+        ledMatrix.setColumnColor(1, LedStrip.LedColor.BLUE);
         ledMatrix.render(Duration.ofSeconds(3));
 
         System.out.println("Third led of the first and second row is YELLOW");
         ledMatrix.allOff();
-        ledMatrix.setPixelColor(0, 2, LedStrip.LedPixelColor.YELLOW);
-        ledMatrix.setPixelColor(1, 2, LedStrip.LedPixelColor.YELLOW);
+        ledMatrix.setPixelColor(0, 2, LedStrip.LedColor.YELLOW);
+        ledMatrix.setPixelColor(1, 2, LedStrip.LedColor.YELLOW);
         ledMatrix.render(Duration.ofSeconds(3));
 
         ledMatrix.reset();

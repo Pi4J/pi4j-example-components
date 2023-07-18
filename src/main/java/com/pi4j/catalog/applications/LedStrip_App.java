@@ -28,7 +28,7 @@ public class LedStrip_App implements Application {
         delay(sec1);
 
         System.out.println("LED strip shines purple");
-        ledStrip.setStripColor(LedStrip.LedPixelColor.PURPLE);
+        ledStrip.setStripColor(LedStrip.LedColor.PURPLE);
         ledStrip.render(sec1);
 
         System.out.println("turn strip off");
@@ -36,23 +36,23 @@ public class LedStrip_App implements Application {
         ledStrip.render(sec1);
 
         System.out.println("toggle between GREEN and RED");
-        ledStrip.alternate(LedStrip.LedPixelColor.GREEN, LedStrip.LedPixelColor.RED, ms500, 3);
+        ledStrip.alternate(LedStrip.LedColor.GREEN, LedStrip.LedColor.RED, ms500, 3);
 
         System.out.println("setting the LEDs to blue and the first one to purple");
-        ledStrip.setStripColor(LedStrip.LedPixelColor.BLUE);
-        ledStrip.setPixelColor(0, LedStrip.LedPixelColor.PURPLE);
+        ledStrip.setStripColor(LedStrip.LedColor.BLUE);
+        ledStrip.setPixelColor(0, LedStrip.LedColor.PURPLE);
         ledStrip.render(ms500);
 
         System.out.println("Start a kind of animation");
         for(int i = 0; i < leds -1; i++){
-            ledStrip.setPixelColor(i, LedStrip.LedPixelColor.BLUE);
-            ledStrip.setPixelColor(i+1, LedStrip.LedPixelColor.PURPLE);
+            ledStrip.setPixelColor(i, LedStrip.LedColor.BLUE);
+            ledStrip.setPixelColor(i+1, LedStrip.LedColor.PURPLE);
             ledStrip.render(ms50);
         }
 
         for(int i = leds -1; i > 0; i--){
-            ledStrip.setPixelColor(i, LedStrip.LedPixelColor.BLUE);
-            ledStrip.setPixelColor(i - 1, LedStrip.LedPixelColor.PURPLE);
+            ledStrip.setPixelColor(i, LedStrip.LedColor.BLUE);
+            ledStrip.setPixelColor(i - 1, LedStrip.LedColor.PURPLE);
             ledStrip.render(ms50);
         }
         delay(ms500);
@@ -60,7 +60,7 @@ public class LedStrip_App implements Application {
         System.out.println("setting the brightness to full and show the first LED as white");
         ledStrip.allOff();
         ledStrip.setMaxBrightness(1);
-        ledStrip.setPixelColor(0, LedStrip.LedPixelColor.WHITE);
+        ledStrip.setPixelColor(0, LedStrip.LedColor.WHITE);
         ledStrip.render(Duration.ofSeconds(2));
 
         //finishing and closing
