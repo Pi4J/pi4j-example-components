@@ -18,6 +18,7 @@ public class Potentiometer_App implements Application {
     public void execute(Context pi4j) {
         System.out.println("Potentiometer demo started ...");
 
+        // a potentiometer needs an ADC
         Ads1115 ads1115 = new Ads1115(pi4j);
 
         Potentiometer poti = new Potentiometer(ads1115, Ads1115.Channel.A0);
@@ -48,6 +49,6 @@ public class Potentiometer_App implements Application {
         delay(Duration.ofSeconds(5));
 
         ads1115.reset();
-        System.out.println("Demo done\n\n\n");
+        System.out.println("Potentiometer demo finished");
     }
 }

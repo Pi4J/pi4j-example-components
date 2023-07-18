@@ -16,6 +16,13 @@ import com.pi4j.catalog.components.base.Component;
  * on all raspbian-versions after Buster.
  */
 public class Camera extends Component {
+    public static PicConfig.Builder newPictureConfigBuilder(){
+        return new PicConfig.Builder();
+    }
+
+    public static VidConfig.Builder newVidConfigBuilder(){
+        return new VidConfig.Builder();
+    }
 
     /**
      * Constructor for using the picture and video functionality
@@ -30,8 +37,10 @@ public class Camera extends Component {
      * <p>
      * If a file already exists, the code will break. better use useDate while taking pictures
      */
-    public void takeStill() {
-        takeStill(PicConfig.Builder.newInstance().outputPath("/home/pi/Pictures/picam.jpg").build());
+    public void recordPicture() {
+        recordPicture(newPictureConfigBuilder()
+                .outputPath("/home/pi/Pictures/picam.jpg")
+                .build());
     }
 
     /**
@@ -39,7 +48,7 @@ public class Camera extends Component {
      *
      * @param config Use the ConfigBuilder of the CameraConfig to create the desired parameters
      */
-    public void takeStill(PicConfig config) {
+    public void recordPicture(PicConfig config) {
         logDebug("Taking Picture");
 
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -57,8 +66,8 @@ public class Camera extends Component {
      * <p>
      * If a file already exists, the code will break. better use useDate while taking videos
      */
-    public void takeVid() {
-        takeVid(VidConfig.Builder.newInstance()
+    public void recordVideo() {
+        recordVideo(newVidConfigBuilder()
                 .outputPath("/home/pi/Videos/video.h264")
                 .recordTime(5000)
                 .build());
@@ -69,7 +78,7 @@ public class Camera extends Component {
      *
      * @param config path to the .h264 file
      */
-    public void takeVid(VidConfig config) {
+    public void recordVideo(VidConfig config) {
         logDebug("Taking Video");
 
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -303,10 +312,6 @@ public class Camera extends Component {
             private boolean disablePreview;
             private boolean allowFullscreenPreview;
 
-            public static Builder newInstance() {
-                return new Builder();
-            }
-
             public Builder outputPath(String outputPath) {
                 this.outputPath = outputPath;
                 return this;
@@ -430,10 +435,6 @@ public class Camera extends Component {
             private int recordTime;
             private VidEncoding encoding;
             private boolean useDate;
-
-            public static Builder newInstance() {
-                return new Builder();
-            }
 
             public Builder outputPath(String outputPath) {
                 this.outputPath = outputPath;

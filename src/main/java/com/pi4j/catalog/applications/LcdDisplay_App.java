@@ -9,18 +9,17 @@ import com.pi4j.catalog.components.LcdDisplay;
 
 /**
  * This example shows how to use the LCDDisplay component by writing different things to the display
- * <P>
+ * <p>
  * see <a href="https://pi4j.com/examples/components/lcddisplay/">Description on Pi4J website</a>
  */
 public class LcdDisplay_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        //Create a Component, with amount of ROWS and COLUMNS of the Device
+        System.out.println("LCD demo started");
 
+        //Create a Component, with amount of ROWS and COLUMNS of the device
         //LcdDisplay lcd = new LcdDisplay(pi4j); //2x16 is default
         LcdDisplay lcd = new LcdDisplay(pi4j, 4, 20);
-
-        System.out.println("Here we go.. let's have some fun with that LCD Display!");
 
         // Write text to specific position
         lcd.displayLineOfText("Hello" , 0);
@@ -38,23 +37,21 @@ public class LcdDisplay_App implements Application {
         // To write some text there are different methods. The simplest one is this one which automatically inserts
         // linebreaks if needed.
         lcd.displayText("Boohoo that's so simple to use!");
-
-        // Delay again
         delay(Duration.ofSeconds(3));
 
-        // Of course, it is also possible to write with newLine Chars
+        // Of course, it is also possible to use linebreaks
         lcd.displayText("Some big text \nwith a new line\nonly displayed on 4 row LCD");
         delay(Duration.ofSeconds(4));
 
-        // Of course, it is also possible to write long text
+        // Long text are cut to the bone
         lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
         delay(Duration.ofSeconds(4));
 
         // Clear the display to start next parts
         lcd.clearDisplay();
 
-        // Let's try to draw a house. To keep this method short and clean we create the characters in a separate
-        // method below.
+        // Let's try to draw a house.
+        // To keep this method short and clean we create the characters in a separate method below.
         createCharacters(lcd);
 
         // Now all characters are ready. Just draw them on the right place by moving the cursor and writing the
@@ -66,6 +63,7 @@ public class LcdDisplay_App implements Application {
 
         delay(Duration.ofSeconds(3));
 
+        // we've built a rolling home
         for (int i = 0; i < 5; i++) {
             lcd.scrollRight();
             delay(Duration.ofSeconds(1));
@@ -76,8 +74,8 @@ public class LcdDisplay_App implements Application {
             delay(Duration.ofSeconds(1));
         }
 
-        // Turn off the backlight makes the display appear turned off
         lcd.reset();
+        System.out.println("LCD demo finished");
     }
 
     public void createCharacters(LcdDisplay lcd) {

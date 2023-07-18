@@ -25,7 +25,6 @@ public abstract class Component {
     }
 
     protected Component(){
-
     }
 
     /**

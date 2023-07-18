@@ -66,6 +66,6 @@ public class LedStrip_App implements Application {
         //finishing and closing
         ledStrip.reset();
 
-        System.out.println("LED strip demo done.");
+        System.out.println("LED strip demo finished.");
     }
 }

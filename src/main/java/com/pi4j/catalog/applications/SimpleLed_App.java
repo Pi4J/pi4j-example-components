@@ -11,7 +11,7 @@ import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the simple LED component by creating a flashing light by repeatedly toggling the LED on and off.
- * <P>
+ * <p>
  * see <a href="https://pi4j.com/examples/components/simpleled/">Description on Pi4J website</a>
  */
 public class SimpleLed_App implements Application {
@@ -29,16 +29,14 @@ public class SimpleLed_App implements Application {
 
         // Make a flashing light by toggling the LED every second
         for (int i = 0; i < 10; i++) {
-            System.out.println("Current LED state is " + led.toggle() +".");
+            System.out.println("Current LED state is :" + led.toggle() +".");
             delay(Duration.ofSeconds(1));
         }
 
         // That's it so reset all and quit
         led.reset();
-        System.out.println("Reset LED.");
-        delay(Duration.ofSeconds(2));
 
-        System.out.println("Simple LED demo done.");
+        System.out.println("Simple LED demo finished.");
     }
 }
 

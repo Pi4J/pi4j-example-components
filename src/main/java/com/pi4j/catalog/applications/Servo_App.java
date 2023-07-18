@@ -16,11 +16,12 @@ import com.pi4j.catalog.components.base.PIN;
 public class Servo_App implements Application {
     @Override
     public void execute(Context pi4j) {
+        System.out.println("Server demo started ...");
 
         // Initialize servo motor component
         final var servoMotor = new ServoMotor(pi4j, PIN.PWM18, 50, -90.0f, 90.0f, 2.0f, 12f);
 
-//        // Demonstrate the percentage mapping on the servo
+       // Demonstrate the percentage mapping on the servo
         System.out.println("In 2 seconds, the servo motor will move to the left-most position which is 0%");
         delay(Duration.ofSeconds(2));
         servoMotor.setPercent(0);
@@ -52,10 +53,8 @@ public class Servo_App implements Application {
         servoMotor.setRange(-20, +40); // This will define our range as values between -20 and +40
         servoMotor.moveOnRange(-10); // This will map -10 based on the previously defined range
 
-
-        // And this demo is over, sleep for a second to give the servo some time to position itself
-        delay(Duration.ofSeconds(1));
-
         servoMotor.reset();
+
+        System.out.println("Server demo finished");
     }
 }

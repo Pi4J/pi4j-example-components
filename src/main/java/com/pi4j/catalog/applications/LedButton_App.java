@@ -19,7 +19,7 @@ public class LedButton_App implements Application {
         System.out.println("LED button demo started ...");
 
         // Initialize the button component
-        final LedButton ledButton = new LedButton(pi4j, PIN.D26, Boolean.FALSE, PIN.PWM19);
+        final LedButton ledButton = new LedButton(pi4j, PIN.D26, false, PIN.PWM19);
 
         // Turn on the LED to have a defined state
         ledButton.ledOn();

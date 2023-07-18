@@ -16,7 +16,7 @@ import com.pi4j.catalog.components.LedStrip;
 public class LedMatrix_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        System.out.println("LED matrix app started ...");
+        System.out.println("LED matrix demo started ...");
         int rows = 2;
         int columns = 5;
 
@@ -50,6 +50,6 @@ public class LedMatrix_App implements Application {
 
         ledMatrix.reset();
 
-        System.out.println("LED matrix app done.");
+        System.out.println("LED matrix app finished.");
     }
 }

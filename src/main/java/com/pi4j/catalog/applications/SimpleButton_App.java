@@ -23,9 +23,9 @@ public class SimpleButton_App implements Application {
         final var button = new SimpleButton(pi4j, PIN.D26, Boolean.FALSE);
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
-        button.onDown      (() -> System.out.println("Pressing the button"));
-        button.whilePressed(() -> System.out.println("Pressing"), Duration.ofSeconds(1));
-        button.onUp        (() -> System.out.println("Stopped pressing."));
+        button.onDown      (() -> System.out.println("Button pressed"));
+        button.whilePressed(() -> System.out.println("Still pressing"), Duration.ofSeconds(1));
+        button.onUp        (() -> System.out.println("Stopped pressing"));
 
         // Wait for 15 seconds while handling events before exiting
         System.out.println("Press the button to see it in action!");
@@ -39,6 +39,6 @@ public class SimpleButton_App implements Application {
         button.onUp(null);
         */
 
-        System.out.println("Simple button demo done.");
+        System.out.println("Simple button demo finished.");
     }
 }

@@ -25,7 +25,7 @@ public final class Launcher implements Runnable {
      * This list must contain all applications which should be executable through the launcher.
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
-    public static final List<Application> APPLICATIONS = new ArrayList<Application>(Arrays.asList(
+    public static final List<Application> APPLICATIONS = List.of(
         new SimpleButton_App(),
         new SimpleLed_App(),
         new Ads1115_App(),
@@ -40,7 +40,7 @@ public final class Launcher implements Runnable {
         new Potentiometer_App(),
         new SerialGps_App(),
         new Servo_App()
-    ));
+    );
 
     /**
      * Demo mode will keep the launcher running forever, allowing the consecutive execution of several applications.
