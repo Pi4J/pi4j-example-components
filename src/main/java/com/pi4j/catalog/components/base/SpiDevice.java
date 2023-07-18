@@ -1,7 +1,5 @@
 package com.pi4j.catalog.components.base;
 
-import java.time.Duration;
-
 import com.pi4j.context.Context;
 import com.pi4j.io.spi.Spi;
 import com.pi4j.io.spi.SpiConfig;

@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import com.pi4j.context.Context;
 import com.pi4j.io.pwm.Pwm;
-import com.pi4j.io.pwm.PwmPolarity;
 import com.pi4j.io.pwm.PwmType;
 
 import com.pi4j.catalog.components.base.PIN;

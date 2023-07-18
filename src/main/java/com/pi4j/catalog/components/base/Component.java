@@ -1,8 +1,9 @@
 package com.pi4j.catalog.components.base;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.logging.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class Component {
     /**

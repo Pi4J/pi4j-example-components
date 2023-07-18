@@ -18,7 +18,7 @@ public class CameraTest extends ComponentTest {
     @Test
     public void testBuilderPattern() {
         //when
-        var config = Camera.PicConfig.Builder.newInstance()
+        var config = Camera.newPictureConfigBuilder()
                 .outputPath("/home/pi/Pictures/pic.png")
                 .delay(3000)
                 .disablePreview(true)
@@ -35,7 +35,7 @@ public class CameraTest extends ComponentTest {
     @Test
     public void testBuilderPatternVideo() {
         //when
-        var config = Camera.VidConfig.Builder.newInstance()
+        var config = Camera.newVidConfigBuilder()
                 .outputPath("/home/pi/Videos/video.mjpeg")
                 .encoding(Camera.VidEncoding.MJPEG)
                 .recordTime(5000)
