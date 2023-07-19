@@ -77,7 +77,7 @@ public class LedStrip extends SpiDevice {
                         .bus(SpiBus.BUS_1)
                         .name("LED Strip")
                         .address(channel)
-                        .baud(8 * DEFAULT_FREQUENCY_PI3) //bit-banging from Bit to SPI-Byte
+                        .baud(8 * DEFAULT_FREQUENCY_PI4) //bit-banging from Bit to SPI-Byte
                         .build());
         if (numberOfLEDs < 1 || maxBrightness < 0 || maxBrightness > 1 || channel < 0 || channel > 1) {
             throw new IllegalArgumentException("Illegal Constructor");

@@ -22,7 +22,7 @@ public class LedStrip_App implements Application {
         Duration ms500 = Duration.ofMillis(500);
         Duration sec1  = Duration.ofSeconds(1);
 
-        int leds = 10;  //
+        int leds = 25;  //
         final LedStrip ledStrip = new LedStrip(pi4j, leds);
 
         delay(sec1);
