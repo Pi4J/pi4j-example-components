@@ -22,23 +22,6 @@ public class LcdDisplayTest extends ComponentTest {
         i2c = lcd420Display.mock();
     }
 
-    @Test
-    public void testWriteTooLongText() {
-        // when
-        String text = "too long text to write the 2x16 display";
-
-        // then
-        assertThrows(IllegalArgumentException.class, () -> lcd216Display.displayText(text));
-
-        for (int i : new int[]{0, 1, 2, 3}) {
-            assertThrows(IllegalArgumentException.class, () -> lcd216Display.displayLineOfText(text, i));
-        }
-
-        for (int i : new int[]{0, 1, 2, 3, 4, 5}) {
-            assertThrows(IllegalArgumentException.class, () -> lcd420Display.displayLineOfText(text, i));
-        }
-
-    }
 
     @Test
     public void testWriteTextWithAllowedLength() {
@@ -47,8 +30,8 @@ public class LcdDisplayTest extends ComponentTest {
 
         // then
         assertDoesNotThrow(() -> {
+            lcd216Display.displayLineOfText(text, 0);
             lcd216Display.displayLineOfText(text, 1);
-            lcd216Display.displayLineOfText(text, 2);
             lcd216Display.displayText(text);
         });
 

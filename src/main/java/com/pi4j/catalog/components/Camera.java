@@ -10,6 +10,7 @@ import com.pi4j.catalog.components.base.Component;
 /**
  * FHNW implementation of a camera, works with the raspberry-pi v2 camera module and
  * the Pi4J-Basic-OS image on the raspberry-pi.
+ * <p>
  * Maybe works on other camera-modules too, but is not yet tested.
  * <p>
  * It uses the libcamera-still and libcamera-vid bash commands. those are pre-installed
@@ -57,7 +58,7 @@ public class Camera extends Component {
         try {
             callBash(processBuilder);
         } catch (Exception e) {
-            logError("Camera: Error while taking picture: " + e.getMessage());
+            logException("Camera: Error while taking picture: ", e);
         }
     }
 
@@ -87,7 +88,7 @@ public class Camera extends Component {
         try {
             callBash(processBuilder);
         } catch (Exception e) {
-            logError("Camera: Error while taking video: " + e.getMessage());
+            logException("Camera: Error while taking video: ", e);
         }
     }
 
@@ -110,9 +111,9 @@ public class Camera extends Component {
         //exitCode 0 = No Errors
         int exitCode = process.waitFor();
         if (exitCode != 0) {
-            System.out.println("\nCamera exited with error code : " + exitCode);
+            logError("Camera exited with error code : %s", exitCode);
         } else {
-            System.out.println("\nCamera finished successfully");
+            logInfo("Camera finished successfully");
         }
     }
 
@@ -129,7 +130,7 @@ public class Camera extends Component {
         try {
             callBash(processBuilder);
         } catch (Exception e) {
-            logError("Camera: Error at initialisation: " + e.getMessage());
+            logException("Camera: Error at initialisation: ", e);
         }
     }
 

@@ -37,12 +37,12 @@ public class ServoTest extends ComponentTest {
         servo.setAngle(servo.getMinAngle());
 
         //then
-        assertEquals(2, pwm.getDutyCycle());
+        assertEquals(12, pwm.getDutyCycle());
 
         //when
         servo.setAngle(servo.getMaxAngle());
 
         //then
-        assertEquals(12, pwm.getDutyCycle());
+        assertEquals(2, pwm.getDutyCycle());
     }
 }

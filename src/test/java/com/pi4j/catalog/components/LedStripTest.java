@@ -11,20 +11,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LedStripTest extends ComponentTest {
 
-    private MockSpi spi;
     private LedStrip strip;
     private int pixels;
 
     @BeforeEach
     public void setUp() {
-        this.pixels = 10;
+        pixels = 10;
         strip = new LedStrip(pi4j, pixels);
-        spi = strip.mock();
     }
 
 
     @Test
     public void testSetPixelColor() {
+        //given
+        strip.setMaxBrightness(1.0);
+
         //when
         strip.allOff();
         strip.setPixelColor(1, LedStrip.LedColor.YELLOW);
@@ -35,12 +36,17 @@ public class LedStripTest extends ComponentTest {
 
     @Test
     public void testSetStripColor() {
+        //given
+        strip.setMaxBrightness(1.0);
+
         //when
         strip.allOff();
         strip.setStripColor(LedStrip.LedColor.YELLOW);
 
         //then
-        assertEquals(LedStrip.LedColor.YELLOW, strip.getPixelColor(5));
+        for(int i= 0; i<pixels; i++){
+            assertEquals(LedStrip.LedColor.YELLOW, strip.getPixelColor(i));
+        }
     }
 
     @Test

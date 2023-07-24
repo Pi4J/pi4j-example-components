@@ -19,7 +19,7 @@ public abstract class ComponentTest {
     protected Context pi4j;
 
     @BeforeEach
-    public final void setUpBase() {
+    public final void setUpPi4J() {
         pi4j = Pi4J.newContextBuilder()
             .add(new MockPlatform())
             .add(
@@ -36,7 +36,7 @@ public abstract class ComponentTest {
     }
 
     @AfterEach
-    public void tearDownBase() {
+    public void tearDownPi4J() {
         pi4j.shutdown();
     }
 }
