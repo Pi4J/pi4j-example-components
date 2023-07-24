@@ -9,7 +9,7 @@ import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalOutput;
 import com.pi4j.catalog.ComponentTest;
 import com.pi4j.catalog.components.base.PIN;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleLedTest extends ComponentTest {
 
@@ -34,6 +34,7 @@ public class SimpleLedTest extends ComponentTest {
 
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
+        assertTrue(led.isOn());
     }
 
     @Test
@@ -43,6 +44,7 @@ public class SimpleLedTest extends ComponentTest {
 
         //then
         assertEquals(DigitalState.LOW, digitalOutput.state());
+        assertFalse(led.isOn());
     }
 
 

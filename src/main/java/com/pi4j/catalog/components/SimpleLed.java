@@ -32,6 +32,10 @@ public class SimpleLed extends DigitalActuator {
         digitalOutput.on();
     }
 
+    public boolean isOn(){
+        return digitalOutput.isOn();
+    }
+
     /**
      * Sets the LED to off
      */
