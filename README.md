@@ -14,12 +14,13 @@ See [Pi4J website](https://pi4j.com/examples/components/).
 
 ## Start application on Pi
 
-It's strongly recommended to use the Linux image [Pi4J-Basis-OS](https://github.com/Pi4J/pi4j-os/tree/upgrade-jdk18-jfx18) and [IntelliJ IDEA](https://www.jetbrains.com/idea/) as IDE on your developer machine. But, of course, you can use any other IDE and use maven commands to experiment with our component catalogue.
+
+It's strongly recommended to use the Linux image [Pi4J-Basic-OS](https://pi4j-download.com/latest.php?flavor=basic) and [IntelliJ IDEA](https://www.jetbrains.com/idea/) as IDE on your developer machine. But, of course, you can use any other IDE and use maven commands to experiment with our component catalogue.
 
 In IntelliJ IDEA ready-made run-configurations are available for running the demo application on the RaspPi.
 
 ## Start application on Raspberry Pi
-- Make sure that Pi and your development machine are in the same WLAN (see recommendations in [Pi4J OS](https://github.com/Pi4J/pi4j-os/tree/upgrade-jdk18-jfx18))
+- Make sure that Pi and your development machine are in the same WLAN (see recommendations in [Pi4J OS](https://github.com/Pi4J/pi4j-os))
 - Check whether the correct IP-address is set in `pom.xml`
   - set properties `<pi.hostname>` and `<pi.ipnumber>`
 - `Run on Pi` compiles and packages the demo application on your developer machine, deploys it to Raspberry Pi and starts the demo application remotely on the Raspberry Pi
