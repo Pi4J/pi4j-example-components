@@ -2,16 +2,16 @@ package com.pi4j.example.applications;
 
 import com.pi4j.context.Context;
 import com.pi4j.example.Application;
-import com.pi4j.example.components.Mcp23017;
-import com.pi4j.example.components.McpLed;
+import com.pi4j.example.components.Pim517;
+import com.pi4j.example.components.PimLed;
 
-public class McpLed_App implements Application {
+public class PimLed_App implements Application {
     @Override
     public void execute(Context pi4j){
         logInfo("McpLed App is starting.");
-        var mcp = new Mcp23017(pi4j);
+        var mcp = new Pim517(pi4j);
 
-        var led = new McpLed(pi4j, mcp.getPin(0));
+        var led = new PimLed(pi4j, mcp.getPin(0));
 
         // Turn on the LED to have a defined state
         logInfo("Turn on LED.");

@@ -2,16 +2,16 @@ package com.pi4j.example.applications;
 
 import com.pi4j.context.Context;
 import com.pi4j.example.Application;
-import com.pi4j.example.components.Mcp23017;
-import com.pi4j.example.components.McpButton;
+import com.pi4j.example.components.Pim517;
+import com.pi4j.example.components.PimButton;
 
-public class McpButton_App implements Application {
+public class PimButton_App implements Application {
     @Override
     public void execute(Context pi4j){
         logInfo("McpButton App is starting");
-        var mcp = new Mcp23017(pi4j);
+        var mcp = new Pim517(pi4j);
 
-        var button = new McpButton(pi4j, mcp.getPin(0), false);
+        var button = new PimButton(pi4j, mcp.getPin(0), false);
 
         // Register event handlers to print a message when pressed (onDown) and depressed (onUp)
         button.onDown      (() -> logInfo("Pressing the button"));

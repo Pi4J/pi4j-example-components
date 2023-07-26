@@ -3,18 +3,18 @@ package com.pi4j.example.components;
 import com.pi4j.context.Context;
 import com.pi4j.example.components.interfaces.LED;
 
-public class McpLed extends Component implements LED {
+public class PimLed extends Component implements LED {
 
-    protected Mcp23017.DigitalInOut PIN;
+    protected Pim517.DigitalInOut PIN;
 
     protected Context pi4j;
 
-    public McpLed(Context pi4j, Mcp23017.DigitalInOut PIN){
+    public PimLed(Context pi4j, Pim517.DigitalInOut PIN){
 
         this.pi4j = pi4j;
         this.PIN = PIN;
 
-        this.PIN.setDirection(Mcp23017.DigitalInOut.Direction.OUTPUT);
+        this.PIN.setDirection(Pim517.DigitalInOut.Direction.OUTPUT);
         this.PIN.invert_polarity(false);
     }
 
