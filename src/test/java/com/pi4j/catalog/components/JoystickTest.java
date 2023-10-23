@@ -128,7 +128,8 @@ public class JoystickTest extends ComponentTest {
         assertFalse(joystick.isPushed());
     }
 
-    @Test void testJoystickWithButton(){
+    @Test
+    public void testJoystickWithButton(){
         //given
         joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.D17, PIN.D16, PIN.D11);
 
