@@ -5,8 +5,8 @@ import java.time.Duration;
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.ServoMotor;
 import com.pi4j.catalog.components.base.PIN;
+import com.pi4j.catalog.components.ServoMotor;
 
 /**
  * This example shows how to use the servo component by turning the servo to different positions

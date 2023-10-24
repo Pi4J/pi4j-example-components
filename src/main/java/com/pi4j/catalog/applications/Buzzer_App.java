@@ -6,8 +6,8 @@ import java.util.List;
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.Buzzer;
 import com.pi4j.catalog.components.base.PIN;
+import com.pi4j.catalog.components.Buzzer;
 
 import static com.pi4j.catalog.components.Buzzer.Note.*;
 

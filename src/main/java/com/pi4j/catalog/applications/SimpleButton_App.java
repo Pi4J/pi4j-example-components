@@ -5,8 +5,8 @@ import java.time.Duration;
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.SimpleButton;
 import com.pi4j.catalog.components.base.PIN;
+import com.pi4j.catalog.components.SimpleButton;
 
 /**
  * This example shows how to use the SimpleButton component by registering events for different interactions with the button

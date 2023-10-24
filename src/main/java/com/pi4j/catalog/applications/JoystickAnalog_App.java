@@ -5,9 +5,9 @@ import java.time.Duration;
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Ads1115;
 import com.pi4j.catalog.components.JoystickAnalog;
-import com.pi4j.catalog.components.base.PIN;
 
 /**
  * This example shows how to use the analog joystick component

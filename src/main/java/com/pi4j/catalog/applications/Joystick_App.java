@@ -5,8 +5,8 @@ import java.time.Duration;
 import com.pi4j.context.Context;
 
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.Joystick;
 import com.pi4j.catalog.components.base.PIN;
+import com.pi4j.catalog.components.Joystick;
 
 /**
  * This example shows how to use the Joystick by registering actions for each position of the joystick
