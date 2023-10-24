@@ -1,54 +1,49 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Ads1115;
 import com.pi4j.catalog.components.JoystickAnalog;
-import com.pi4j.catalog.components.helpers.PIN;
 
 /**
- * This example shows how to use the analog joystick component by registering different interactions for the positions of the joystick
+ * This example shows how to use the analog joystick component
+ * <p>
+ * see <a href="https://pi4j.com/examples/components/joystickanalog/">Description on Pi4J website</a>
  */
 public class JoystickAnalog_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        System.out.println("Joystick test started ...");
+        System.out.println("Joystick demo started ...");
 
-        Ads1115 ads1115 = new Ads1115(pi4j, 0x01, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
-
-        //joystick with normalized axis from 0 to 1
-        JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, true, PIN.D26);
+        // an analog joystick needs an ADC
+        Ads1115 ads1115 = new Ads1115(pi4j);
 
         //joystick with normalized axis from -1 to 1
-        //JoystickAnalog joystick = new JoystickAnalog(pi4j, ads1115, 0, 1, 3.3, false, PIN.D26);
+        JoystickAnalog joystick = new JoystickAnalog(ads1115, Ads1115.Channel.A0, Ads1115.Channel.A1, PIN.D26, true);
 
-        //register event handlers
-        joystick.xOnMove((value) -> System.out.println("Current value of joystick x axis is: " + String.format("%.3f", value)));
-        joystick.yOnMove((value) -> System.out.println("Current value of joystick y axis is: " + String.format("%.3f", value)));
+        //register all event handlers you need
+        joystick.onMove((xPos, yPos) -> System.out.printf("Current position of joystick is: %.2f, %.2f%n", xPos, yPos),
+                        ()           -> System.out.println("Joystick in home position"));
 
-        joystick.pushOnDown(() -> System.out.println("Pressing the Button"));
-        joystick.pushOnUp(() -> System.out.println("Stopped pressing."));
-        joystick.pushWhilePressed(() -> System.out.println("Button is still pressed."), 1000);
+        joystick.onDown      (() -> System.out.println("Pressing the button"));
+        joystick.onUp        (() -> System.out.println("Stopped pressing."));
+        joystick.whilePressed(() -> System.out.println("Button is still pressed."), Duration.ofMillis(500));
 
-        joystick.calibrateJoystick();
+        //start continuous reading after all ADC channels are configured
+        ads1115.startContinuousReading(0.1);
 
-        //start continuous reading with single shot in this mode you can connect up to 4 devices to the analog module
-        joystick.start(0.05, 10);
-
-        //wait while handling events before exiting
         System.out.println("Move the joystick to see it in action!");
 
-        delay(30_000);
+        //wait while handling events before exiting
+        delay(Duration.ofSeconds(30));
 
-        //stop continuous reading
-        joystick.stop();
+        //cleanup
+        joystick.reset();
 
-        delay(1000
-        );
-
-        //deregister all event handlers
-        joystick.deregisterAll();
-
-        System.out.println("Joystick test done");
+        System.out.println("Joystick demo finished");
     }
 }

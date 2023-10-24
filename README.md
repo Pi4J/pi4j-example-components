@@ -14,31 +14,35 @@ See [Pi4J website](https://pi4j.com/examples/components/).
 
 ## Start application on Pi
 
-It's strongly recommended to use the Linux image [Pi4J-Basis-OS](https://github.com/Pi4J/pi4j-os/tree/upgrade-jdk18-jfx18) and [IntelliJ IDEA](https://www.jetbrains.com/idea/) as IDE on your developer machine. But, of course, you can use any other IDE and use maven commands to experiment with our component catalogue.
+
+It's strongly recommended to use the Linux image [Pi4J-Basic-OS](https://pi4j-download.com/latest.php?flavor=basic) and [IntelliJ IDEA](https://www.jetbrains.com/idea/) as IDE on your developer machine. But, of course, you can use any other IDE and use maven commands to experiment with our component catalogue.
 
 In IntelliJ IDEA ready-made run-configurations are available for running the demo application on the RaspPi.
 
 ## Start application on Raspberry Pi
-- Make sure that Pi and your development machine are in the same WLAN.
-- You have to check whether the correct IP-address is set in the run-configuration
-  - via `Edit Configurations... -> Run on Pi -> Properties -> pi.ipnumber=pi4j.local`
-- `Run on Pi` starts the demo application remotely on the Raspberry Pi
+- Make sure that Pi and your development machine are in the same WLAN (see recommendations in [Pi4J OS](https://github.com/Pi4J/pi4j-os))
+- Check whether the correct IP-address is set in `pom.xml`
+  - set properties `<pi.hostname>` and `<pi.ipnumber>`
+- `Run on Pi` compiles and packages the demo application on your developer machine, deploys it to Raspberry Pi and starts the demo application remotely on the Raspberry Pi
 
+## Restart application on Raspberry Pi
+Once you have started the demo application on Raspberry Pi using `Run on Pi`, you can restart it without recompiling
+- `Rerun version on Pi` starts the demo application remotely on the Raspberry Pi without applying any changes
 
 ## Start application in debugger
-
-To start the application on the Raspberry Pi in debug mode the two run configurations `Debug on Pi` and `Attach to Pi Debugger` are required.
+To start the application on the Raspberry Pi in debug mode, two run configurations are required: `Debug on Pi` and `Attach to Pi Debugger`.
 
 The sequence of starting the run configurations is critical:
-1. Check whether the correct IP-address is set in the run-configurations (both, `Debug on Pi` and `Attach to Pi Debugger`)
-1. Start `Debug on Pi` using the **Run** button
-1. Wait till the console contains the following message: `Listening for transport dt_socket at address: 5005 (Attach debugger)`
+1. Check whether the correct IP-address (or hostname) is set in `pom.xml`
+1. Start `Debug on Pi` using the **Run** button 
+1. Wait till the following message is displayed in console:  
+`Listening for transport dt_socket at address: 5005 (Attach debugger)`
 1. Start `Attach to Pi Debugger` using the **Debug** button
 1. Only now the demo application is started
 
 Now you can use the debugger from IntelliJ IDEA, setting breakpoints and stepping through the application. 
 
-The output to console is in `Debug on Pi Tab` the debugger output in `Attach to Pi Debugger Tab`. You have to switch between these tabs.
+The output to console is in `Debug on Pi` tab  the debugger output in `Attach to Pi Debugger` tab. You have to switch between these tabs.
 
 ## LICENSE
 

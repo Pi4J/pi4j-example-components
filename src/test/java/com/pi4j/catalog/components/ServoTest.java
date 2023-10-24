@@ -1,12 +1,14 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.PIN;
-import com.pi4j.plugin.mock.provider.pwm.MockPwm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.pi4j.plugin.mock.provider.pwm.MockPwm;
+
+import com.pi4j.catalog.ComponentTest;
+import com.pi4j.catalog.components.base.PIN;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServoTest extends ComponentTest {
     private ServoMotor servo;
@@ -16,7 +18,7 @@ public class ServoTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         servo = new ServoMotor(pi4j, address);
-        pwm = toMock(servo.getPwm());
+        pwm = servo.mock();
     }
 
     @Test
@@ -35,12 +37,12 @@ public class ServoTest extends ComponentTest {
         servo.setAngle(servo.getMinAngle());
 
         //then
-        assertEquals(2, servo.getPwm().getDutyCycle());
+        assertEquals(12, pwm.getDutyCycle());
 
         //when
         servo.setAngle(servo.getMaxAngle());
 
         //then
-        assertEquals(12, servo.getPwm().getDutyCycle());
+        assertEquals(2, pwm.getDutyCycle());
     }
 }

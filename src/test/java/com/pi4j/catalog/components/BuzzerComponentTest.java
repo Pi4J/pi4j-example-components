@@ -1,12 +1,17 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.PIN;
-import com.pi4j.plugin.mock.provider.pwm.MockPwm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.Duration;
+
+import com.pi4j.plugin.mock.provider.pwm.MockPwm;
+
+import com.pi4j.catalog.ComponentTest;
+import com.pi4j.catalog.components.base.PIN;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BuzzerComponentTest extends ComponentTest {
 
@@ -17,26 +22,26 @@ public class BuzzerComponentTest extends ComponentTest {
     @BeforeEach
     public void setUp() {
         buzzer = new Buzzer(pi4j, address);
-        pwm = toMock(buzzer.pwm);
+        pwm = buzzer.mock();
     }
 
     @Test
     public void testPlayTone() {
         // when
-        this.buzzer.playTone(1000);
+        buzzer.on(1000);
 
         // then
-        assertTrue(this.pwm.isOn());
-        assertEquals(1000, this.pwm.frequency());
+        assertTrue(pwm.isOn());
+        assertEquals(1000, pwm.frequency());
     }
 
     @Test
     public void testPlayToneWithDuration() {
         // when
-        this.buzzer.playTone(1000, 10);
+        buzzer.playTone(1000, Duration.ofMillis(10));
 
         // then
-        assertTrue(this.pwm.isOff());
+        assertTrue(pwm.isOff());
         assertEquals(1000, pwm.frequency());
     }
 
@@ -44,19 +49,19 @@ public class BuzzerComponentTest extends ComponentTest {
     public void testPlayToneWithInterrupt() {
         // when
         Thread.currentThread().interrupt();
-        buzzer.playTone(1000, 5000);
+        buzzer.playTone(1000, Duration.ofSeconds(5));
 
         // then
-        assertTrue(this.pwm.isOff());
+        assertTrue(pwm.isOff());
     }
 
     @Test
     public void testPlaySilence() {
         // given
-        buzzer.playTone(1000);
+        buzzer.on(1000);
 
         // when
-        buzzer.playSilence();
+        buzzer.off();
 
         // then
         assertTrue(pwm.isOff());
@@ -65,11 +70,11 @@ public class BuzzerComponentTest extends ComponentTest {
     @Test
     public void testPlaySilenceInterrupt() {
         // given
-        buzzer.playTone(1000);
+        buzzer.on(1000);
 
         // when
         Thread.currentThread().interrupt();
-        buzzer.playSilence(5000);
+        buzzer.silence(Duration.ofSeconds(5));
 
         // then
         assertTrue(pwm.isOff());

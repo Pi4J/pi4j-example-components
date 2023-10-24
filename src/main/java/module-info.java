@@ -28,14 +28,15 @@ module com.pi4j.example {
     // Module Exports
     exports com.pi4j.catalog;
     exports com.pi4j.catalog.components;
+    exports com.pi4j.catalog.components.base;
     exports com.pi4j.catalog.components.helpers;
 
     // Pi4J MODULES
     requires com.pi4j;
+    requires com.pi4j.library.pigpio;
     requires com.pi4j.plugin.pigpio;
     requires com.pi4j.plugin.raspberrypi;
-    requires com.pi4j.library.pigpio;
-    //for LCD Display
+    requires com.pi4j.plugin.mock;
     requires com.pi4j.plugin.linuxfs;
 
     uses com.pi4j.extension.Extension;

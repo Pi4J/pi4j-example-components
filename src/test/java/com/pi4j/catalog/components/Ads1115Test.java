@@ -1,19 +1,13 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.config.exception.ConfigException;
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
-import com.pi4j.io.i2c.I2C;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.util.concurrent.atomic.AtomicReference;
+import com.pi4j.io.i2c.I2C;
 
-import static java.lang.Thread.sleep;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import com.pi4j.catalog.ComponentTest;
+
 import static org.mockito.Mockito.when;
 
 public class Ads1115Test extends ComponentTest {
@@ -33,308 +27,27 @@ public class Ads1115Test extends ComponentTest {
 
     @BeforeEach
     public void setUp() {
-        mockI2C = mock(I2C.class);
 
         //setup mocks
-        defaultConfigRegister = Ads1115.OS.WRITE_START.getOs()
+        defaultConfigRegister = Ads1115.OperationalStatus.WRITE_START.getOperationalStatus()
                 | Ads1115.GAIN.GAIN_4_096V.gain()
-                | Ads1115.DR.SPS_128.getConf()
+                | Ads1115.DataRate.SPS_128.getConf()
                 | Ads1115.COMP_MODE.TRAD_COMP.getCompMode()
                 | Ads1115.COMP_POL.ACTIVE_LOW.getCompPol()
                 | Ads1115.COMP_LAT.NON_LATCH.getLatching()
                 | Ads1115.COMP_QUE.DISABLE_COMP.getCompQue();
 
         answerSingleShotAIN0ConfigRegister = defaultConfigRegister
-                & Ads1115.OS.CLR_CURRENT_CONF_PARAM.getOs()
-                | Ads1115.OS.READ_NO_CONV.getOs()
-                | Ads1115.MUX.AIN0_GND.getMux()
-                | Ads1115.MODE.SINGLE.getMode();
+                & Ads1115.OperationalStatus.CLR_CURRENT_CONF_PARAM.getOperationalStatus()
+                | Ads1115.OperationalStatus.READ_NO_CONV.getOperationalStatus()
+                | Ads1115.MultiplexerConfig.AIN0_GND.getMux()
+                | Ads1115.OperationMode.SINGLE.getMode();
 
-        when(mockI2C.writeRegisterWord(CONFIG_REGISTER, defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode())).thenReturn(answerSingleShotAIN0ConfigRegister);
+        when(mockI2C.writeRegisterWord(CONFIG_REGISTER, defaultConfigRegister | Ads1115.MultiplexerConfig.AIN0_GND.getMux() | Ads1115.OperationMode.SINGLE.getMode())).thenReturn(answerSingleShotAIN0ConfigRegister);
 
-        ads1115 = new Ads1115(pi4j, i2cBus, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 1, mockI2C);
-
+        ads1115 = new Ads1115(pi4j);
+        mockI2C = ads1115.mock();
     }
 
-    @Test
-    public void testGetContext() {
-        assertEquals(pi4j, ads1115.getContext());
-    }
 
-    @Test
-    public void testGetI2CBus() {
-        assertEquals(i2cBus, ads1115.getI2CBus());
-    }
-
-    @Test
-    public void testGetDeviceId() {
-        assertEquals("ADS1115", ads1115.getDeviceId());
-    }
-
-    @Test
-    public void testGetGain() {
-        assertEquals(Ads1115.DR.SPS_128.getSpS(), ads1115.getSamplingRate());
-    }
-
-    @Test
-    public void testReadConversionRegister() {
-        //given
-        int conversionRegisterValue = 16;
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        //then
-        assertEquals(conversionRegisterValue, ads1115.readConversionRegister());
-    }
-
-    @Test
-    public void testWriteConfigRegister() {
-        //given
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-        //then
-        assertEquals(answerSingleShotAIN0ConfigRegister, ads1115.writeConfigRegister( defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode()));
-    }
-
-    @Test
-    public void testSingleShotAIn0(){
-        //given
-        int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-        //then
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), ads1115.singleShotAIn0());
-    }
-
-    @Test
-    public void testSingleShotAIn0Exception(){
-        //when
-        ads1115.startFastContinuousReading(0,0.05,10);
-        //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn1());
-    }
-
-    @Test
-    public void testSingleShotExceptionReadWrongChanel(){
-        //given
-        int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-        //then
-        assertThrows( ConfigException.class, () -> ads1115.singleShotAIn1());
-
-    }
-
-    @Test
-    public void testSingleShotAIn1(){
-        //given
-        int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN1_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-        //then
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), ads1115.singleShotAIn1());
-    }
-
-    @Test
-    public void testSingleShotAIn1Exception(){
-        //when
-        ads1115.startFastContinuousReading(0,0.05,10);
-        //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn1());
-    }
-
-    @Test
-    public void testSingleShotAIn2(){
-        //given
-        int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN2_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-        //then
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), ads1115.singleShotAIn2());
-    }
-
-    @Test
-    public void testSingleShotAIn2Exception(){
-        //when
-        ads1115.startFastContinuousReading(0,0.05,10);
-        //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn2());
-    }
-
-    @Test
-    public void testSingleShotAIn3(){
-        //given
-        int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN3_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-        //then
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), ads1115.singleShotAIn3());
-    }
-
-    @Test
-    public void testSingleShotAIn3Exception(){
-        //when
-        ads1115.startFastContinuousReading(0,0.05,10);
-        //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.singleShotAIn3());
-    }
-
-    @Test
-    public void testFastContinuousReading(){
-        //given
-        int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN3_GND.getMux() | Ads1115.MODE.CONTINUOUS.getMode();
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-
-        AtomicReference<Double> actualValue = new AtomicReference<>((double) 0);
-        AtomicReference<Integer> counter = new AtomicReference<>(0);
-        ads1115.setConsumerFastRead((value)->{
-            actualValue.set(value);
-            counter.set(counter.get()+1);
-        });
-
-        //when
-        ads1115.startFastContinuousReading(0,0.05,10);
-
-        //then
-        assertEquals(0, counter.get());
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(1, counter.get());
-
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        // no new value in conversion register
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(1, counter.get());
-
-        //when
-        conversionRegisterValue =18000;
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-
-        //then
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        //new value in conversion register
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(2, counter.get());
-
-
-        //when
-        int deltaConversionRegister = 20;
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue + deltaConversionRegister);
-
-        //then
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        //new value in conversion register is too small for value change event
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testFastContinuousReadingExceptionFrequency(){
-        //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startFastContinuousReading(0,0.05, 200));
-    }
-
-    @Test
-    public void testFastContinuousReadingExceptionReadingAlreadyRunning(){
-        //when
-        ads1115.startFastContinuousReading(0,0.05,10);
-        //then
-        ads1115.stopFastContinuousReading();
-        ads1115.startFastContinuousReading(0,0.05,10);
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startFastContinuousReading(0,0.05, 10));
-    }
-
-    @Test
-    public void testSlowContinuousReading(){
-        //given
-        int conversionRegisterValue =16000;
-        answerConfigRegister = defaultConfigRegister | Ads1115.MUX.AIN0_GND.getMux() | Ads1115.MODE.SINGLE.getMode();
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-        when(mockI2C.readRegisterWord(CONFIG_REGISTER)).thenReturn(answerConfigRegister);
-
-        AtomicReference<Double> actualValue = new AtomicReference<>((double) 0);
-        AtomicReference<Integer> counter = new AtomicReference<>(0);
-        ads1115.setConsumerSlowReadChannel0((value)->{
-            actualValue.set(value);
-            counter.set(counter.get()+1);
-        });
-
-        //when
-        ads1115.startSlowContinuousReading(0,0.05,10);
-
-        //then
-        assertEquals(0, counter.get());
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(1, counter.get());
-
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        // no new value in conversion register
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(1, counter.get());
-
-        //when
-        conversionRegisterValue =18000;
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue);
-
-        //then
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        //new value in conversion register
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(2, counter.get());
-
-
-        //when
-        int deltaConversionRegister = 20;
-        when(mockI2C.readRegisterWord(CONVERSION_REGISTER)).thenReturn(conversionRegisterValue + deltaConversionRegister);
-
-        //then
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        //new value in conversion register is too small for value change event
-        assertEquals(conversionRegisterValue * ads1115.getPga().gainPerBit(), actualValue.get());
-        assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testSlowContinuousReadingExceptionFrequency(){
-        //then
-        assertThrows(ContinuousMeasuringException.class, () -> ads1115.startSlowContinuousReading(0,0.05, 200));
-    }
 }

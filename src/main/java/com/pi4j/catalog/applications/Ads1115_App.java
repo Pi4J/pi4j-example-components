@@ -1,107 +1,66 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Ads1115;
 
+/**
+ * This example shows how to use the analog-to-digital converter (ADC, A/D or A-to-D) 'ADS1115' that converts an
+ * analog signal, like the current 'position' of a potentiometer into a digital signal.
+ * <p>
+ * see <a href="https://pi4j.com/examples/components/ads1115/">Description on Pi4J website</a>
+ */
 public class Ads1115_App implements Application {
     @Override
     public void execute(Context pi4j) {
-        System.out.println("ADS1115 test started ...");
-        //System.out.println("read all channels in single mode");
-        //singleRead(pi4j);
+        System.out.println("ADS1115 demo started ...");
+
+        Ads1115 adc = new Ads1115(pi4j);
+
+        System.out.println("read all channels in single mode");
+        singleRead(adc);
 
         System.out.println("read all channels in continuous mode");
-        continuousSlowRead(pi4j);
+        continuousRead(adc);
 
-        //System.out.println("read one channel in fast continuous mode");
-        //continuousFastRead(pi4j);
+        //cleanup
+        adc.reset();
 
-        System.out.println("ADS1115 test done");
+        System.out.println("ADS1115 demo finished");
     }
 
-    private void singleRead(Context pi4j) {
-        //start test
+    private void singleRead(Ads1115 adc) {
         System.out.println("Single read started ...");
-        System.out.println("Create ADS1115 object");
-        Ads1115 adc = new Ads1115(pi4j, 0x1, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
-
         //read analog value from all four channels
-        for (int i = 0; i < 30; i++) {
-            double aIn0 = adc.singleShotAIn0();
-            double aIn1 = adc.singleShotAIn1();
-            double aIn2 = adc.singleShotAIn2();
-            double aIn3 = adc.singleShotAIn3();
-            System.out.println("[" + i + "] Voltages: a0=" + String.format("%.3f", aIn0) + " V, a1=" + String.format("%.3f", aIn1) + " V, a2=" + String.format("%.3f", aIn2) + " V, a3=" + String.format("%.3f", aIn3) + " V");
-            //wait for next read
-            delay(1000);
-        }
+        double aIn0 = adc.readValue(Ads1115.Channel.A0);
+        double aIn1 = adc.readValue(Ads1115.Channel.A1);
+        double aIn2 = adc.readValue(Ads1115.Channel.A2);
+        double aIn3 = adc.readValue(Ads1115.Channel.A3);
+        System.out.printf("Voltages: a0=%.3f V, a1=%.3f V, a2=%.3f V, a3=%.3f V%n", aIn0, aIn1, aIn2, aIn3);
 
-        pi4j.shutdown();
-
-        //end test
         System.out.println("Single read done.");
     }
 
-    private void continuousSlowRead(Context pi4j) {
-        //start test
-        System.out.println("Continuous slow read test started ...");
-
-        Ads1115 ads1115 = new Ads1115(pi4j, 0x01, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
+    private void continuousRead(Ads1115 adc) {
+        System.out.println("Continuous read started ...");
 
         // Register event handlers to print a message on value change
-        ads1115.setConsumerSlowReadChannel0((value) -> System.out.println("The actual value from channel 0 is: " + String.format("%.3f", value) + "voltage."));
-        ads1115.setConsumerSlowReadChannel1((value) -> System.out.println("The actual value from channel 1 is: " + String.format("%.3f", value) + "voltage."));
-        ads1115.setConsumerSlowReadChannel2((value) -> System.out.println("The actual value from channel 2 is: " + String.format("%.3f", value) + "voltage."));
-        ads1115.setConsumerSlowReadChannel3((value) -> System.out.println("The actual value from channel 3 is: " + String.format("%.3f", value) + "voltage."));
+        adc.onValueChange(Ads1115.Channel.A0, (value) -> System.out.printf("Value channel 0 : %.2f V%n", value));
+        adc.onValueChange(Ads1115.Channel.A1, (value) -> System.out.printf("Value channel 1 : %.2f V%n", value));
+        adc.onValueChange(Ads1115.Channel.A2, (value) -> System.out.printf("Value channel 2 : %.2f V%n", value));
+        adc.onValueChange(Ads1115.Channel.A3, (value) -> System.out.printf("Value channel 3 : %.2f V%n", value));
 
-        //start continuous measuring
-        ads1115.startSlowContinuousReadingAllChannels(0.1, 10);
+        adc.startContinuousReading(0.1);
 
-        // Wait while handling events before exiting
-        delay(30000);
+        // continue reading for 30 seconds
+        delay(Duration.ofSeconds(30));
 
-        //stop continuous measuring
-        ads1115.stopSlowReadContinuousReadingAllChannels();
+        adc.stopContinuousReading();
 
-        //deregister all handlers
-        ads1115.deregisterAll();
-
-        pi4j.shutdown();
-
-        //end test
-        System.out.println("Continuous slow read test done.");
+        System.out.println("Continuous read done.");
     }
 
-    private void continuousFastRead(Context pi4j) {
-        //start test
-        System.out.println("Continuous fast read test started ...");
-
-        Ads1115 ads1115 = new Ads1115(pi4j, 0x1, Ads1115.GAIN.GAIN_4_096V, Ads1115.ADDRESS.GND, 4);
-
-        // Register event handlers to print a message on value change
-        ads1115.setConsumerFastRead((value) -> {
-            System.out.println("The actual value from fast read channel is: " + String.format("%.3f", value) + "voltage.");
-        });
-
-        for (int i = 0; i < 4; i++) {
-            //start continuous measuring
-            ads1115.startFastContinuousReading(i, 0.1, 10);
-
-            // Wait while handling events before exiting
-            delay(20000);
-
-            //stop continuous measuring
-            ads1115.stopFastContinuousReading();
-        }
-
-
-        //deregister all handlers
-        ads1115.deregisterAll();
-
-        pi4j.shutdown();
-
-        //end test
-        System.out.println("Continuous fast read test done.");
-    }
 }

@@ -1,11 +1,15 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.context.Context;
-import com.pi4j.catalog.components.helpers.PIN;
-import com.pi4j.io.pwm.Pwm;
-import com.pi4j.io.pwm.PwmConfig;
+import java.time.Duration;
 
-public class ServoMotor extends Component {
+import com.pi4j.context.Context;
+import com.pi4j.io.pwm.Pwm;
+import com.pi4j.io.pwm.PwmType;
+
+import com.pi4j.catalog.components.base.PIN;
+import com.pi4j.catalog.components.base.PwmActuator;
+
+public class ServoMotor extends PwmActuator {
     /**
      * Default PWM frequency of the servo, based on values for SG92R
      */
@@ -28,11 +32,6 @@ public class ServoMotor extends Component {
      * Maximum PWM duty cycle to put the PWM into the maximum angle position
      */
     protected final static float DEFAULT_MAX_DUTY_CYCLE = 12;
-
-    /**
-     * Pi4J PWM instance for this servo
-     */
-    private final Pwm pwm;
 
     /**
      * Minimum angle of the servo motor used for this instance, should match previously tested real world values
@@ -96,11 +95,27 @@ public class ServoMotor extends Component {
      * @param maxDutyCycle Maximum duty cycle as float, between 0 and 100
      */
     public ServoMotor(Context pi4j, PIN address, int frequency, float minAngle, float maxAngle, float minDutyCycle, float maxDutyCycle) {
-        this.pwm = pi4j.create(buildPwmConfig(pi4j, address, frequency));
+        super(pi4j,
+                Pwm.newConfigBuilder(pi4j)
+                .id("BCM-" + address)
+                .name("Servo Motor " + address)
+                .address(address.getPin())
+                .pwmType(PwmType.HARDWARE)
+                .frequency(frequency)
+                .initial(0)
+                .shutdown(0)
+                .build());
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
         this.minDutyCycle = minDutyCycle;
         this.maxDutyCycle = maxDutyCycle;
+    }
+
+    @Override
+    public void reset() {
+        setAngle(0);
+        delay(Duration.ofSeconds(1));
+        super.reset();
     }
 
     /**
@@ -208,7 +223,7 @@ public class ServoMotor extends Component {
      * @param outputEnd   Maximum value for output
      * @return Mapped input value
      */
-    private static float mapRange(float input, float inputStart, float inputEnd, float outputStart, float outputEnd) {
+    private float mapRange(float input, float inputStart, float inputEnd, float outputStart, float outputEnd) {
         // Automatically swap minimum/maximum of input if inverted
         if (inputStart > inputEnd) {
             final float tmp = inputEnd;
@@ -225,41 +240,11 @@ public class ServoMotor extends Component {
 
         // Automatically clamp the input value and calculate the mapped value
         final float clampedInput = Math.min(inputEnd, Math.max(inputStart, input));
-        return outputStart + ((outputEnd - outputStart) / (inputEnd - inputStart)) * (clampedInput - inputStart);
+
+        //this set the max to the left and min to the right
+        //return outputStart + ((outputEnd - outputStart) / (inputEnd - inputStart)) * (clampedInput - inputStart);
+
+        return outputEnd - ((outputEnd - outputStart) / (inputEnd - inputStart)) * (clampedInput - inputStart);
     }
 
-    /**
-     * shutting down the component
-     */
-    public void off(){
-        this.pwm.off();
-    }
-
-    /**
-     * Returns the created PWM instance for the servo
-     *
-     * @return PWM instance
-     */
-    protected Pwm getPwm() {
-        return pwm;
-    }
-
-    /**
-     * Builds a new PWM configuration for the step motor.
-     *
-     * @param pi4j      Pi4J context
-     * @param address   BCM address
-     * @param frequency PWM frequency
-     * @return PWM configuration
-     */
-    protected PwmConfig buildPwmConfig(Context pi4j, PIN address, int frequency) {
-        return Pwm.newConfigBuilder(pi4j)
-                .id("BCM" + address)
-                .name("Servo Motor")
-                .address(address.getPin())
-                .frequency(frequency)
-                .initial(0)
-                .shutdown(0)
-                .build();
-    }
 }

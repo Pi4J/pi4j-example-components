@@ -1,17 +1,23 @@
 package com.pi4j.catalog.components;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
-import com.pi4j.io.i2c.I2CConfig;
+
+import com.pi4j.catalog.components.base.I2CDevice;
 
 /**
  * Implementation of a LCDDisplay using GPIO with Pi4J
- * For now, only works with the PCF8574T Backpack
+ * <p>
+ * Works with the PCF8574T backpack, only.
  */
-public class LcdDisplay extends Component {
+public class LcdDisplay extends I2CDevice {
     /** Flags for display commands */
     private static final byte LCD_CLEAR_DISPLAY   = (byte) 0x01;
     private static final byte LCD_RETURN_HOME     = (byte) 0x02;
+    private static final byte LCD_SCROLL_RIGHT    = (byte) 0x1E;
+    private static final byte LCD_SCROLL_LEFT     = (byte) 0x18;
     private static final byte LCD_ENTRY_MODE_SET  = (byte) 0x04;
     private static final byte LCD_DISPLAY_CONTROL = (byte) 0x08;
     private static final byte LCD_CURSOR_SHIFT    = (byte) 0x10;
@@ -33,8 +39,6 @@ public class LcdDisplay extends Component {
     // flags for display/cursor shift
     private static final byte LCD_DISPLAY_MOVE = (byte) 0x08;
     private static final byte LCD_CURSOR_MOVE  = (byte) 0x00;
-    private static final byte LCD_MOVE_RIGHT   = (byte) 0x04;
-    private static final byte LCD_MOVE_LEFT    = (byte) 0x00;
     // flags for function set
     private static final byte LCD_8BIT_MODE = (byte) 0x10;
     private static final byte LCD_4BIT_MODE = (byte) 0x00;
@@ -53,32 +57,19 @@ public class LcdDisplay extends Component {
      * Display row offsets. Offset for up to 4 rows.
      */
     private static final byte[] LCD_ROW_OFFSETS = {0x00, 0x40, 0x14, 0x54};
-    /**
-     * The Default BUS and Device Address.
-     * On the PI, you can look it up with the Command 'sudo i2cdetect -y 1'
-     */
-    private static final int DEFAULT_BUS    = 0x1;
+
     private static final int DEFAULT_DEVICE = 0x27;
 
     /**
-     * The PI4J I2C component
-     */
-    private final I2C i2c;
-    /**
-     * The amount of rows on the display
+     * Number of rows on the display
      */
     private final int rows;
     /**
-     * The amount of columns on the display
+     * Number of columns on the display
      */
     private final int columns;
-
     /**
-     * With this Byte cursor visibility is controlled
-     */
-    private byte displayControl;
-    /**
-     * This boolean checks if the backlight is on or not
+     * Is backlight is on or off
      */
     private boolean backlight;
 
@@ -88,201 +79,195 @@ public class LcdDisplay extends Component {
      * @param pi4j Pi4J context
      */
     public LcdDisplay(Context pi4j){
-        this(pi4j, 2, 16);
+        this(pi4j, 2, 16, DEFAULT_DEVICE);
     }
 
     /**
      * Creates a new LCDDisplay component with custom rows and columns
      *
      * @param pi4j      Pi4J context
-     * @param rows      Custom amount of display lines
-     * @param columns   Custom amount of chars on line
+     * @param rows      amount of display lines
+     * @param columns   amount of chars on each line
      */
-    public LcdDisplay(Context pi4j, int rows, int columns) {
-        this.rows = rows;
-        this.columns = columns;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, DEFAULT_BUS, DEFAULT_DEVICE));
-        init();
+    public LcdDisplay(Context pi4j, int rows, int columns){
+        this(pi4j, rows, columns, DEFAULT_DEVICE);
     }
 
     /**
      * Creates a new LCDDisplay component with custom rows and columns
      *
      * @param pi4j      Pi4J context
-     * @param rows      Custom amount of display lines
-     * @param columns   Custom amount of chars on line
-     * @param bus       Custom I2C bus address
-     * @param device    Custom I2C device Address
+     * @param rows      amount of display lines
+     * @param columns   amount of chars on each line
+     * @param device    I2C device address
      */
-    public LcdDisplay(Context pi4j, int rows, int columns, int bus, int device) {
-        this.rows = rows;
+    public LcdDisplay(Context pi4j, int rows, int columns, int device) {
+        super(pi4j, device, "PCF8574AT backed LCD");
+        this.rows    = rows;
         this.columns = columns;
-        this.i2c = pi4j.create(buildI2CConfig(pi4j, bus, device));
-        init();
-    }
-
-    /**
-     * Registers the I2C Component on the PI4J
-     *
-     * @param pi4j   The Context
-     * @param bus    The I2C Bus
-     * @param device The I2C Device
-     * @return A Provider of an I2C Bus
-     */
-    private I2CConfig buildI2CConfig(Context pi4j, int bus, int device) {
-        return I2C.newConfigBuilder(pi4j)
-                .id("I2C-" + device + "@" + bus)
-                .name("PCF8574AT")
-                .bus(bus)
-                .device(device)
-                .build();
     }
 
 
     /**
-     * @return The current running Context
+     * Initializes the LCD with the backlight off
      */
-    public I2C getI2C(){
-        return this.i2c;
+    @Override
+    protected void init(I2C i2c) {
+        sendLcdTwoPartsCommand((byte) 0x03);
+        sendLcdTwoPartsCommand((byte) 0x03);
+        sendLcdTwoPartsCommand((byte) 0x03);
+        sendLcdTwoPartsCommand((byte) 0x02);
+
+        // Initialize display settings
+        sendLcdTwoPartsCommand((byte) (LCD_FUNCTION_SET | LCD_2LINE | LCD_5x8DOTS | LCD_4BIT_MODE));
+        sendLcdTwoPartsCommand((byte) (LCD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_OFF | LCD_BLINK_OFF));
+        sendLcdTwoPartsCommand((byte) (LCD_ENTRY_MODE_SET | LCD_ENTRY_LEFT | LCD_ENTRY_SHIFT_DECREMENT));
+
+        clearDisplay();
+
+        // Enable backlight
+        setDisplayBacklight(true);
     }
 
     /**
      * Turns the backlight on or off
      */
-    public void setDisplayBacklight(boolean state) {
-        this.backlight = state;
-        executeCommand(this.backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT);
+    public void setDisplayBacklight(boolean backlightEnabled) {
+        backlight = backlightEnabled;
+        sendCommand(backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT);
     }
 
     /**
      * Clear the LCD and set cursor to home
      */
     public void clearDisplay() {
-        writeCommand(LCD_CLEAR_DISPLAY);
         moveCursorHome();
+        sendLcdTwoPartsCommand(LCD_CLEAR_DISPLAY);
     }
 
     /**
      * Returns the Cursor to Home Position (First line, first character)
      */
     public void moveCursorHome() {
-        writeCommand(LCD_RETURN_HOME);
-        sleep(3, 0);
+        sendLcdTwoPartsCommand(LCD_RETURN_HOME);
     }
 
     /**
      * Shuts the display off
      */
     public void off() {
-        executeCommand(LCD_DISPLAY_OFF);
+        sendCommand(LCD_DISPLAY_OFF);
     }
 
     /**
-     * Write a Line of Text on the LCD Display
+     * Write a line of text on the LCD
      *
-     * @param text Text to display
-     * @param line Select Line of Display
+     * @param text Text to be displayed
+     * @param line linenumber of display, range: 0 .. rows-1
      */
-    public void displayText(String text, int line) {
-        if (text.length() > columns) {
-            throw new IllegalArgumentException("Too long text. Only " + columns + " characters possible");
-        }
-        if (line > rows || line < 1) {
-            throw new IllegalArgumentException("Wrong line id. Only " + rows + " lines possible");
-        }
-
-        clearLine(line);
-        moveCursorHome();
-        displayLine(text, LCD_ROW_OFFSETS[line - 1]);
+    public void displayLineOfText(String text, int line) {
+        displayLineOfText(text, line, 0);
     }
 
     /**
-     * Write a Line of Text on the LCD Display
+     * Center specified text in specified line
+     * @param text Text to be displayed
+     * @param line linenumber of display, range: 0 .. rows-1
+     */
+    public void centerTextInLine(String text, int line){
+        displayLineOfText(text, line, (int) ((columns - text.length()) * 0.5));
+    }
+
+    /**
+     * Write a line of text on the LCD
      *
-     * @param text     Text to display
-     * @param line     Select Line of Display
-     * @param position Select position on line
+     * @param text     text to be displayed
+     * @param line     line number of display, range: 0..rows-1
+     * @param position start position, range: 0..columns-1
      */
-    public void displayText(String text, int line, int position) {
-        if (position > columns) {
-            throw new IllegalArgumentException("Too long text. Only " + columns + " characters possible");
-        }
-        if (line > rows || line < 1) {
-            throw new IllegalArgumentException("Wrong line id. Only " + rows + " lines possible");
+    public void displayLineOfText(String text, int line, int position) {
+        if (text.length() + position > columns) {
+            logInfo("Text '%s' too long, cut to %d characters", text, (columns - position));
+            text = text.substring(0, (columns - position));
         }
 
-        clearLine(line);
-        setCursorToPosition(position, line);
-        for (char character: text.toCharArray()) {
-            writeCharacter(character);
+        if (line > rows || line < 0) {
+            logError("Wrong line id '%d'. Only %d lines possible", line, rows);
+        }
+        else {
+            setCursorToPosition(line, 0);
+            for(int i= 0; i < position; i++){
+                writeCharacter(' ');
+            }
+            for (char character : text.toCharArray()) {
+                writeCharacter(character);
+            }
+            for(int i = 0; i< columns - text.length(); i++){
+                writeCharacter(' ');
+            }
         }
     }
 
     /**
-     * Write Text on the LCD Display
+     * Write text on the LCD starting in home position
      *
      * @param text Text to display
      */
     public void displayText(String text) {
-        if (text.length() > (rows * columns)) {
-            throw new IllegalArgumentException("Too long text. Only " + rows * columns + " characters allowed");
-        }
-
-        // Clean and prepare to write some text
+        logDebug("Display in LCD: '%s'", text);
         var currentLine = 0;
-        String[] lines = new String[rows];
-        for (int j = 0; j < rows; j++) {
-            lines[j] = "";
-        }
-        clearDisplay();
 
-        // Iterate through lines and characters and write them to the display
+        StringBuilder[] texts = new StringBuilder[rows];
+        for (int j = 0; j < rows; j++) {
+            texts[j] = new StringBuilder(rows);
+        }
+
         for (int i = 0; i < text.length(); i++) {
-            // line break in text found
-            if (text.charAt(i) == '\n' && currentLine < rows) {
+            if (currentLine > rows - 1) {
+                logInfo("Text too long, remaining '%s' will not be displayed", text.substring(i));
+                break;
+            }
+            if (text.charAt(i) == '\n') {
                 currentLine++;
-                //if a space comes after newLine, it is omitted
-                if (i+1 >= text.length()) return;
-                if (text.charAt(i + 1) == ' ') i++;
                 continue;
             }
-
-            // Write character to array
-            lines[currentLine] += (char) text.charAt(i);
-
-            if (lines[currentLine].length() == columns && currentLine < rows) {
+            else if(texts[currentLine].length() >= columns){
                 currentLine++;
-                //if a space comes after newLine, it is omitted
-                if (i+1 >= text.length()) return;
-                if (text.charAt(i + 1) == ' ') i++;
+                if (text.charAt(i) == ' ') {
+                    i++;
+                }
+            }
+            // append character to line
+            if(currentLine < rows){
+                texts[currentLine].append(text.charAt(i));
             }
         }
 
-        //display the created Rows
+        //display the created texts
         for (int j = 0; j < rows; j++) {
-            displayLine(lines[j], LCD_ROW_OFFSETS[j]);
+            displayLineOfText(texts[j].toString(), j);
         }
     }
 
     /**
-     * write a character to lcd
+     * write a character to LCD at current cursor position
      *
-     * @param charvalue of the char that is written
+     * @param character  char that is written
      */
-    public void writeCharacter(char charvalue) {
-        writeSplitCommand((byte) charvalue, Rs);
+    public void writeCharacter(char character) {
+        sendLcdTwoPartsCommand((byte) character, Rs);
     }
 
     /**
-     * write a character to lcd
+     * write a character to lcd at a specific position
      *
-     * @param charvalue of the char that is written
-     * @param line      ROW-position, Range 1 - ROWS
-     * @param column    Column-position, Range 0 - COLUMNS-1
+     * @param character char that is written
+     * @param line   row-position, Range 0 .. rows-1
+     * @param pos    col-position, Range 0 .. columns-1
      */
-    public void writeCharacter(char charvalue, int column, int line) {
-        setCursorToPosition(column, line);
-        writeSplitCommand((byte) charvalue, Rs);
+    public void writeCharacter(char character, int line, int pos) {
+        setCursorToPosition(line, pos);
+        sendLcdTwoPartsCommand((byte) character, Rs);
     }
 
     /**
@@ -292,9 +277,8 @@ public class LcdDisplay extends Component {
      * @param pos  for the start of the text
      */
     private void displayLine(String text, int pos) {
-        writeCommand((byte) (0x80 + pos));
+        sendLcdTwoPartsCommand((byte) (0x80 + pos));
 
-        if (text == null || text.isEmpty()) return;
         for (int i = 0; i < text.length(); i++) {
             writeCharacter(text.charAt(i));
         }
@@ -303,7 +287,7 @@ public class LcdDisplay extends Component {
     /**
      * Clears a line of the display
      *
-     * @param line Select line to clear
+     * @param line line number of line to be cleared
      */
     public void clearLine(int line) {
         if (line > rows || line < 1) {
@@ -313,125 +297,20 @@ public class LcdDisplay extends Component {
     }
 
     /**
-     * Write a command to the LCD
-     */
-    private void writeCommand(byte cmd) {
-        writeSplitCommand(cmd, (byte) 0);
-    }
-
-    /**
-     * Write a command in 2 parts to the LCD
-     */
-    private void writeSplitCommand(byte cmd, byte mode) {
-        //bitwise AND with 11110000 to remove last 4 bits
-        writeFourBits((byte) (mode | (cmd & 0xF0)));
-        //bitshift and bitwise AND to remove first 4 bits
-        writeFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
-    }
-
-    /**
-     * Write the four bits of a byte to the LCD
-     *
-     * @param data the byte that is sent
-     */
-    private void writeFourBits(byte data) {
-        i2c.write((byte) (data | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
-        lcd_strobe(data);
-    }
-
-    /**
-     * Clocks EN to latch command
-     */
-    private void lcd_strobe(byte data) {
-        i2c.write((byte) (data | En | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
-        sleep(0, 500_000);
-        i2c.write((byte) ((data & ~En) | (backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT)));
-        sleep(0, 100_000);
-    }
-
-    /**
-     * Moves the cursor 1 character right
-     */
-    public void moveCursorRight() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_RIGHT));
-        delay(1);
-    }
-
-    /**
-     * Moves the cursor 1 character left
-     */
-    public void moveCursorLeft() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_CURSOR_MOVE | LCD_MOVE_LEFT));
-        delay(1);
-    }
-
-    /**
      * Sets the cursor to a target destination
      *
-     * @param digit Selects the character of the line. Range: 0 - Columns-1
-     * @param line  Selects the line of the display. Range: 1 - ROWS
+     * @param line Selects the line of the display. Range: 0 - ROWS-1
+     * @param pos  Selects the character of the line. Range: 0 - Columns-1
      */
-    public void setCursorToPosition(int digit, int line) {
-        if (line > rows || line < 1) {
+    public void setCursorToPosition(int line, int pos) {
+        if (line > rows-1 || line < 0) {
             throw new IllegalArgumentException("Line out of range. Display has only " + rows + "x" + columns + " Characters!");
         }
 
-        if (digit < 0 || digit > columns) {
+        if (pos < 0 || pos > columns-1) {
             throw new IllegalArgumentException("Line out of range. Display has only " + rows + "x" + columns + " Characters!");
         }
-        writeCommand((byte) (LCD_SET_DDRAM_ADDR | digit + LCD_ROW_OFFSETS[line - 1]));
-    }
-
-    /**
-     * Set the cursor to desired line
-     *
-     * @param line Sets the cursor to this line. Only Range 1 - lines allowed.
-     */
-    public void setCursorToLine(int line) {
-        setCursorToPosition(0, line);
-    }
-
-    /**
-     * Sets the display cursor to hidden or showing
-     *
-     * @param show Set the state of the cursor
-     */
-    public void setCursorVisibility(boolean show) {
-        if (show) {
-            this.displayControl |= LCD_CURSOR_ON;
-        } else {
-            this.displayControl &= ~LCD_CURSOR_ON;
-        }
-        executeCommand(LCD_DISPLAY_CONTROL, this.displayControl);
-    }
-
-    /**
-     * Set the cursor to blinking or static
-     *
-     * @param blink Blink = true means the cursor will change to blinking mode. False lets the cursor stay static
-     */
-    public void setCursorBlinking(boolean blink) {
-        if (blink) {
-            this.displayControl |= LCD_BLINK_ON;
-        } else {
-            this.displayControl &= ~LCD_BLINK_ON;
-        }
-
-        executeCommand(LCD_DISPLAY_CONTROL, this.displayControl);
-    }
-
-    /**
-     * Moves the whole displayed text one character right
-     */
-    public void moveDisplayRight() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_DISPLAY_MOVE | LCD_MOVE_RIGHT));
-    }
-
-    /**
-     * Moves the whole displayed text one character right
-     */
-    public void moveDisplayLeft() {
-        executeCommand(LCD_CURSOR_SHIFT, (byte) (LCD_DISPLAY_MOVE | LCD_MOVE_LEFT));
+        sendLcdTwoPartsCommand((byte) (LCD_SET_DDRAM_ADDR | pos + LCD_ROW_OFFSETS[line]));
     }
 
     /**
@@ -450,62 +329,62 @@ public class LcdDisplay extends Component {
         if (location > 7 || location < 1) {
             throw new IllegalArgumentException("Invalid memory location. Range 1-7 allowed. Value: " + location);
         }
-        writeCommand((byte) (LCD_SET_CGRAM_ADDR | location << 3));
+        sendLcdTwoPartsCommand((byte) (LCD_SET_CGRAM_ADDR | location << 3));
 
         for (int i = 0; i < 8; i++) {
-            writeSplitCommand(character[i], (byte) 1);
+            sendLcdTwoPartsCommand(character[i], (byte) 1);
         }
     }
 
-
     /**
-     * Execute Display commands
-     *
-     * @param command Select the LCD Command
-     * @param data    Setup command data
+     * Scroll whole display to the right by one column.
      */
-    private void executeCommand(byte command, byte data) {
-        executeCommand((byte) (command | data));
+    public void scrollRight(){
+        sendLcdTwoPartsCommand(LCD_SCROLL_RIGHT);
     }
 
     /**
-     * Write a single command
+     * Scroll whole display to the left by one column.
      */
-    private void executeCommand(byte cmd) {
-        i2c.write(cmd);
-        sleep(0, 100_000);
+    public void scrollLeft(){
+        sendLcdTwoPartsCommand(LCD_SCROLL_LEFT);
     }
 
-    /**
-     * Initializes the LCD with the backlight off
-     */
-    private void init() {
-        writeCommand((byte) 0x03);
-        writeCommand((byte) 0x03);
-        writeCommand((byte) 0x03);
-        writeCommand((byte) 0x02);
-
-        // Initialize display settings
-        writeCommand((byte) (LCD_FUNCTION_SET | LCD_2LINE | LCD_5x8DOTS | LCD_4BIT_MODE));
-        writeCommand((byte) (LCD_DISPLAY_CONTROL | LCD_DISPLAY_ON | LCD_CURSOR_OFF | LCD_BLINK_OFF));
-        writeCommand((byte) (LCD_ENTRY_MODE_SET | LCD_ENTRY_LEFT | LCD_ENTRY_SHIFT_DECREMENT));
-
+    @Override
+    public void reset() {
         clearDisplay();
-
-        // Enable backlight
-        setDisplayBacklight(true);
-        logDebug("LCD Display initialized");
+        off();
     }
 
     /**
-     * Utility function to sleep for the specified amount of milliseconds. An {@link InterruptedException} will be catched and ignored while setting the
-     * interrupt flag again.
+     * Write a command to the LCD
      */
-    protected void sleep(long millis, int nanos) {
-        try {
-            Thread.sleep(millis, nanos);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    private void sendLcdTwoPartsCommand(byte cmd) {
+        sendLcdTwoPartsCommand(cmd, (byte) 0);
     }
+
+    /**
+     * Write a command in 2 parts to the LCD
+     */
+    private void sendLcdTwoPartsCommand(byte cmd, byte mode) {
+        //bitwise AND with 11110000 to remove last 4 bits
+        writeFourBits((byte) (mode | (cmd & 0xF0)));
+        //bitshift and bitwise AND to remove first 4 bits
+        writeFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
+    }
+
+    /**
+     * Write the four bits of a byte to the LCD
+     *
+     * @param data the byte that is sent
+     */
+    private void writeFourBits(byte data) {
+        byte backlightStatus = backlight ? LCD_BACKLIGHT : LCD_NO_BACKLIGHT;
+
+        write((byte) (data | En | backlightStatus));
+        write((byte) ((data & ~En) | backlightStatus));
+
+        delay(Duration.ofNanos(50_000));
+    }
+
 }

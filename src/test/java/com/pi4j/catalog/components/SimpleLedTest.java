@@ -1,75 +1,69 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.catalog.components.helpers.PIN;
-import com.pi4j.io.gpio.digital.DigitalOutput;
-import com.pi4j.io.gpio.digital.DigitalState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.pi4j.io.gpio.digital.DigitalState;
+import com.pi4j.plugin.mock.provider.gpio.digital.MockDigitalOutput;
+
+import com.pi4j.catalog.ComponentTest;
+import com.pi4j.catalog.components.base.PIN;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleLedTest extends ComponentTest {
 
-    protected SimpleLed led;
-
-    protected DigitalOutput digitalOutput;
+    private SimpleLed led;
+    private MockDigitalOutput digitalOutput;
 
     @BeforeEach
     public void setUp() {
-        this.led = new SimpleLed(pi4j, PIN.D26);
-        this.digitalOutput = led.getDigitalOutput();
+        led = new SimpleLed(pi4j, PIN.D26);
+        digitalOutput = led.mock();
     }
 
     @Test
-    public void testLed_Address() {
-        //when
-        digitalOutput = led.getDigitalOutput();
-        //then
-        assertEquals(26, digitalOutput.getAddress());
-
+    public void testInitialization() {
+        assertEquals(26, led.pinNumber());
     }
 
     @Test
-    public void testSetState_On() {
-        //when
-        led.setState(true);
-        //then
-        assertEquals(DigitalState.HIGH, digitalOutput.state());
-    }
-
-    @Test
-    public void testSetState_Off() {
-        //when
-        led.setState(false);
-        //then
-        assertEquals(DigitalState.LOW, digitalOutput.state());
-    }
-
-    @Test
-    public void testSetStateOn() {
+    public void testOn() {
         //when
         led.on();
+
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
+        assertTrue(led.isOn());
     }
 
     @Test
-    public void testSetStateOff() {
-        //given
-        led.on();
+    public void testOff() {
         //when
         led.off();
+
         //then
         assertEquals(DigitalState.LOW, digitalOutput.state());
+        assertFalse(led.isOn());
     }
 
+
     @Test
-    public void testToggleState() {
+    public void testToggle() {
+        //given
+        led.off();
+
         //when
-        led.toggleState();
+        led.toggle();
+
         //then
         assertEquals(DigitalState.HIGH, digitalOutput.state());
+
+        //when
+        led.toggle();
+
+        //then
+        assertEquals(DigitalState.LOW, digitalOutput.state());
     }
 
 }

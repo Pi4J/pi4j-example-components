@@ -1,8 +1,8 @@
 package com.pi4j.catalog;
 
-import com.pi4j.context.Context;
+import java.time.Duration;
 
-import java.util.logging.Logger;
+import com.pi4j.context.Context;
 
 /**
  * This interface should be implemented by each CrowPi example / application
@@ -40,25 +40,14 @@ public interface Application {
      * Utility function to sleep for the specified amount of milliseconds.
      * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
      *
-     * @param milliseconds Time in milliseconds to sleep
+     * @param duration Time to sleep
      */
-    default void delay(long milliseconds) {
+    default void delay(Duration duration) {
         try {
-            Thread.sleep(milliseconds);
+            Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    /**
-     * Logger instance
-     */
-    Logger logger = Logger.getLogger("Pi4J-App");
-
-    default void logInfo(String msg){
-        logger.info(() -> msg);
-    }
-    default void logError(String msg){
-        logger.severe(() -> msg);
-    }
 }

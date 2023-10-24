@@ -1,43 +1,52 @@
 package com.pi4j.catalog.applications;
 
+import java.time.Duration;
+
 import com.pi4j.context.Context;
+
 import com.pi4j.catalog.Application;
-import com.pi4j.catalog.components.helpers.PIN;
+import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Joystick;
 
 /**
  * This example shows how to use the Joystick by registering actions for each position of the joystick
+ * <p>
+ * see <a href="https://pi4j.com/examples/components/joystick/">Description on Pi4J website</a>
  */
 public class Joystick_App implements Application {
     @Override
     public void execute(Context pi4j) {
+        System.out.println("Joystick demo started ...");
 
-        System.out.println("Joystick app started ...");
         final var joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.PWM13, PIN.PWM19, PIN.D26);
 
-        //Register event handlers to print a message when pressed (onDown) and (onUp)
-        joystick.onNorth(() -> System.out.println("Start Pressing joystick button North"));
-        joystick.whileNorth(1000, () -> System.out.println("Pressing joystick button North"));
+        //Register all event handlers
+        joystick.onNorth(() -> System.out.println("Start NORTH"));
+        joystick.whileNorth(() -> System.out.println("Still NORTH"),
+                            Duration.ofSeconds(1));
 
-        joystick.onWest(() -> System.out.println("Start Pressing joystick button West"));
-        joystick.whileWest(1000, () -> System.out.println("Pressing joystick button West"));
+        joystick.onWest(() -> System.out.println("Start WEST"));
+        joystick.whileWest(() -> System.out.println("Still WEST"),
+                           Duration.ofSeconds(1));
 
-        joystick.onSouth(() -> System.out.println("Start Pressing joystick button South"));
-        joystick.whileSouth(1000, () -> System.out.println("Pressing joystick button South"));
+        joystick.onSouth(() -> System.out.println("Start SOUTH"));
+        joystick.whileSouth(() -> System.out.println("Still SOUTH"),
+                            Duration.ofSeconds(1));
 
-        joystick.onEast(() -> System.out.println(" Start Pressing joystick button East"));
-        joystick.whileEast(1000, () -> System.out.println("Pressing joystick button East"));
+        joystick.onEast(() -> System.out.println(" Start EAST"));
+        joystick.whileEast(() -> System.out.println("Still EAST"),
+                          Duration.ofSeconds(1));
 
-        joystick.onPushDown(() -> System.out.println("Start Pressing joystick button PUSH"));
-        joystick.onPushUp(() -> System.out.println("Stop pressing joystick button PUSH"));
+        joystick.onPushDown(() -> System.out.println("Start PUSH"));
+        joystick.onPushUp(() -> System.out.println("Still PUSHing"));
 
         // Wait for 15 seconds while handling events before exiting
-        System.out.println("Press the button to see it in action!");
-        delay(15_000);
+        System.out.println("Move the joystick and push it's button to see it in action!");
+        delay(Duration.ofSeconds(15));
 
-        // Unregister all event handlers to exit this application in a clean way
-        joystick.deRegisterAll();
+        // cleanup
+        joystick.reset();
 
-        System.out.println("Joystick app done.");
+        System.out.println("Joystick demo finished.");
     }
 }

@@ -1,8 +1,16 @@
 package com.pi4j.catalog;
 
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
+
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
-import com.pi4j.catalog.applications.*;
 import com.pi4j.library.pigpio.PiGpio;
 import com.pi4j.plugin.linuxfs.provider.i2c.LinuxFsI2CProvider;
 import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalInputProvider;
@@ -11,10 +19,8 @@ import com.pi4j.plugin.pigpio.provider.pwm.PiGpioPwmProvider;
 import com.pi4j.plugin.pigpio.provider.serial.PiGpioSerialProvider;
 import com.pi4j.plugin.pigpio.provider.spi.PiGpioSpiProvider;
 import com.pi4j.plugin.raspberrypi.platform.RaspberryPiPlatform;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import java.util.*;
+
+import com.pi4j.catalog.applications.*;
 
 @Command(name = "Raspberry Pi Example Launcher", version = "1.0.0", mixinStandardHelpOptions = true)
 public final class Launcher implements Runnable {
@@ -22,7 +28,7 @@ public final class Launcher implements Runnable {
      * This list must contain all applications which should be executable through the launcher.
      * Each class instance must implement the Application interface and gets automatically added as a subcommand.
      */
-    public static final List<Application> APPLICATIONS = new ArrayList<Application>(Arrays.asList(
+    public static final List<Application> APPLICATIONS = List.of(
         new SimpleButton_App(),
         new SimpleLed_App(),
         new Ads1115_App(),
@@ -37,7 +43,7 @@ public final class Launcher implements Runnable {
         new Potentiometer_App(),
         new SerialGps_App(),
         new Servo_App()
-    ));
+    );
 
     /**
      * Demo mode will keep the launcher running forever, allowing the consecutive execution of several applications.
@@ -123,7 +129,7 @@ public final class Launcher implements Runnable {
                         }
                     })
                     .add(PiGpioDigitalInputProvider.newInstance(piGpio),
-                            PiGpioDigitalOutputProvider.newInstance(piGpio),
+                            PiGpioDigitalOutputProvider.newInstance(piGpio) ,
                             PiGpioPwmProvider.newInstance(piGpio),
                             PiGpioSerialProvider.newInstance(piGpio),
                             PiGpioSpiProvider.newInstance(piGpio),

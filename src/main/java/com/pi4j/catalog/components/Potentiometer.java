@@ -1,72 +1,53 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.config.exception.ConfigException;
-import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
-
 import java.util.function.Consumer;
 
+import com.pi4j.catalog.components.base.Component;
+
+/**
+ * A potentiometer is an analog device and needs to use an analog-digital convertor (ADC) to be attached to RaspPi.
+ * <p>
+ * In this implementation we use an 'Ads115' and attach the potentiometer to one of the ADC channels.
+ * <p>
+ * We use the terms 'normalized value' and 'raw value'.
+ * <ul>
+ *     <li>Normalized values are between -1 and 1 ( 0 means that potentiometer is in center position) or between 0 and 1.
+ *     Potentiometer can be configured which range it should use.
+ *     </li>
+ *     <li>Raw value is the measured voltage</li>
+ * </ul>
+ */
 public class Potentiometer extends Component {
+    public enum Range {
+        ZERO_TO_ONE, MINUS_ONE_TO_ONE
+    }
+
     /**
      * ads1115 instance
      */
     private final Ads1115 ads1115;
+    private final Range range;
 
     /**
-     * AD channel connected to potentiometer (must be between 0 and 3)
+     * ADC channel the potentiometer is attached to
      */
-    private final int channel;
-    /**
-     * min value which potentiometer has reached
-     */
-    private double minValue;
+    private final Ads1115.Channel channel;
 
     /**
-     * max value which potentiometer has reached
-     */
-    private double maxValue;
-
-    /**
-     * fast continuous reading is active
-     */
-    private boolean fastContinuousReadingActive = false;
-
-    /**
-     * slow continuous reading is active
-     */
-    private boolean slowContinuousReadingActive = false;
-
-    /**
-     * Create a new potentiometer component with custom channel and custom maxVoltage
+     * Create a new potentiometer component attached to the specified ADC channel and preliminary values for raw value range
      *
-     * @param ads1115    ads instance
-     * @param channel     custom ad channel
-     * @param maxVoltage custom maxVoltage
+     * @param ads1115 ADC instance
      */
-    public Potentiometer(Ads1115 ads1115, int channel, double maxVoltage) {
-        this.ads1115  = ads1115;
-        this.minValue = ads1115.getPga().gain() * 0.1;
-        this.maxValue = maxVoltage;
-        this.channel  = channel;
-
-        //check if channel is in range of ad converter
-        if (channel < 0 || channel > 3) {
-            throw new ConfigException("Channel number for ad converter not possible, choose channel between 0 to 3");
-        }
-        logDebug("Build component potentiometer");
+    public Potentiometer(Ads1115 ads1115, Ads1115.Channel channel) {
+        this(ads1115, channel, Range.ZERO_TO_ONE);
     }
 
-    /**
-     * Create a new potentiometer component with default channel and maxVoltage for Raspberry pi
-     *
-     * @param ads1115 ads instance
-     */
-    public Potentiometer(Ads1115 ads1115) {
+    public Potentiometer(Ads1115 ads1115, Ads1115.Channel channel, Range range) {
         this.ads1115 = ads1115;
-        this.minValue = ads1115.getPga().gain() * 0.1;
-        this.maxValue = 3.3;
-        this.channel = 0;
+        this.range = range;
+        this.channel = channel;
 
-        logDebug("Build component potentiometer");
+        logDebug("Potentiometer initialized");
     }
 
     /**
@@ -74,16 +55,8 @@ public class Potentiometer extends Component {
      *
      * @return voltage from potentiometer
      */
-    public double singleShotGetVoltage() {
-        double result = switch (channel) {
-            case 0  -> ads1115.singleShotAIn0();
-            case 1  -> ads1115.singleShotAIn1();
-            case 2  -> ads1115.singleShotAIn2();
-            case 3  -> ads1115.singleShotAIn3();
-            default -> 0.0;
-        };
-        updateMinMaxValue(result);
-        return result;
+    public double readCurrentVoltage() {
+        return ads1115.readValue(channel);
     }
 
     /**
@@ -91,8 +64,8 @@ public class Potentiometer extends Component {
      *
      * @return normalized value
      */
-    public double singleShotGetNormalizedValue() {
-        return singleShotGetVoltage() / maxValue;
+    public double readNormalizedValue() {
+        return normalizeVoltage(readCurrentVoltage());
     }
 
     /**
@@ -100,160 +73,28 @@ public class Potentiometer extends Component {
      * This event gets triggered whenever the value changes.
      * Only a single event handler can be registered at once.
      *
-     * @param method Event handler to call or null to disable
+     * @param onChange Event handler to call or null to disable
      */
-    public void setConsumerFastRead(Consumer<Double> method) {
-        ads1115.setConsumerFastRead((value) -> {
-            updateMinMaxValue(value);
-            value = value / maxValue;
-            method.accept(value);
-        });
+    public void onNormalizedValueChange(Consumer<Double> onChange) {
+        ads1115.onValueChange(channel, (voltage) -> onChange.accept(normalizeVoltage(voltage)));
     }
 
-    /**
-     * Sets or disables the handler for the onValueChange event.
-     * This event gets triggered whenever the value changes.
-     * Only a single event handler can be registered at once.
-     *
-     * @param method Event handler to call or null to disable
-     */
-    public void setConsumerSlowReadChan(Consumer<Double> method) {
-        switch (channel) {
-            case 0:
-                ads1115.setConsumerSlowReadChannel0((value) -> {
-                    updateMinMaxValue(value);
-                    value = value / maxValue;
-                    method.accept(value);
-                });
-                break;
-            case 1:
-                ads1115.setConsumerSlowReadChannel1((value) -> {
-                    updateMinMaxValue(value);
-                    value = value / maxValue;
-                    method.accept(value);
-                });
-                break;
-            case 2:
-                ads1115.setConsumerSlowReadChannel2((value) -> {
-                    updateMinMaxValue(value);
-                    value = value / maxValue;
-                    method.accept(value);
-                });
-                break;
-            case 3:
-                ads1115.setConsumerSlowReadChannel3((value) -> {
-                    updateMinMaxValue(value);
-                    value = value / maxValue;
-                    method.accept(value);
-                });
-                break;
+    @Override
+    public void reset() {
+        ads1115.resetChannel(channel);
+    }
+
+    private double normalizeVoltage(double voltage) {
+        double maxRawValue = ads1115.maxRawValue(channel);
+        double minRawValue = ads1115.minRawValue(channel);
+
+        if(range == Range.ZERO_TO_ONE){
+            return Math.max(0.0, Math.min(voltage / (maxRawValue - minRawValue), 1.0));
         }
-    }
-
-    /**
-     * start slow continuous reading. In this mode, up to 4 devices can be connected to the analog to digital
-     * converter. For each device a single read command is sent to the ad converter and waits for the response.
-     * The maximum sampling frequency of the analog signals depends on how many devices are connected to the AD
-     * converter at the same time.
-     * The maximum allowed sampling frequency of the signal is 1/2 the sampling rate of the ad converter.
-     * The reciprocal of this sampling rate finally results in the minimum response time to a signal request.
-     * (the delay of the bus is not included).
-     * <p>
-     * This leads to the following table for the maximum allowed readFrequency by a sampling rate of 128 sps:
-     * 1 channel in use -> readFrequency max 64Hz (min. response time = 16ms)
-     * 2 channel in use -> readFrequency max 32Hz (min. response time = 32ms)
-     * 3 channel in use -> readFrequency max 21Hz (min. response time = 48ms)
-     * 4 channel in use -> readFrequency max 16Hz (min. response time = 63ms)
-     *
-     * @param threshold     threshold for trigger new value change event (+- voltage)
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      sampling rate of device
-     */
-    public void startSlowContinuousReading(double threshold, int readFrequency) {
-        if (fastContinuousReadingActive) {
-            throw new ContinuousMeasuringException("fast continuous reading currently active");
-        } else {
-            //set slow continuous reading active to lock fast continuous reading
-            slowContinuousReadingActive = true;
-            ads1115.startSlowContinuousReading(channel, threshold, readFrequency);
+        else {
+            double homeVoltage = (maxRawValue - minRawValue) * 0.5;
+            return Math.max(-1.0, Math.min((voltage - homeVoltage) / homeVoltage,  1.0));
         }
-    }
 
-    /**
-     * stops slow continuous reading
-     */
-    public void stopSlowContinuousReading() {
-        slowContinuousReadingActive = false;
-        ads1115.stopSlowReadContinuousReading(channel);
-    }
-
-    /**
-     * Starts fast continuous reading. In this mode only on device can be connected to the ad converter.
-     * The maximum allowed readFrequency ist equal to the sample rate of the ad converter
-     *
-     * @param threshold     threshold for trigger new value change event (+- voltage)
-     * @param readFrequency read frequency to get new value from device, must be lower than the
-     *                      sampling rate of the device
-     */
-    public void startFastContinuousReading(double threshold, int readFrequency) {
-        if (slowContinuousReadingActive) {
-            throw new ContinuousMeasuringException("slow continuous reading currently active");
-        } else {
-            //set fast continuous reading active to lock slow continuous reading
-            fastContinuousReadingActive = true;
-
-            //start continuous reading on ads1115
-            ads1115.startFastContinuousReading(channel, threshold, readFrequency);
-        }
-    }
-
-    /**
-     * stops fast continuous reading
-     */
-    public void stopFastContinuousReading() {
-        fastContinuousReadingActive = false;
-        //stop continuous reading
-        ads1115.stopFastContinuousReading();
-    }
-
-    /**
-     * disables all handlers
-     */
-    public void deregisterAll() {
-        switch (channel) {
-            case 0:
-                ads1115.setConsumerSlowReadChannel0(null);
-                break;
-            case 1:
-                ads1115.setConsumerSlowReadChannel1(null);
-                break;
-            case 2:
-                ads1115.setConsumerSlowReadChannel2(null);
-                break;
-            case 3:
-                ads1115.setConsumerSlowReadChannel3(null);
-                break;
-        }
-    }
-
-    /**
-     * returns the maximum value which the potentiometer has reached in voltage
-     *
-     * @return maximal value in voltage
-     */
-    public double getMaxValue(){return maxValue;}
-
-    /**
-     * Check if new value is bigger than current max value or lower than min value
-     * In this case update min or max value
-     *
-     * @param result value to check against min Max value
-     */
-    private void updateMinMaxValue(double result) {
-        if (result < minValue) {
-            minValue = result;
-        } else if (result > maxValue) {
-            maxValue = result;
-        }
     }
 }

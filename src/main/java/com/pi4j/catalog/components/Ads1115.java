@@ -1,103 +1,16 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.config.exception.ConfigException;
-import com.pi4j.context.Context;
-import com.pi4j.catalog.components.helpers.ContinuousMeasuringException;
-import com.pi4j.io.i2c.I2C;
-import com.pi4j.io.i2c.I2CConfig;
-
-import java.util.Arrays;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public class Ads1115 extends Component {
-    /**
-     * PI4J i2c component
-     */
-    private final I2C i2c;
+import com.pi4j.context.Context;
+import com.pi4j.io.i2c.I2C;
 
-    /**
-     * device name
-     */
-    private final static String DEVICE_ID = "ADS1115";
+import com.pi4j.catalog.components.base.I2CDevice;
 
-    /**
-     * pi4j context
-     */
-    private final Context context;
-
-    /**
-     * bus number
-     */
-    private final int i2cBus;
-
-    /**
-     * default bus number
-     */
-    private final static int DEFAULT_I2C_BUS = 0x01;
-
-    /**
-     * default number of channels
-     */
-    private final static int DEFAULT_NUMBER_OF_CHANNELS = 1;
-    /**
-     * device address
-     */
-    private final ADDRESS address;
-
-    /**
-     * Operational status or single-shot conversion start
-     */
-    private final int os;
-
-    /**
-     * programmable gain amplifier
-     */
-    private final Ads1115.GAIN pga;
-
-    /**
-     * sampling rate of device
-     */
-
-    private final DR dr;
-
-    /**
-     * Comparator mode
-     */
-    private final int compMode;
-
-    /**
-     * Comparator polarity
-     */
-    private final int compPol;
-
-    /**
-     * Latching comparator
-     */
-    private final int compLat;
-
-    /**
-     * Comparator queue and disable
-     */
-    private final int compQue;
-
-    /**
-     * old value from last successful read of conversion register (raw data)
-     */
-    private int[] oldValue = new int[4];
-
-    /**
-     * number of channels controlled by ad converter
-     */
-    private final int numberOfChannels;
-    /**
-     * continuous reading active
-     */
-    protected boolean continuousReadingActive;
-    /**
-     * flag which channel is continuous reading active
-     */
-    private boolean[] continuousReadingActiveChannel;
-
+public class Ads1115 extends I2CDevice {
     /**
      * The Conversion register contains the result of the last conversion.
      */
@@ -115,575 +28,247 @@ public class Ads1115 extends Component {
      */
     private static final int HI_THRESH_REGISTER = 0x03;
 
+    private final Context pi4j;
     /**
-     * Runnable code when current value from fast read is changed
+     * programmable gain amplifier
      */
-    private Consumer<Double> consumerFastRead;
+    private final Ads1115.GAIN pga;
+    /**
+     * sampling rate of device
+     */
+    private final DataRate dataRate;
 
     /**
-     * Consumer code when current value from slow read is changed
+     * old values from last successful read of conversion register (raw data)
      */
-    private Consumer<Double>[] consumersSlowRead;
+    private final Map<Channel, Double> oldVoltages = new HashMap<>();
+
+    private final Map<Channel, Consumer<Double>> channelsInUse = new HashMap<>();
+
+    private final Map<Channel, RawValueRange> valueRanges = new HashMap<>();
+
+    private boolean continuousReadingActive;
 
     /**
      * Config register default configuration
      */
-    private int CONFIG_REGISTER_TEMPLATE;
+    private final int configRegisterTemplate;
 
-    /**
-     * Creates a new AD converter component with default bus 0x01, device bus address 0x48 (GND)
-     * and max gain 4.096 V (parameters for raspberry pi)
-     *
-     * @param pi4j Pi4J context
-     */
-    public Ads1115(Context pi4j) {
-        this(pi4j, DEFAULT_I2C_BUS,GAIN.GAIN_4_096V, ADDRESS.GND, DEFAULT_NUMBER_OF_CHANNELS);
+
+    public Ads1115(Context pi4j){
+        this(pi4j, ADDRESS.GND, GAIN.GAIN_6_144V);
     }
-
     /**
-     * Creates a new AD converter component with custom bus, device address
      *
-     * @param pi4j    Pi4J context
-     * @param bus     Custom I2C bus address
-     * @param gain    Custom gain amplifier
-     * @param address Custom device address on I2C
-     */
-    public Ads1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels) {
-        this(pi4j, bus, gain, address, numberOfChannels, pi4j.create(buildI2CConfig(pi4j, bus, address.getAddress(), DEVICE_ID)));
-    }
-
-    /**
      * Creates a new custom AD converter
      *
      * @param pi4j    Pi4J context
-     * @param bus     Custom I2C bus address
      * @param gain    Custom gain amplifier
-     * @param address Custom device address on I2C
-     * @param i2c     Custom I2C bus
      */
-    public Ads1115(Context pi4j, int bus, GAIN gain, ADDRESS address, int numberOfChannels, I2C i2c){
-        this.context = pi4j;
-        this.numberOfChannels = numberOfChannels;
-        this.consumersSlowRead = new Consumer[numberOfChannels];
-        this.continuousReadingActiveChannel = new boolean[numberOfChannels];
+    public Ads1115(Context pi4j, ADDRESS device, GAIN gain){
+        super(pi4j, device.address, "ADS1115");
+        this.pi4j = pi4j;
 
-        //write default configuration
-        this.os = OS.WRITE_START.getOs();
-        //mux will be set in function
         this.pga = gain;
-        //mode will be set in function
-        this.dr       = DR.SPS_128;
-        this.compMode = COMP_MODE.TRAD_COMP.getCompMode();
-        this.compPol  = COMP_POL.ACTIVE_LOW.getCompPol();
-        this.compLat  = COMP_LAT.NON_LATCH.getLatching();
-        this.compQue  = COMP_QUE.DISABLE_COMP.getCompQue();
-        createTemplateConfiguration();
+        this.dataRate = DataRate.SPS_128;
 
-        //i2c parameter
-        this.i2cBus = bus;
-        this.address = address;
-        this.i2c = i2c;
+        int operationalStatus = OperationalStatus.WRITE_START.getOperationalStatus();
+        int compMode          = COMP_MODE.TRAD_COMP.getCompMode();
+        int compPol           = COMP_POL.ACTIVE_LOW.getCompPol();
+        int latching          = COMP_LAT.NON_LATCH.getLatching();
+        int compQue           = COMP_QUE.DISABLE_COMP.getCompQue();
 
-        logDebug("Build component " + DEVICE_ID);
+        this.configRegisterTemplate = operationalStatus | pga.gain | dataRate.getConf() | compMode | compPol | latching | compQue;
     }
 
-    /**
-     * read last stored conversion from device
-     *
-     * @return last stored conversion
-     */
-    public int readConversionRegister() {
-        return i2c.readRegisterWord(CONVERSION_REGISTER);
+    Context getPi4j() {
+        return pi4j;
     }
 
-    /**
-     * read lower threshold from device
-     *
-     * @return lower threshold
-     */
-    public int readLoThreshRegister() {
-        return i2c.readRegisterWord(LO_THRESH_REGISTER);
+    @Override
+    protected void init(I2C i2c) {
+        //nothing to init
     }
 
-    /**
-     * read upper threshold from device
-     *
-     * @return upper threshold
-     */
-    public int readHiThreshRegister() {
-        return i2c.readRegisterWord(HI_THRESH_REGISTER);
-    }
-
-    /**
-     * write custom configuration to device
-     *
-     * @param config custom configuration
-     */
-    public int writeConfigRegister(int config) {
-        logDebug("start write configuration");
-        i2c.writeRegisterWord(CONFIG_REGISTER, config);
-        //wait until ad converter has stored new value in conversion register
-        //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
-        //round value up to wait long enough
-        delay((long) Math.ceil(2000.0 / dr.getSpS()));
-
-        return readConfigRegister();
-    }
-
-    /**
-     * Returns voltage value from AIn0
-     *
-     * @return double voltage
-     */
-    public double singleShotAIn0() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
-        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
-    }
-
-    /**
-     * Returns voltage value from AIn1
-     *
-     * @return double voltage
-     */
-    public double singleShotAIn1() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
-        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
-    }
-
-    /**
-     * Returns voltage value from AIn2
-     *
-     * @return double voltage
-     */
-    public double singleShotAIn2() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
-        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
-    }
-
-    /**
-     * Returns voltage value from AIn3
-     *
-     * @return double voltage
-     */
-    public double singleShotAIn3() {
-        if (continuousReadingActive) throw new ContinuousMeasuringException("Continuous measuring active");
-        return pga.gainPerBit * readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
-    }
-
-    /**
-     * start continuous reading
-     *
-     * @param channel       ad converter channel
-     * @param threshold     threshold for trigger new value change event (+- voltage)
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      sampling rate of device
-     */
-    public void startFastContinuousReading(int channel, double threshold, int readFrequency) {
-        //only if continuous reading is not set to true by other component
-        if (!continuousReadingActive) {
-            //get mux from channel
-            MUX mux = switch (channel) {
-                case 1 -> MUX.AIN1_GND;
-                case 2 -> MUX.AIN2_GND;
-                case 3 -> MUX.AIN3_GND;
-                default -> MUX.AIN0_GND;
-            };
-            continuousReadingActive = true;
-            fastReadContinuousValue(CONFIG_REGISTER_TEMPLATE | mux.getMux() | MODE.CONTINUOUS.getMode(), threshold, readFrequency);
-            logDebug("Start fast continuous reading");
-        }else{
-            throw new ContinuousMeasuringException("Continuous reading already active!");
-        }
-    }
-
-    /**
-     * stops continuous reading
-     */
-    public void stopFastContinuousReading() {
-        logDebug("Stop continuous reading");
-        // write single shot configuration to stop reading process in device
-        writeConfigRegister(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
-        continuousReadingActive = false;
-    }
-
-    /**
-     * start slow continuous reading on custom channel
-     *
-     * @param threshold     threshold for trigger new value change event (+- digit)
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      sampling rate of device
-     */
-    public void startSlowContinuousReading(int channel, double threshold, int readFrequency) {
-        logDebug("Start slow continuous reading channel " + channel);
-        //only start continuous Reading if it is not already running because of other component
-        if (!continuousReadingActive) {
-            continuousReadingActive = true;
-            slowReadContinuousValue(threshold, readFrequency);
-        }
-        continuousReadingActiveChannel[channel] = true;
-    }
-
-    /**
-     * stops continuous reading
-     */
-    public void stopSlowReadContinuousReading() {
-        logDebug("Stop continuous reading");
-        continuousReadingActive = false;
-    }
-
-    /**
-     * start slow continuous reading on all channels
-     *
-     * @param threshold     threshold for trigger new value change event (+- digit)
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      sampling rate of device
-     */
-    public void startSlowContinuousReadingAllChannels(double threshold, int readFrequency) {
-        for (int i = 0; i < numberOfChannels; i++) {
-            startSlowContinuousReading(i, threshold, readFrequency);
-        }
-    }
-
-    /**
-     * stops slow continuous reading on custom channel
-     *
-     * @param channel channel to stop continuous reading
-     */
-    public void stopSlowReadContinuousReading(int channel) {
-        logDebug("Stop continuous reading channel " + channel);
-        continuousReadingActiveChannel[channel] = false;
-        for (boolean b : continuousReadingActiveChannel) {
-            if (b) {
-                return;
+    public void onValueChange(Channel channel, Consumer<Double> onChange) {
+        if (onChange != null) {
+            if (continuousReadingActive) {
+                throw new IllegalStateException("Can't add a new onValueChange while continuous reading is active");
             }
-        }
-        continuousReadingActive = false;
-    }
-
-    /**
-     * stops slow continuous reading on all channels
-     */
-    public void stopSlowReadContinuousReadingAllChannels() {
-        for (int i = 0; i < numberOfChannels; i++) {
-            stopSlowReadContinuousReading(i);
+            channelsInUse.put(channel, onChange);
+        } else {
+            channelsInUse.remove(channel);
         }
     }
 
-    /**
-     * Return pi4j context
-     *
-     * @return pi4j context
-     */
-    public Context getContext() {
-        return context;
+    public double maxRawValue(Channel channel){
+        return getRange(channel).maxRawValue;
+    }
+
+    public double minRawValue(Channel channel){
+        return getRange(channel).minRawValue;
     }
 
     /**
-     * Return bus address
+     * Returns voltage value from specified channel
      *
-     * @return bus address
+     * @return double voltage
      */
-    public int getI2CBus() {
-        return i2cBus;
+    public double readValue(Channel channel) {
+        if (continuousReadingActive) {
+            throw new IllegalStateException("Continuous measuring active, can't read a single value");
+        }
+
+        double voltage = readSingleValue(channel);
+
+        logDebug("current value of channel %s: %.2f", channel, voltage);
+
+        return voltage;
+    }
+
+
+    /**
+     * Start continuous reading. In this mode, up to 4 devices can be connected to the analog to digital
+     * converter. For each device a single read command is sent to the ADC and waits for the response.
+     * The maximum sampling frequency of the analog signals depends on how many devices are connected to the ADC.
+     * <p>
+     * The maximum allowed sampling frequency of the signal is 1/2 the sampling rate of the ADC.
+     * The reciprocal of this sampling rate finally results in the minimum response time to a signal request.
+     * (the delay of the bus is not included).
+     * <p>
+     * This leads to the following table for the maximum allowed readFrequency by a sampling rate of 128 sps:
+     * 1 channels in use -> readFrequency max 64Hz (min. response time = 16ms)
+     * 2 channels in use -> readFrequency max 32Hz (min. response time = 32ms)
+     * 3 channels in use -> readFrequency max 21Hz (min. response time = 48ms)
+     * 4 channels in use -> readFrequency max 16Hz (min. response time = 63ms)
+     *
+     * @param threshold  threshold for triggering value change event (+- voltage)
+     */
+    public void startContinuousReading(double threshold) {
+        if (continuousReadingActive) {
+            throw new IllegalStateException("continuous reading already active");
+        } else {
+            //set fast continuous reading active to lock slow continuous reading
+            continuousReadingActive = true;
+
+            readAllChannels(threshold);
+
+            logDebug("Start continuous reading");
+        }
     }
 
     /**
-     * Return I2C object
-     * @return I2C object
+     * stops continuous reading
      */
-    public I2C getI2cObject(){return i2c;}
+    public void stopContinuousReading() {
+         continuousReadingActive = false;
 
-    /**
-     * Return device name
-     *
-     * @return device name
-     */
-    public String getDeviceId() {
-        return DEVICE_ID;
-    }
-
-    /**
-     * Return GAIN object with bit structure for configuration and resolution (gain per bit)
-     *
-     * @return GAIN object
-     */
-    public GAIN getPga() {
-        return pga;
-    }
-
-    /**
-     * Return sampling rate from device
-     *
-     * @return sampling rate
-     */
-    public int getSamplingRate() {
-        return dr.getSpS();
-    }
-
-    /**
-     * Sets or disables the handler for the onValueChange event.
-     * This event gets triggered whenever the analog value
-     * from the device changes.
-     * Only a single event handler can be registered at once.
-     *
-     * @param method Event handler to call or null to disable
-     */
-    public void setConsumerFastRead(Consumer<Double> method) {
-        this.consumerFastRead = method;
-    }
-
-    /**
-     * Sets or disables the handler for the onValueChange event from continuous slow read.
-     * This event gets triggered whenever the analog value
-     * from the device changes.
-     * Only a single event handler can be registered at once.
-     *
-     * @param method Event handler to call or null to disable
-     */
-    public void setConsumerSlowReadChannel0(Consumer<Double> method) {
-        this.consumersSlowRead[0] = method;
-    }
-
-    /**
-     * Sets or disables the handler for the onValueChange event from continuous slow read.
-     * This event gets triggered whenever the analog value
-     * from the device changes.
-     * Only a single event handler can be registered at once.
-     *
-     * @param method Event handler to call or null to disable
-     */
-    public void setConsumerSlowReadChannel1(Consumer<Double> method) {
-        this.consumersSlowRead[1] = method;
-    }
-
-    /**
-     * Sets or disables the handler for the onValueChange event from continuous slow read.
-     * This event gets triggered whenever the analog value
-     * from the device changes.
-     * Only a single event handler can be registered at once.
-     *
-     * @param method Event handler to call or null to disable
-     */
-    public void setConsumerSlowReadChannel2(Consumer<Double> method) {
-        this.consumersSlowRead[2] = method;
-    }
-
-    /**
-     * Sets or disables the handler for the onValueChange event from continuous slow read.
-     * This event gets triggered whenever the analog value
-     * from the device changes.
-     * Only a single event handler can be registered at once.
-     *
-     * @param method Event handler to call or null to disable
-     */
-    public void setConsumerSlowReadChannel3(Consumer<Double> method) {
-        this.consumersSlowRead[3] = method;
+        logDebug("Continuous reading stopped");
     }
 
     /**
      * disables all handlers
      */
-    public void deregisterAll() {
-        setConsumerFastRead(null);
-        for (int i = 1; i < 4; i++) {
-            consumersSlowRead[i] = null;
-        }
+    @Override
+    public void reset() {
+        stopContinuousReading();
+        delay(Duration.ofMillis(channelsInUse.size() * 16L));
+        channelsInUse.clear();
+        oldVoltages.clear();
     }
 
-    /**
-     * Setup configuration for config register
-     */
-    private void createTemplateConfiguration() {
-        CONFIG_REGISTER_TEMPLATE = os | pga.gain | dr.getConf() | compMode | compPol | compLat | compQue;
-    }
-
-    /**
-     * read configuration from device
-     *
-     * @return configuration from device
-     */
-    private int readConfigRegister() {
-        String[] osInfo   = {"0 : Device is currently performing a conversion\n", "1 : Device is not currently performing a conversion\n"};
-
-        String[] muxInfo  = {"000 : AINP = AIN0 and AINN = AIN1\n", "001 : AINP = AIN0 and AINN = AIN3\n", "010 : AINP = AIN1 and AINN = AIN3\n", "011 : AINP = AIN2 and AINN = AIN3\n", "100 : AINP = AIN0 and AINN = GND\n", "101 : AINP = AIN1 and AINN = GND\n", "110 : AINP = AIN2 and AINN = GND\n", "111 : AINP = AIN3 and AINN = GND\n"};
-
-        String[] pgaInfo  = {"000 : FSR = ±6.144 V(1)\n", "001 : FSR = ±4.096 V(1)\n", "010 : FSR = ±2.048 V\n", "011 : FSR = ±1.024 V\n", "100 : FSR = ±0.512 V\n", "101 : FSR = ±0.256 V\n", "110 : FSR = ±0.256 V\n", "111 : FSR = ±0.256 V\n"};
-
-        String[] modeInfo = {"0 : Continuous-conversion mode\n", "1 : Single-shot mode or power-down state\n"};
-
-        String[] drInfo   = {"000 : 8 SPS\n", "001 : 16 SPS\n", "010 : 32 SPS\n", "011 : 64 SPS\n", "100 : 128 SPS\n", "101 : 250 SPS\n", "110 : 475 SPS\n", "111 : 860 SPS\n"};
-
-        String[] compModeInfo = {"0 : Traditional comparator (default)\n", "1 : Window comparator\n"};
-
-        String[] compPolInfo  = {"0 : Active low (default)\n", "1 : Active high\n"};
-
-        String[] compLatInfo  = {"0 : Non latching comparator\n", "1 : Latching comparator\n"};
-
-        String[] compQueInfo  = {"00 : Assert after one conversion\n", "01 : Assert after two conversions\n", "10 : Assert after four conversions\n", "11 : Disable comparator and set ALERT/RDY pin to high-impedance\n"};
-
-        //get configuration from device
-        int result = i2c.readRegisterWord(CONFIG_REGISTER);
-
-        //create logger message
-        //check os
-        String loggerMessage = (osInfo[result >> 15]) +
-                //check mux
-                muxInfo[(result & MUX.CLR_OTHER_CONF_PARAM.getMux()) >> 12] +
-                //check pga
-                pgaInfo[(result & PGA.CLR_OTHER_CONF_PARAM.getPga()) >> 9] +
-                //check mode
-                modeInfo[(result & MODE.CLR_OTHER_CONF_PARAM.getMode()) >> 8] +
-                //check dr
-                drInfo[(result & DR.CLR_OTHER_CONF_PARAM.getConf()) >> 5] +
-                //check comp mode
-                compModeInfo[(result & COMP_MODE.CLR_OTHER_CONF_PARAM.getCompMode()) >> 4] +
-                //check comp pol
-                compPolInfo[(result & COMP_POL.CLR_OTHER_CONF_PARAM.getCompPol()) >> 3] +
-                //check comp lat
-                compLatInfo[(result & COMP_LAT.CLR_OTHER_CONF_PARAM.getLatching()) >> 2] +
-                //check comp que
-                compQueInfo[result & COMP_QUE.CLR_OTHER_CONF_PARAM.getCompQue()];
-
-        logDebug(loggerMessage);
-
-        return result;
+    public void resetChannel(Channel channel){
+        channelsInUse.remove(channel);
+        oldVoltages.remove(channel);
     }
 
     /**
      * Sends a request to device and wait for response
      *
-     * @param config Configuration for config register
-     * @return int conversion register
+     * @return value from conversion register
      */
-    private synchronized int readSingleShot(int config) {
-        //write configuration to device
-        int confCheck = writeConfigRegister(config);
-        //check if configuration is correct written on device, ignore first bit (os)
-        if ((confCheck & OS.CLR_CURRENT_CONF_PARAM.getOs()) != (config & OS.CLR_CURRENT_CONF_PARAM.getOs()))
-            throw new ConfigException("Configuration not correctly written to device.");
-        //read actual ad value from device
-        int result = readConversionRegister();
-        logDebug("readIn: " + config + ", raw " + result);
-        return result;
-    }
+    private double readSingleValue(Channel channel) {
+        MultiplexerConfig mpc = switch (channel) {
+            case A0 -> MultiplexerConfig.AIN0_GND;
+            case A1 -> MultiplexerConfig.AIN1_GND;
+            case A2 -> MultiplexerConfig.AIN2_GND;
+            case A3 -> MultiplexerConfig.AIN3_GND;
+        };
 
-    /**
-     * Sends configuration for continuous reading to device, updates actual value from analog input
-     * and triggers valueChange event
-     *
-     * @param config        Configuration for config register
-     * @param threshold     threshold for trigger new value change event
-     * @param readFrequency read frequency to get new value from device, must be lower than
-     *                      the sampling rate of the device
-     */
-    private void fastReadContinuousValue(int config, double threshold, int readFrequency) {
-        if (readFrequency < dr.getSpS()) {
-            logDebug("Start continuous reading");
-            //set configuration
-            writeConfigRegister(config);
-            //start new thread for continuous reading
-            new Thread(() -> {
-                while (continuousReadingActive) {
-                    //start measuring time
-                    long startTime = System.nanoTime();
+        //which channel should be available in ConfigRegister
+        writeRegister(CONFIG_REGISTER, configRegisterTemplate | mpc.getMux() | OperationMode.SINGLE.getMode());
+        //wait until ad converter has stored new value in conversion register
+        //delay time is reciprocal of 1/2 of sampling time (*1000 from s to ms)
+        delay(Duration.ofMillis((long) (2000.0 / dataRate.getSpS())));
 
-                    int result = readConversionRegister();
-                    logDebug("Current value: " + result);
-                    //convert threshold voltage to digits
-                    int thresholdDigits = (int) (threshold / pga.gainPerBit);
-                    if (oldValue[0] - thresholdDigits > result || oldValue[0] + thresholdDigits < result) {
-                        logDebug("New event triggered on value change, old value: " + Arrays.toString(oldValue) + " , new value: " + result);
-                        oldValue[0] = result;
-                        consumerFastRead.accept(pga.gainPerBit * (double) result);
-                    }
-                    //stop measuring time
-                    long stopTime = System.nanoTime();
-                    long delta = stopTime - startTime;
-                    long restDelay = (1 / readFrequency * 1000) - delta;
-                    restDelay = (restDelay > 0) ? restDelay : 0;
-                    //wait for rest of the cycle time
-                    delay(restDelay);
-                }
-            }).start();
-        } else {
-            throw new ContinuousMeasuringException("readFrequency to high");
-        }
+        //now we can read the channel value from conversion register
+        int registeredValue = readRegister(CONVERSION_REGISTER);
+
+        double voltage = pga.gainPerBit * registeredValue;
+
+        RawValueRange range = getRange(channel);
+        range.maxRawValue = Math.max(range.maxRawValue, voltage);
+        range.minRawValue = Math.min(range.minRawValue, voltage);
+
+        return voltage;
     }
 
     /**
      * Sends, for each channel, a request to device and wait for response. Enters all responses in actualValue array.
      * Waits for the rest of readFrequency time.
      *
-     * @param threshold     threshold for trigger new value change event
-     * @param readFrequency read frequency to get new value from device, must be lower than 1/2
-     *                      the sampling rate of the device
+     * @param threshold threshold for trigger new value change event in Volt
      */
-    private void slowReadContinuousValue(double threshold, int readFrequency) {
-        //sum of readFrequency of all channels must be lower than 1/2 sampling rate
-        if (readFrequency * numberOfChannels * 2 < dr.getSpS()) {
-            logDebug("Start continuous reading");
-            //start new thread for continuous reading
-            new Thread(() -> {
-                while (continuousReadingActive) {
-                    //start measuring time
-                    long startTime = System.nanoTime();
+    private void readAllChannels(double threshold) {
+        logDebug("Start continuous reading");
+        final long readFrequency = channelsInUse.size() * 16 * 1_000_000L;
 
-                    int[] result = new int[4];
-                    //at least on channel must be activated
-                    result[0] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN0_GND.getMux() | MODE.SINGLE.getMode());
-                    logDebug("Current value channel 0: " + result[0]);
-                    //if at least two channels are activated
-                    if (numberOfChannels > 1) {
-                        result[1] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN1_GND.getMux() | MODE.SINGLE.getMode());
-                        logDebug("Current value channel 1: " + result[1]);
-                    }
-                    //if at least three channels are activated
-                    if (numberOfChannels > 2) {
-                        result[2] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN2_GND.getMux() | MODE.SINGLE.getMode());
-                        logDebug("Current value channel 2: " + result[2]);
-                    }
-                    //if all 4 channels are activated
-                    if (numberOfChannels > 3) {
-                        result[3] = readSingleShot(CONFIG_REGISTER_TEMPLATE | MUX.AIN3_GND.getMux() | MODE.SINGLE.getMode());
-                        logDebug("Current value channel 3: " + result[3]);
-                    }
-                    //convert threshold voltage to digits
-                    int thresholdDigits = (int) (threshold / pga.gainPerBit);
+        //start new thread for continuous reading
+        new Thread(() -> {
+            while (continuousReadingActive) {
+                //start measuring time
+                long startTime = System.nanoTime();
 
-                    for (int i = 0; i < numberOfChannels; i++) {
-                        if (oldValue[i] - thresholdDigits > result[i] || oldValue[i] + thresholdDigits < result[i]) {
-                            logDebug("New event triggered on value change, old value: " + oldValue[i] + " , new value: " + result[i]);
-                            oldValue[i] = result[i];
-                            if (consumersSlowRead[i] != null) {
-                                consumersSlowRead[i].accept(pga.gainPerBit * (double) result[i]);
-                            }
+                channelsInUse.forEach((channel, onValueChange) -> {
+                    if(continuousReadingActive){ //can be set to false in the meantime
+                        double newVoltage = readSingleValue(channel);
+                        logDebug("Current value of channel %s: %d", channel, newVoltage);
+
+                        double oldVoltage = getOldVoltage(channel);
+
+                        if (Math.abs(oldVoltage - newVoltage) >= threshold) {
+                            logDebug("New value change triggered on channel %s, old value: %f , new value: %f", channel, oldVoltage, newVoltage);
+                            oldVoltages.put(channel, newVoltage);
+
+                            onValueChange.accept(newVoltage);
                         }
                     }
+                });
 
-                    //stop measuring time
-                    long stopTime = System.nanoTime();
-                    long delta = stopTime - startTime;
-                    long restDelay = (1 / readFrequency * 1000) - delta;
-                    restDelay = (restDelay > 0) ? restDelay : 0;
-                    //wait for rest of the cycle time
-                    delay(restDelay);
-                }
-            }).start();
-        } else {
-            throw new ContinuousMeasuringException("readFrequency too high");
-        }
+                long elapsedNanos = System.nanoTime() - startTime;
+                long restDelay = elapsedNanos - readFrequency;
+
+                //wait for rest of the cycle time
+                delay(Duration.ofMillis(((restDelay > 0) ? restDelay : 0) / 1_000_000L));
+            }
+        }).start();
     }
 
-    /**
-     * Build a I2C Configuration to use the AD convertor
-     *
-     * @param pi4j   PI4J Context
-     * @param bus    I2C Bus address
-     * @param device I2C Device address
-     * @return I2C configuration
-     */
-    private static I2CConfig buildI2CConfig(Context pi4j, int bus, int device, String deviceId) {
-        return I2C.newConfigBuilder(pi4j).id("I2C-" + device + "@" + bus).name(deviceId).bus(bus).device(device).build();
+    private double getOldVoltage(Channel channel){
+        return oldVoltages.computeIfAbsent(channel, (c) -> -10.0);
+    }
+
+    private RawValueRange getRange(Channel channel){
+        return valueRanges.computeIfAbsent(channel, (c) -> new RawValueRange());
+    }
+
+    private static class RawValueRange{
+        double minRawValue = 0.1;
+        double maxRawValue = 3.2;
+    }
+
+    public enum Channel {
+        A0, A1, A2, A3
     }
 
     /**
@@ -758,27 +343,27 @@ public class Ads1115 extends Component {
         /**
          * 000 : Full-Scale Range (FSR)  = ±6.144 V
          */
-        GAIN_6_144V(PGA.FSR_6_144.pga, 187.5 / 1_000_000),
+        GAIN_6_144V(PGA.FSR_6_144.pga, 187.5 / 1_000_000.0),
         /**
          * 001 : FSR = ±4.096 V
          */
-        GAIN_4_096V(PGA.FSR_4_096.pga, 125.0 / 1_000_000),
+        GAIN_4_096V(PGA.FSR_4_096.pga, 125.0 / 1_000_000.0),
         /**
          * 010 : FSR = ±2.048 V
          */
-        GAIN_2_048V(PGA.FSR_2_048.pga, 62.5 / 1_000_000),
+        GAIN_2_048V(PGA.FSR_2_048.pga, 62.5 / 1_000_000.0),
         /**
          * 011 : FSR = ±1.024 V
          */
-        GAIN_1_024V(PGA.FSR_1_024.pga, 31.25 / 1_000_000),
+        GAIN_1_024V(PGA.FSR_1_024.pga, 31.25 / 1_000_000.0),
         /**
          * 100 : FSR = ±0.512 V
          */
-        GAIN_0_512V(PGA.FSR_0_512.pga, 15.625 / 1_000_000),
+        GAIN_0_512V(PGA.FSR_0_512.pga, 15.625 / 1_000_000.0),
         /**
          * 101 : FSR = ±0.256 V
          */
-        GAIN_0_256V(PGA.FSR_0_256.pga, 7.8125 / 1_000_000);
+        GAIN_0_256V(PGA.FSR_0_256.pga, 7.8125 / 1_000_000.0);
         /**
          * bit structure for configuration
          */
@@ -1050,7 +635,7 @@ public class Ads1115 extends Component {
      * {@link #SPS_475}
      * {@link #SPS_860}
      */
-    public enum DR {
+    public enum DataRate {
         /**
          * 8 sampling per second
          */
@@ -1110,7 +695,7 @@ public class Ads1115 extends Component {
          *
          * @param sps sampling rate for configuration
          */
-        DR(int conf, int sps) {
+        DataRate(int conf, int sps) {
             this.conf = conf;
             this.sps = sps;
         }
@@ -1142,7 +727,7 @@ public class Ads1115 extends Component {
      * {@link #CONTINUOUS}
      * {@link #SINGLE}
      */
-    public enum MODE {
+    public enum OperationMode {
         /**
          * Continuous-conversion mode
          */
@@ -1170,7 +755,7 @@ public class Ads1115 extends Component {
          *
          * @param mode operation mode for configuration
          */
-        MODE(int mode) {
+        OperationMode(int mode) {
             this.mode = mode;
         }
 
@@ -1180,7 +765,7 @@ public class Ads1115 extends Component {
          * @return configured operation mode
          */
         public int getMode() {
-            return this.mode;
+            return mode;
         }
     }
 
@@ -1269,7 +854,7 @@ public class Ads1115 extends Component {
      * {@link #AIN2_GND}
      * {@link #AIN3_GND}
      */
-    public enum MUX {
+    public enum MultiplexerConfig {
         /**
          * 000 : AINP = AIN0 and AINN = AIN1
          */
@@ -1321,7 +906,7 @@ public class Ads1115 extends Component {
          *
          * @param mux Input multiplexer configuration
          */
-        MUX(int mux) {
+        MultiplexerConfig(int mux) {
             this.mux = mux;
         }
 
@@ -1331,7 +916,7 @@ public class Ads1115 extends Component {
          * @return Input multiplexer configuration
          */
         public int getMux() {
-            return this.mux;
+            return mux;
         }
     }
 
@@ -1345,7 +930,7 @@ public class Ads1115 extends Component {
      * {@link #READ_CONV}
      * {@link #READ_NO_CONV}
      */
-    public enum OS {
+    public enum OperationalStatus {
         /**
          * When writing: start a single conversion (when in power-down state)
          */
@@ -1377,7 +962,7 @@ public class Ads1115 extends Component {
          *
          * @param os parameter
          */
-        OS(int os) {
+        OperationalStatus(int os) {
             this.os = os;
         }
 
@@ -1386,8 +971,8 @@ public class Ads1115 extends Component {
          *
          * @return os configuration parameter
          */
-        public int getOs() {
-            return this.os;
+        public int getOperationalStatus() {
+            return os;
         }
     }
 }

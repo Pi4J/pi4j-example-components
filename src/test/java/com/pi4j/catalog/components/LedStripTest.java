@@ -1,44 +1,52 @@
 package com.pi4j.catalog.components;
 
-import com.pi4j.catalog.ComponentTest;
-import com.pi4j.plugin.mock.provider.spi.MockSpi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.pi4j.plugin.mock.provider.spi.MockSpi;
+
+import com.pi4j.catalog.ComponentTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LedStripTest extends ComponentTest {
 
-    private MockSpi spi;
     private LedStrip strip;
     private int pixels;
 
     @BeforeEach
     public void setUp() {
-        this.pixels = 10;
-        strip = new LedStrip(pi4j, pixels, 0.5);
-        spi = toMock(strip.spi);
+        pixels = 10;
+        strip = new LedStrip(pi4j, pixels);
     }
 
 
     @Test
     public void testSetPixelColor() {
+        //given
+        strip.setMaxBrightness(1.0);
+
         //when
         strip.allOff();
-        strip.setPixelColor(1, LedStrip.PixelColor.YELLOW);
+        strip.setPixelColor(1, LedStrip.LedColor.YELLOW);
 
         //then
-        assertEquals(LedStrip.PixelColor.YELLOW, strip.getPixelColor(1));
+        assertEquals(LedStrip.LedColor.YELLOW, strip.getPixelColor(1));
     }
 
     @Test
     public void testSetStripColor() {
+        //given
+        strip.setMaxBrightness(1.0);
+
         //when
         strip.allOff();
-        strip.setStripColor(LedStrip.PixelColor.YELLOW);
+        strip.setStripColor(LedStrip.LedColor.YELLOW);
 
         //then
-        assertEquals(LedStrip.PixelColor.YELLOW, strip.getPixelColor(5));
+        for(int i= 0; i<pixels; i++){
+            assertEquals(LedStrip.LedColor.YELLOW, strip.getPixelColor(i));
+        }
     }
 
     @Test
@@ -49,26 +57,26 @@ public class LedStripTest extends ComponentTest {
     @Test
     public void testGetPixelChannels() {
         //when
-        int red = LedStrip.PixelColor.RED;
-        int blue = LedStrip.PixelColor.BLUE;
-        int green = LedStrip.PixelColor.GREEN;
-        int white = LedStrip.PixelColor.WHITE;
+        int red = LedStrip.LedColor.RED;
+        int blue = LedStrip.LedColor.BLUE;
+        int green = LedStrip.LedColor.GREEN;
+        int white = LedStrip.LedColor.WHITE;
 
         //then
-        assertEquals(LedStrip.PixelColor.getRedComponent(red), 255);
-        assertEquals(LedStrip.PixelColor.getGreenComponent(red), 0);
-        assertEquals(LedStrip.PixelColor.getBlueComponent(red), 0);
+        assertEquals(LedStrip.LedColor.getRedComponent(red), 255);
+        assertEquals(LedStrip.LedColor.getGreenComponent(red), 0);
+        assertEquals(LedStrip.LedColor.getBlueComponent(red), 0);
 
-        assertEquals(LedStrip.PixelColor.getRedComponent(green), 0);
-        assertEquals(LedStrip.PixelColor.getGreenComponent(green), 255);
-        assertEquals(LedStrip.PixelColor.getBlueComponent(green), 0);
+        assertEquals(LedStrip.LedColor.getRedComponent(green), 0);
+        assertEquals(LedStrip.LedColor.getGreenComponent(green), 255);
+        assertEquals(LedStrip.LedColor.getBlueComponent(green), 0);
 
-        assertEquals(LedStrip.PixelColor.getRedComponent(blue), 0);
-        assertEquals(LedStrip.PixelColor.getGreenComponent(blue), 0);
-        assertEquals(LedStrip.PixelColor.getBlueComponent(blue), 255);
+        assertEquals(LedStrip.LedColor.getRedComponent(blue), 0);
+        assertEquals(LedStrip.LedColor.getGreenComponent(blue), 0);
+        assertEquals(LedStrip.LedColor.getBlueComponent(blue), 255);
 
-        assertEquals(255, LedStrip.PixelColor.getRedComponent(white));
-        assertEquals(255, LedStrip.PixelColor.getGreenComponent(white));
-        assertEquals(255, LedStrip.PixelColor.getBlueComponent(white));
+        assertEquals(255, LedStrip.LedColor.getRedComponent(white));
+        assertEquals(255, LedStrip.LedColor.getGreenComponent(white));
+        assertEquals(255, LedStrip.LedColor.getBlueComponent(white));
     }
 }
