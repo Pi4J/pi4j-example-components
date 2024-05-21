@@ -63,38 +63,35 @@
     </properties>
 
     <dependencies>
-        <!-- Pi4J Core -->
+        <!-- Pi4J -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-core</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
-
-        <!-- Pi4J Raspberry Pi Platform -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-raspberrypi</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
-
-        <!-- Pi4J Raspberry Pi GPIO -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-pigpio</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
-
-        <!-- Pi4J Mock Platform -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-mock</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
-
-        <!-- Plugin for I2C -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-plugin-linuxfs</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-gpiod</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
 
@@ -125,7 +122,6 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
