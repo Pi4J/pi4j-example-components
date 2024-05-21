@@ -41,7 +41,7 @@
 
         <!-- Project Dependencies -->
         <java.version>17</java.version>
-        <pi4j.version>2.4.0</pi4j.version>
+        <pi4j.version>2.6.0</pi4j.version>
         <picocli.version>4.7.4</picocli.version>
         <junit.version>5.10.0</junit.version>
         <mockito.version>5.4.0</mockito.version>
