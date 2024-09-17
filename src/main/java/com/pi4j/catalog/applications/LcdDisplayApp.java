@@ -2,9 +2,9 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
+import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
-import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.LcdDisplay;
 
 /**
@@ -12,9 +12,9 @@ import com.pi4j.catalog.components.LcdDisplay;
  * <p>
  * see <a href="https://pi4j.com/examples/components/lcddisplay/">Description on Pi4J website</a>
  */
-public class LcdDisplay_App implements Application {
-    @Override
-    public void execute(Context pi4j) {
+public class LcdDisplayApp {
+    public static void main(String[] args) {
+        final Context pi4j = Pi4J.newAutoContext();
         System.out.println("LCD demo started");
 
         //Create a Component, with amount of ROWS and COLUMNS of the device
@@ -78,7 +78,7 @@ public class LcdDisplay_App implements Application {
         System.out.println("LCD demo finished");
     }
 
-    public void createCharacters(LcdDisplay lcd) {
+    public static void createCharacters(LcdDisplay lcd) {
         // Create upper left part of the house
         lcd.createCharacter(1, new byte[]{
                 0b00000,
@@ -126,5 +126,19 @@ public class LcdDisplay_App implements Application {
                 0b11111,
                 0b11111
         });
+    }
+
+    /**
+     * Utility function to sleep for the specified amount of milliseconds.
+     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
+     *
+     * @param duration Time to sleep
+     */
+    private static void delay(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

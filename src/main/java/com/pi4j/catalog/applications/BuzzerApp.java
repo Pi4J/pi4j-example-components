@@ -3,9 +3,9 @@ package com.pi4j.catalog.applications;
 import java.time.Duration;
 import java.util.List;
 
+import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
-import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Buzzer;
 
@@ -16,11 +16,11 @@ import static com.pi4j.catalog.components.Buzzer.Note.*;
  * <p>
  * see <a href="https://pi4j.com/examples/components/buzzer/">Description on Pi4J website</a>
  */
-public class Buzzer_App implements Application {
+public class BuzzerApp {
 
     //this is how you compose a simple melody
     //Piano baseline of Seven Nation Army by the white Stripes
-    private final List<Buzzer.Sound> melody = List.of(
+    private static final List<Buzzer.Sound> melody = List.of(
             new Buzzer.Sound(E7   , 11),
             new Buzzer.Sound(PAUSE, 1),
             new Buzzer.Sound(E7   , 2),
@@ -36,7 +36,7 @@ public class Buzzer_App implements Application {
             new Buzzer.Sound(PAUSE, 8)
     );
 
-    private final List<Buzzer.Sound> imperialMarch = List.of(
+    private static final List<Buzzer.Sound> imperialMarch = List.of(
             new Buzzer.Sound(G4,  8),
             new Buzzer.Sound(G4,  8),
             new Buzzer.Sound(G4,  8),
@@ -47,8 +47,9 @@ public class Buzzer_App implements Application {
             new Buzzer.Sound(AS4, 2),
             new Buzzer.Sound(G4, 16));
 
-    @Override
-    public void execute(Context pi4j) {
+    public static void main(String[] args) {
+        final Context pi4j = Pi4J.newAutoContext();
+
         System.out.println("Buzzer demo started");
 
         //initialising the buzzer
@@ -75,5 +76,19 @@ public class Buzzer_App implements Application {
         buzzer.reset();
 
         System.out.println("buzzer demo finished");
+    }
+
+    /**
+     * Utility function to sleep for the specified amount of milliseconds.
+     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
+     *
+     * @param duration Time to sleep
+     */
+    private static  void delay(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

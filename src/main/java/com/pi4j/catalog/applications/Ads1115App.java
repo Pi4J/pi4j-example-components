@@ -2,9 +2,9 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
+import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
-import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.Ads1115;
 
 /**
@@ -13,9 +13,10 @@ import com.pi4j.catalog.components.Ads1115;
  * <p>
  * see <a href="https://pi4j.com/examples/components/ads1115/">Description on Pi4J website</a>
  */
-public class Ads1115_App implements Application {
-    @Override
-    public void execute(Context pi4j) {
+public class Ads1115App {
+    public static void main(String[] args) {
+        final Context pi4j = Pi4J.newAutoContext();
+
         System.out.println("ADS1115 demo started ...");
 
         Ads1115 adc = new Ads1115(pi4j);
@@ -32,7 +33,7 @@ public class Ads1115_App implements Application {
         System.out.println("ADS1115 demo finished");
     }
 
-    private void singleRead(Ads1115 adc) {
+    private static void singleRead(Ads1115 adc) {
         System.out.println("Single read started ...");
         //read analog value from all four channels
         double aIn0 = adc.readValue(Ads1115.Channel.A0);
@@ -44,7 +45,7 @@ public class Ads1115_App implements Application {
         System.out.println("Single read done.");
     }
 
-    private void continuousRead(Ads1115 adc) {
+    private static void continuousRead(Ads1115 adc) {
         System.out.println("Continuous read started ...");
 
         // Register event handlers to print a message on value change
@@ -63,4 +64,17 @@ public class Ads1115_App implements Application {
         System.out.println("Continuous read done.");
     }
 
+    /**
+     * Utility function to sleep for the specified amount of milliseconds.
+     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
+     *
+     * @param duration Time to sleep
+     */
+    private static  void delay(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }

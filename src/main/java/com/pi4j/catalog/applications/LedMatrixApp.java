@@ -2,9 +2,9 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
+import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
-import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.LedMatrix;
 import com.pi4j.catalog.components.LedStrip;
 
@@ -13,9 +13,10 @@ import com.pi4j.catalog.components.LedStrip;
  * <p>
  * see <a href="https://pi4j.com/examples/components/ledmatrix/">Description on Pi4J website</a>
  */
-public class LedMatrix_App implements Application {
-    @Override
-    public void execute(Context pi4j) {
+public class LedMatrixApp {
+    public static void main(String[] args) {
+        final Context pi4j = Pi4J.newAutoContext();
+
         System.out.println("LED matrix demo started ...");
         int rows = 2;
         int columns = 5;

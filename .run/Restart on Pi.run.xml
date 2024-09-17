@@ -1,27 +1,28 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Rerun version on Pi" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="Restart on Pi" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
       <option name="myRunnerParameters">
         <MavenRunnerParameters>
+          <option name="cmdOptions" />
           <option name="profiles">
             <set />
           </option>
           <option name="goals">
             <list>
-              <option value="package" />
-              <option value="-DskipTests=true" />
-              <option value="-Dmaven.test.skip" />
-              <option value="-Dmaven.main.skip=true" />
-              <option value="--no-snapshot-updates" />
+              <option value="validate" />
             </list>
           </option>
+          <option name="multimoduleDir" />
           <option name="pomFileName" value="pom.xml" />
           <option name="profilesMap">
             <map>
-              <entry key="rerun" value="true" />
+              <entry key="restart-on-Pi" value="true" />
             </map>
+          </option>
+          <option name="projectsCmdOptionValues">
+            <list />
           </option>
           <option name="resolveToWorkspace" value="false" />
           <option name="workingDirPath" value="$PROJECT_DIR$" />

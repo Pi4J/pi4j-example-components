@@ -2,9 +2,9 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
+import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
-import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.SimpleButton;
 
@@ -13,10 +13,11 @@ import com.pi4j.catalog.components.SimpleButton;
  * <P>
  * see <a href="https://pi4j.com/examples/components/simplebutton/">Description on Pi4J website</a>
  */
-public class SimpleButton_App implements Application {
+public class SimpleButtonApp {
 
-    @Override
-    public void execute(Context pi4j) {
+    public static void main(String[] args) {
+        final Context pi4j = Pi4J.newAutoContext();
+
         System.out.println("Simple button demo started ...");
 
         // Initialize the button component
@@ -40,5 +41,19 @@ public class SimpleButton_App implements Application {
         */
 
         System.out.println("Simple button demo finished.");
+    }
+
+    /**
+     * Utility function to sleep for the specified amount of milliseconds.
+     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
+     *
+     * @param duration Time to sleep
+     */
+    private static void delay(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

@@ -2,9 +2,9 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
+import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
-import com.pi4j.catalog.Application;
 import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Joystick;
 
@@ -13,9 +13,10 @@ import com.pi4j.catalog.components.Joystick;
  * <p>
  * see <a href="https://pi4j.com/examples/components/joystick/">Description on Pi4J website</a>
  */
-public class Joystick_App implements Application {
-    @Override
-    public void execute(Context pi4j) {
+public class JoystickApp {
+    public static void main(String[] args) {
+        final Context pi4j = Pi4J.newAutoContext();
+
         System.out.println("Joystick demo started ...");
 
         final var joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.PWM13, PIN.PWM19, PIN.D26);
@@ -48,5 +49,19 @@ public class Joystick_App implements Application {
         joystick.reset();
 
         System.out.println("Joystick demo finished.");
+    }
+
+    /**
+     * Utility function to sleep for the specified amount of milliseconds.
+     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
+     *
+     * @param duration Time to sleep
+     */
+    private static  void delay(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
