@@ -87,7 +87,7 @@ public class SimpleButton extends DigitalSensor {
          * Calls the methods onUp, onDown and whilePressed. WhilePressed gets
          * executed in an own Thread, as to not block other resources.
          */
-        digitalInput.addListener(digitalStateChangeEvent -> {
+        digitalInput.addListener(stateChangeEvent -> {
             DigitalState state = getState();
 
             logDebug("Button switched to '%s'", state);

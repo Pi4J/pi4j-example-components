@@ -86,7 +86,7 @@ public class SerialDevice extends Component {
                         byte b = (byte) br.read();
                         if (b < 32) {
                             // All non-string bytes are handled as line breaks
-                            if (line.length() > 0) {
+                            if (!line.isEmpty()) {
                                 // Here we should add code to parse the data to a GPS data object
                                 onNewData.accept(line.toString());
                                 line = new StringBuilder();
@@ -96,12 +96,11 @@ public class SerialDevice extends Component {
                         }
                     }
                 } else {
-                    Thread.sleep(100);
+                    delay(Duration.ofMillis(100));
                 }
             }
         } catch (Exception e) {
             logException("Error reading data from serial: ", e);
-            e.printStackTrace();
         }
     }
 }
