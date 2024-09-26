@@ -19,7 +19,7 @@ public class JoystickApp {
 
         System.out.println("Joystick demo started ...");
 
-        final var joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.PWM13, PIN.PWM19, PIN.D26);
+        final var joystick = new Joystick(pi4j, PIN.D5, PIN.D6, PIN.D13, PIN.D25, PIN.D26);
 
         //Register all event handlers
         joystick.onNorth(() -> System.out.println("Start NORTH"));

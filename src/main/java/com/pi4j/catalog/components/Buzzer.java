@@ -36,7 +36,9 @@ public class Buzzer extends PwmActuator {
                       .name("Buzzer #" + address)
                       .address(address.getPin())
                       .pwmType(PwmType.HARDWARE)
+                      .provider("linuxfs-pwm")
                       .initial(0)
+                      .frequency(1)
                       .shutdown(0)
                       .build());
         logDebug("Created new Buzzer Component");

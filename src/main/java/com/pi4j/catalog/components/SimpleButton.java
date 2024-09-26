@@ -169,6 +169,7 @@ public class SimpleButton extends DigitalSensor {
      * Only a single event handler can be registered at once.
      *
      * @param task Event handler to call or null to disable
+     * @param delay delay between two executions of task
      */
     public void whilePressed(Runnable task, Duration delay) {
         whileDown = task;

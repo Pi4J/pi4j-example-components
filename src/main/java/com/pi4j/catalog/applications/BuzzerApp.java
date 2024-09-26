@@ -53,7 +53,7 @@ public class BuzzerApp {
         System.out.println("Buzzer demo started");
 
         //initialising the buzzer
-        Buzzer buzzer = new Buzzer(pi4j, PIN.PWM13);
+        Buzzer buzzer = new Buzzer(pi4j, PIN.PWM18);
 
         //playing a simple tone
         System.out.println("playing note b6 for 1 sec");
