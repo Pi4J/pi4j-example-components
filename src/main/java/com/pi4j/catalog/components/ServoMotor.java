@@ -99,7 +99,7 @@ public class ServoMotor extends PwmActuator {
                 Pwm.newConfigBuilder(pi4j)
                 .id("BCM-" + address)
                 .name("Servo Motor " + address)
-                .address(address.getPin())
+                .address(getAdress(address))
                 .pwmType(PwmType.HARDWARE)
                 .provider("linuxfs-pwm")
                 .frequency(frequency)
@@ -110,6 +110,15 @@ public class ServoMotor extends PwmActuator {
         this.maxAngle = maxAngle;
         this.minDutyCycle = minDutyCycle;
         this.maxDutyCycle = maxDutyCycle;
+    }
+
+    private static int getAdress(PIN pin){
+        if (pin == PIN.PWM18){
+            return 2;
+        }
+        else {
+            return 3;
+        }
     }
 
     @Override
