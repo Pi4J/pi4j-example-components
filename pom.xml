@@ -35,19 +35,19 @@
         <!-- <launcher.class>com.pi4j.catalog.applications.LcdDisplayApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.LedButtonApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.LedStripApp</launcher.class> -->
-        <!-- <launcher.class>com.pi4j.catalog.applications.PotentiometerApp</launcher.class> -->
+        <launcher.class>com.pi4j.catalog.applications.PotentiometerApp</launcher.class>
         <!-- <launcher.class>com.pi4j.catalog.applications.SerialGpsApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.ServoApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.SimpleButtonApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.SimpleLedApp</launcher.class> -->
-        <launcher.class>com.pi4j.catalog.applications.SimpleButtonApp</launcher.class>
+        <!-- <launcher.class>com.pi4j.catalog.applications.SimpleButtonApp</launcher.class> -->
 
         <jar.name>Pi4JComponentCatalogue</jar.name>
 
         <!-- Setup for the RaspPi -->
         <pi.hostname>pi4j</pi.hostname>
-        <!-- <pi.ipnumber>192.168.132.198</pi.ipnumber> -->
-        <pi.ipnumber>pi4j.local</pi.ipnumber>  <!-- can be used if Pi is uniquein wlan -->
+        <pi.ipnumber>10.175.1.163</pi.ipnumber>
+        <!-- <pi.ipnumber>pi4j.local</pi.ipnumber> --> <!-- can be used if Pi is uniquein wlan -->
         <pi.port>22</pi.port>
         <pi.username>pi</pi.username>
         <pi.password>pi4j</pi.password>

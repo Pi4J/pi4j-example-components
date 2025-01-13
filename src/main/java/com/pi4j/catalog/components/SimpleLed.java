@@ -29,7 +29,10 @@ public class SimpleLed extends DigitalActuator {
      */
     public void on() {
         logDebug("LED turned ON");
-        digitalOutput.on();
+        if(!digitalOutput.isOn()){
+            digitalOutput.on();
+        }
+
     }
 
     public boolean isOn(){
@@ -41,7 +44,9 @@ public class SimpleLed extends DigitalActuator {
      */
     public void off() {
         logDebug("LED turned OFF");
-        digitalOutput.off();
+        if(digitalOutput.isOn()){
+            digitalOutput.off();
+        }
     }
 
     /**
