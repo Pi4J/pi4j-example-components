@@ -52,7 +52,7 @@ public class BuzzerApp {
 
         System.out.println("Buzzer demo started");
 
-        //initialising the buzzer
+        //initialising the buzzer, there is only one PWM pin (PWM18)
         Buzzer buzzer = new Buzzer(pi4j, PIN.PWM18);
 
         //playing a simple tone

@@ -34,7 +34,7 @@ public class Buzzer extends PwmActuator {
               Pwm.newConfigBuilder(pi4j)
                       .id("BCM" + address)
                       .name("Buzzer #" + address)
-                      .address(address.getPin())
+                      .address(getAdress(address))
                       .pwmType(PwmType.HARDWARE)
                       .provider("linuxfs-pwm")
                       .initial(0)
@@ -45,6 +45,14 @@ public class Buzzer extends PwmActuator {
         off();
     }
 
+    private static int getAdress(PIN pin){
+        if (pin == PIN.PWM18){
+            return 2;
+        }
+        else {
+            return 3;
+        }
+    }
 
     /**
      * Plays a tone with the given frequency in Hz indefinitely.

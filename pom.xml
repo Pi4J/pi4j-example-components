@@ -28,7 +28,7 @@
 
         <!-- The class that will be started, choose one and only one -->
         <!-- <launcher.class>com.pi4j.catalog.applications.Ads1115App</launcher.class> -->
-        <!-- <launcher.class>com.pi4j.catalog.applications.BuzzerApp</launcher.class> -->
+        <launcher.class>com.pi4j.catalog.applications.BuzzerApp</launcher.class>
         <!-- <launcher.class>com.pi4j.catalog.applications.Camera_App</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.JoystickAnalogApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.JoystickApp</launcher.class> -->
