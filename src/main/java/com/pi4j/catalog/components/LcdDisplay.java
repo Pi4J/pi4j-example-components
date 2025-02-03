@@ -202,7 +202,7 @@ public class LcdDisplay extends I2CDevice {
             for (char character : text.toCharArray()) {
                 writeCharacter(character);
             }
-            for(int i = 0; i< columns - text.length(); i++){
+            for(int i = 0; i < columns - text.length() - position; i++){
                 writeCharacter(' ');
             }
         }
