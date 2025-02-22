@@ -33,7 +33,7 @@ public class SimpleButtonApp {
         delay(Duration.ofSeconds(15));
 
         // Unregister all event handlers to exit this application in a clean way
-        button.reset();
+        button.shutdown();
 
         /*
         if you want to deRegister only a single function, you can do so like this:

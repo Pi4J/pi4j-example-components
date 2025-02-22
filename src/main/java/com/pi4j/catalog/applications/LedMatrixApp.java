@@ -49,7 +49,7 @@ public class LedMatrixApp {
         ledMatrix.setPixelColor(1, 2, LedStrip.LedColor.YELLOW);
         ledMatrix.render(Duration.ofSeconds(3));
 
-        ledMatrix.reset();
+        ledMatrix.shutdown();
 
         System.out.println("LED matrix app finished.");
     }

@@ -39,9 +39,9 @@ public class LedMatrix extends Component {
 
 
     @Override
-    public void reset() {
-        super.reset();
-        ledStrip.reset();
+    public void shutdown() {
+        super.shutdown();
+        ledStrip.shutdown();
     }
 
     /**

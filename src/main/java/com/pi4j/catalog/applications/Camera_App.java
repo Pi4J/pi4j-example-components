@@ -2,9 +2,6 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
-import com.pi4j.Pi4J;
-import com.pi4j.context.Context;
-
 import com.pi4j.catalog.components.Camera;
 
 /**
@@ -47,7 +44,7 @@ public class Camera_App  {
                 .build();
         camera.recordVideo(vidconfig);
 
-        camera.reset();
+        camera.shutdown();
         System.out.println("Camera demo finished");
     }
 

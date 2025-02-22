@@ -1,5 +1,6 @@
 package com.pi4j.catalog.components;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.pi4j.catalog.components.base.Component;
@@ -17,7 +18,7 @@ import com.pi4j.catalog.components.base.Component;
  *     <li>Raw value is the measured voltage</li>
  * </ul>
  */
-public class Potentiometer extends Component {
+public final class Potentiometer extends Component {
     public enum Range {
         ZERO_TO_ONE, MINUS_ONE_TO_ONE
     }
@@ -43,6 +44,8 @@ public class Potentiometer extends Component {
     }
 
     public Potentiometer(Ads1115 ads1115, Ads1115.Channel channel, Range range) {
+        Objects.requireNonNull(ads1115);
+
         this.ads1115 = ads1115;
         this.range = range;
         this.channel = channel;
@@ -80,7 +83,7 @@ public class Potentiometer extends Component {
     }
 
     @Override
-    public void reset() {
+    public void shutdown() {
         ads1115.resetChannel(channel);
     }
 

@@ -9,7 +9,15 @@ import com.pi4j.context.Context;
 import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Buzzer;
 
-import static com.pi4j.catalog.components.Buzzer.Note.*;
+import static com.pi4j.catalog.components.Buzzer.Note.AS4;
+import static com.pi4j.catalog.components.Buzzer.Note.B5;
+import static com.pi4j.catalog.components.Buzzer.Note.C7;
+import static com.pi4j.catalog.components.Buzzer.Note.D6;
+import static com.pi4j.catalog.components.Buzzer.Note.DS4;
+import static com.pi4j.catalog.components.Buzzer.Note.E7;
+import static com.pi4j.catalog.components.Buzzer.Note.G4;
+import static com.pi4j.catalog.components.Buzzer.Note.G6;
+import static com.pi4j.catalog.components.Buzzer.Note.PAUSE;
 
 /**
  * The buzzer component is an example of an actuator making use of a PWM-channel to play different tones or even simple melodies.
@@ -73,7 +81,7 @@ public class BuzzerApp {
         buzzer.awaitEndOfMelody();
         System.out.println("Second melody has finished");
 
-        buzzer.reset();
+        buzzer.shutdown();
 
         System.out.println("buzzer demo finished");
     }

@@ -35,7 +35,7 @@ public class SimpleLedApp {
         }
 
         // That's it so reset all and quit
-        led.reset();
+        led.shutdown();
 
         System.out.println("Simple LED demo finished.");
     }

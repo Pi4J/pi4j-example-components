@@ -49,7 +49,7 @@ public class PotentiometerApp {
         System.out.println("No new values should be reported");
         delay(Duration.ofSeconds(5));
 
-        ads1115.reset();
+        ads1115.shutdown();
         System.out.println("Potentiometer demo finished");
     }
 

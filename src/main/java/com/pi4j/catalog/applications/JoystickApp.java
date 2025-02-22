@@ -46,7 +46,7 @@ public class JoystickApp {
         delay(Duration.ofSeconds(15));
 
         // cleanup
-        joystick.reset();
+        joystick.shutdown();
 
         System.out.println("Joystick demo finished.");
     }

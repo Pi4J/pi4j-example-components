@@ -55,7 +55,7 @@ public class JoystickTest extends ComponentTest {
         joystick.onSouth(task);
 
         //when
-        joystick.reset();
+        joystick.shutdown();
 
         //then
         assertTrue(joystick.isInInitialState());

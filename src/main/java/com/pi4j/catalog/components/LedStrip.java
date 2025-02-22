@@ -110,10 +110,10 @@ public class LedStrip extends SpiDevice {
      * Setting all LEDS off and closing the strip
      */
     @Override
-    public void reset() {
+    public void shutdown() {
         allOff();
         render(Duration.ZERO);
-        super.reset();
+        super.shutdown();
     }
 
     /**

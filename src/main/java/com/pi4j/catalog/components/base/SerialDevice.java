@@ -46,11 +46,11 @@ public class SerialDevice extends Component {
     }
 
     @Override
-    public void reset() {
+    public void shutdown() {
         stopReading();
         serial.close();
 
-        super.reset();
+        super.shutdown();
     }
 
     public void stopReading() {

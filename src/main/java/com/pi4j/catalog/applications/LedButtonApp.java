@@ -38,7 +38,7 @@ public class LedButtonApp {
         delay(Duration.ofSeconds(15));
 
         // Unregister all event handlers to exit this application in a clean way
-        ledButton.reset();
+        ledButton.shutdown();
 
         System.out.println("LED button demo finished.");
     }

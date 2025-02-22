@@ -55,7 +55,7 @@ public class ServoApp {
         servoMotor.setRange(-20, +40); // This will define our range as values between -20 and +40
         servoMotor.moveOnRange(-10); // This will map -10 based on the previously defined range
 
-        servoMotor.reset();
+        servoMotor.shutdown();
 
         System.out.println("Server demo finished");
     }

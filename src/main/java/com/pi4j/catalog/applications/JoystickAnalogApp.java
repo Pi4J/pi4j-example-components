@@ -43,7 +43,7 @@ public class JoystickAnalogApp {
         delay(Duration.ofSeconds(30));
 
         //cleanup
-        joystick.reset();
+        joystick.shutdown();
 
         System.out.println("Joystick demo finished");
     }

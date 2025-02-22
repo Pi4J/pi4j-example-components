@@ -60,9 +60,9 @@ public class SerialGps extends Component {
     }
 
     @Override
-    public void reset() {
-        device.reset();
-        super.reset();
+    public void shutdown() {
+        device.shutdown();
+        super.shutdown();
         logInfo("Stopped reading GPS data");
     }
 

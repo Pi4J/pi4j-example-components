@@ -66,7 +66,7 @@ public class LedStripApp {
         ledStrip.render(Duration.ofSeconds(2));
 
         //finishing and closing
-        ledStrip.reset();
+        ledStrip.shutdown();
 
         System.out.println("LED strip demo finished.");
     }

@@ -23,7 +23,7 @@ public class SerialGpsApp {
         //provide positions for 15 sec
         delay(Duration.ofSeconds(15));
 
-        gps.reset();
+        gps.shutdown();
 
         System.out.println("GPS demo finished");
     }

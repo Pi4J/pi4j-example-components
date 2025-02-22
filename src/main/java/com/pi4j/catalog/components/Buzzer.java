@@ -34,24 +34,14 @@ public class Buzzer extends PwmActuator {
               Pwm.newConfigBuilder(pi4j)
                       .id("BCM" + address)
                       .name("Buzzer #" + address)
-                      .address(getAdress(address))
+                      .address(getAddress(address))
                       .pwmType(PwmType.HARDWARE)
-                      .provider("linuxfs-pwm")
                       .initial(0)
                       .frequency(1)
                       .shutdown(0)
                       .build());
         logDebug("Created new Buzzer Component");
         off();
-    }
-
-    private static int getAdress(PIN pin){
-        if (pin == PIN.PWM18){
-            return 2;
-        }
-        else {
-            return 3;
-        }
     }
 
     /**
@@ -89,7 +79,7 @@ public class Buzzer extends PwmActuator {
     }
 
     @Override
-    public void reset() {
+    public void shutdown() {
         off();
         if(currentMelody != null){
             currentMelody.cancel(true);

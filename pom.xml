@@ -35,7 +35,7 @@
         <!-- <launcher.class>com.pi4j.catalog.applications.LcdDisplayApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.LedButtonApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.LedStripApp</launcher.class> -->
-        <launcher.class>com.pi4j.catalog.applications.PotentiometerApp</launcher.class>
+        <!-- <launcher.class>com.pi4j.catalog.applications.PotentiometerApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.SerialGpsApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.ServoApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.SimpleButtonApp</launcher.class> -->
@@ -46,8 +46,8 @@
 
         <!-- Setup for the RaspPi -->
         <pi.hostname>pi4j</pi.hostname>
-        <pi.ipnumber>10.175.1.163</pi.ipnumber>
-        <!-- <pi.ipnumber>pi4j.local</pi.ipnumber> --> <!-- can be used if Pi is uniquein wlan -->
+        <!-- <pi.ipnumber>10.175.1.163</pi.ipnumber> -->
+        <pi.ipnumber>${pi.hostname}.local</pi.ipnumber><!-- can be used if Pi is uniquein wlan -->
         <pi.port>22</pi.port>
         <pi.username>pi</pi.username>
         <pi.password>pi4j</pi.password>
@@ -58,11 +58,11 @@
         <java.version>21</java.version>
 
         <!-- Project Dependencies -->
-        <pi4j.version>2.7.0-SNAPSHOT</pi4j.version>
+        <pi4j.version>2.8.0</pi4j.version>
         <jSerialComm.version>2.11.0</jSerialComm.version>
 
-        <junit.version>5.11.0</junit.version>
-        <mockito.version>5.4.0</mockito.version>
+        <junit.version>5.11.4</junit.version>
+        <mockito.version>5.15.2</mockito.version>
 
         <ant-jsch.version>1.10.15</ant-jsch.version>
 
@@ -129,7 +129,6 @@
             <version>${jSerialComm.version}</version>
         </dependency>
 
-
         <!-- JUnit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -171,6 +170,7 @@
                 </configuration>
             </plugin>
         </plugins>
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -305,8 +305,8 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <executable>${project.basedir}/src/assembly/start.sh</executable>
-                            <commandlineArgs>${project.build.directory} ${jar.name}</commandlineArgs>
+                            <executable>java</executable>
+                            <commandlineArgs>-jar "${project.build.directory}/${jar.name}.jar"</commandlineArgs>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -416,4 +416,5 @@
             </properties>
         </profile>
     </profiles>
+
 </project>

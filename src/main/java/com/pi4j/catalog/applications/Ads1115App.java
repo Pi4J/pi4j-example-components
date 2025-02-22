@@ -28,7 +28,7 @@ public class Ads1115App {
         continuousRead(adc);
 
         //cleanup
-        adc.reset();
+        adc.shutdown();
 
         System.out.println("ADS1115 demo finished");
     }

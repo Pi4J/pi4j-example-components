@@ -74,7 +74,7 @@ public class LcdDisplayApp {
             delay(Duration.ofSeconds(1));
         }
 
-        lcd.reset();
+        lcd.shutdown();
         System.out.println("LCD demo finished");
     }
 

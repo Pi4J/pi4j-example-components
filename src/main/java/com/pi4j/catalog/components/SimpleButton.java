@@ -16,7 +16,7 @@ import static com.pi4j.io.gpio.digital.DigitalInput.DEFAULT_DEBOUNCE;
 
 public class SimpleButton extends DigitalSensor {
     /**
-     * Specifies if button state is inverted, e.g. HIGH = depressed, LOW = pressed
+     * Specifies if button state is inverted, e.g., HIGH = depressed, LOW = pressed
      * This will also automatically switch the pull resistance to PULL_UP
      */
     private final boolean inverted;
@@ -38,7 +38,7 @@ public class SimpleButton extends DigitalSensor {
     private Duration whilePressedDelay;
 
     /**
-     * what needs to be done while button is pressed (and whilePressed is != null)
+     * what needs to be done while the button is pressed (and whilePressed is != null)
      */
     private final Runnable whileDownWorker = () -> {
         while (isDown()) {
@@ -190,7 +190,7 @@ public class SimpleButton extends DigitalSensor {
      * disables all the handlers for the onUp, onDown and WhileDown Events
      */
     @Override
-    public void reset() {
+    public void shutdown() {
         onDown    = null;
         onUp      = null;
         whileDown = null;

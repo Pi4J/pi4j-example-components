@@ -22,17 +22,17 @@ public class SimpleLed extends DigitalActuator {
                       .address(address.getPin())
                       .build());
         logDebug("Created new SimpleLed component");
+        digitalOutput.off();
     }
 
     /**
-     * Sets the LED to on.
+     * Sets LED to on.
      */
     public void on() {
-        logDebug("LED turned ON");
-        if(!digitalOutput.isOn()){
+        if(!isOn()){
+            logDebug("LED turned ON");
             digitalOutput.on();
         }
-
     }
 
     public boolean isOn(){
@@ -40,11 +40,11 @@ public class SimpleLed extends DigitalActuator {
     }
 
     /**
-     * Sets the LED to off
+     * Sets LED to off
      */
     public void off() {
-        logDebug("LED turned OFF");
-        if(digitalOutput.isOn()){
+        if(isOn()){
+            logDebug("LED turned OFF");
             digitalOutput.off();
         }
     }
@@ -62,7 +62,7 @@ public class SimpleLed extends DigitalActuator {
     }
 
     @Override
-    public void reset() {
+    public void shutdown() {
         off();
     }
 }

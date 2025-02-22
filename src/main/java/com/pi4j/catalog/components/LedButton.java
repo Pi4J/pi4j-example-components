@@ -131,9 +131,9 @@ public class LedButton extends Component  {
     }
 
     @Override
-    public void reset(){
-        button.reset();
-        led.reset();
+    public void shutdown(){
+        button.shutdown();
+        led.shutdown();
     }
 
     // --------------- for testing --------------------
