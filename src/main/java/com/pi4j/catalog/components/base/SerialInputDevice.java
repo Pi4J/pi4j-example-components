@@ -23,7 +23,9 @@ public class SerialInputDevice extends Component {
     private void openPort(int baudRate) {
         if(BoardInfoHelper.runningOnRaspberryPi()){
             port = SerialPort.getCommPorts()[0];
-            port.setBaudRate(baudRate);
+            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0); //no read timeout
+            port.setComPortParameters(baudRate, 8, 1, SerialPort.NO_PARITY);     // Set baud rate, data bits, stop bits, and parity
+
             port.openPort();
             // Set up an input stream to read from the serial port
             try (BufferedReader input = new BufferedReader(new InputStreamReader(port.getInputStream()))) {
@@ -46,5 +48,4 @@ public class SerialInputDevice extends Component {
             port.closePort();
         }
     }
-
 }
