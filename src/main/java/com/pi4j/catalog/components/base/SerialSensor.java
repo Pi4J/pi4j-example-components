@@ -9,23 +9,37 @@ import com.pi4j.boardinfo.util.BoardInfoHelper;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-public class SerialInputDevice extends Component {
-    private final Consumer<String> onNewLine;
-    private SerialPort port;
+public class SerialSensor extends Component {
+    private final SerialPort port;
 
-    public SerialInputDevice(int baudRate, Consumer<String> onNewLine) {
+    public SerialSensor(int baudRate, Consumer<String> onNewLine) {
         Objects.requireNonNull(onNewLine);
 
-        this.onNewLine = onNewLine;
-        openPort(baudRate);
+        port = createPort(baudRate);
+        openPort(port, onNewLine);
     }
 
-    private void openPort(int baudRate) {
-        if(BoardInfoHelper.runningOnRaspberryPi()){
-            port = SerialPort.getCommPorts()[0];
+    public void shutdown() {
+        super.shutdown();
+        if (BoardInfoHelper.runningOnRaspberryPi()) {
+            port.closePort();
+        }
+    }
+
+    private SerialPort createPort(int baudRate) {
+        if (BoardInfoHelper.runningOnRaspberryPi()) {
+            SerialPort port = SerialPort.getCommPorts()[0];
             port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0); //no read timeout
             port.setComPortParameters(baudRate, 8, 1, SerialPort.NO_PARITY);     // Set baud rate, data bits, stop bits, and parity
 
+            return port;
+        } else {
+            return null;
+        }
+    }
+
+    private void openPort(SerialPort port, Consumer<String> onNewLine) {
+        if (BoardInfoHelper.runningOnRaspberryPi()) {
             port.openPort();
             // Set up an input stream to read from the serial port
             try (BufferedReader input = new BufferedReader(new InputStreamReader(port.getInputStream()))) {
@@ -43,9 +57,4 @@ public class SerialInputDevice extends Component {
         }
     }
 
-    public void shutdown() {
-        if(BoardInfoHelper.runningOnRaspberryPi()){
-            port.closePort();
-        }
-    }
 }
