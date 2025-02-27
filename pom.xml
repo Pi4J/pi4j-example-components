@@ -28,7 +28,7 @@
 
         <!-- The class that will be started, choose one and only one -->
         <!-- <launcher.class>com.pi4j.catalog.applications.Ads1115App</launcher.class> -->
-        <launcher.class>com.pi4j.catalog.applications.BuzzerApp</launcher.class>
+        <!-- <launcher.class>com.pi4j.catalog.applications.BuzzerApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.Camera_App</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.JoystickAnalogApp</launcher.class> -->
         <!-- <launcher.class>com.pi4j.catalog.applications.JoystickApp</launcher.class> -->
@@ -46,7 +46,7 @@
 
         <!-- Setup for the RaspPi -->
         <pi.hostname>pi4j</pi.hostname>
-        <!-- <pi.ipnumber>10.175.1.163</pi.ipnumber> -->
+        <!-- <pi.ipnumber>192.168.0.192</pi.ipnumber> -->
         <pi.ipnumber>${pi.hostname}.local</pi.ipnumber><!-- can be used if Pi is uniquein wlan -->
         <pi.port>22</pi.port>
         <pi.username>pi</pi.username>
@@ -58,10 +58,10 @@
         <java.version>21</java.version>
 
         <!-- Project Dependencies -->
-        <pi4j.version>2.8.0</pi4j.version>
+        <pi4j.version>3.0.0-SNAPSHOT</pi4j.version>
         <jSerialComm.version>2.11.0</jSerialComm.version>
 
-        <junit.version>5.11.4</junit.version>
+        <junit.version>5.12.0</junit.version>
         <mockito.version>5.15.2</mockito.version>
 
         <ant-jsch.version>1.10.15</ant-jsch.version>
