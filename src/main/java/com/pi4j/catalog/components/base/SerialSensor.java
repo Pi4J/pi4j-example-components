@@ -11,24 +11,34 @@ import com.fazecast.jSerialComm.SerialPort;
 
 public class SerialSensor extends Component {
     private final SerialPort port;
+    private boolean continueReading = false;
 
-    public SerialSensor(int baudRate, Consumer<String> onNewLine) {
-        Objects.requireNonNull(onNewLine);
-
+    public SerialSensor(int baudRate) {
         port = createPort(baudRate);
-        openPort(port, onNewLine);
+    }
+
+    public void startReading(Consumer<String> onNewLine){
+        Objects.requireNonNull(onNewLine);
+        continueReading = false; //stop the current reading, if any
+
+        readFromPort(port, onNewLine);
+    }
+
+    public void stopReading(){
+        continueReading = false;
     }
 
     public void shutdown() {
         super.shutdown();
         if (BoardInfoHelper.runningOnRaspberryPi()) {
+            stopReading();
             port.closePort();
         }
     }
 
     private SerialPort createPort(int baudRate) {
         if (BoardInfoHelper.runningOnRaspberryPi()) {
-            SerialPort port = SerialPort.getCommPorts()[0];
+            SerialPort port = SerialPort.getCommPort(runningOnPi5() ? "/dev/ttyAMA0" : "/dev/ttyS0");;
             port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0); //no read timeout
             port.setComPortParameters(baudRate, 8, 1, SerialPort.NO_PARITY);     // Set baud rate, data bits, stop bits, and parity
 
@@ -38,22 +48,26 @@ public class SerialSensor extends Component {
         }
     }
 
-    private void openPort(SerialPort port, Consumer<String> onNewLine) {
+    private void readFromPort(SerialPort port, Consumer<String> onNewLine) {
         if (BoardInfoHelper.runningOnRaspberryPi()) {
-            port.openPort();
-            // Set up an input stream to read from the serial port
-            try (BufferedReader input = new BufferedReader(new InputStreamReader(port.getInputStream()))) {
-                String line;
-                // Continuously read until the port is closed
-                while ((line = input.readLine()) != null) {
-                    onNewLine.accept(line);
+            new Thread(() -> {
+                continueReading = true;
+                port.openPort();
+                // Set up an input stream to read from the serial port
+                try (BufferedReader input = new BufferedReader(new InputStreamReader(port.getInputStream()))) {
+                    String line;
+                    // Continuously read until the port is closed
+                    while (continueReading && (line = input.readLine()) != null) {
+                        logDebug(line);
+                        onNewLine.accept(line);
+                    }
+                } catch (Exception e) {
+                    logException("Reading from Serial Port throws ", e);
+                } finally {
+                    // Always ensure the port is closed after use
+                    port.closePort();
                 }
-            } catch (Exception e) {
-                logException("Reading from Serial Port throws ", e);
-            } finally {
-                // Always ensure the port is closed after use
-                port.closePort();
-            }
+            }).start();
         }
     }
 
