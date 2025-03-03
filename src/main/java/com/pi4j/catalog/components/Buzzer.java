@@ -41,7 +41,7 @@ public class Buzzer extends PwmActuator {
                       .shutdown(0)
                       .build());
         logDebug("Created new Buzzer Component");
-        off();
+       // off(); //Todo: Enable this as soon there's a new version of PWM available
     }
 
     /**
