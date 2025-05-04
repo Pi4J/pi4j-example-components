@@ -13,8 +13,8 @@ public class SerialSensor extends Component {
     private final SerialPort port;
     private boolean continueReading = false;
 
-    public SerialSensor(int baudRate) {
-        port = createPort(baudRate);
+    public SerialSensor(int baudRate, String portDescriptor) {
+        port = createPort(baudRate, portDescriptor);
     }
 
     public void startReading(Consumer<String> onNewLine){
@@ -36,9 +36,9 @@ public class SerialSensor extends Component {
         }
     }
 
-    private SerialPort createPort(int baudRate) {
+    private SerialPort createPort(int baudRate, String portDescriptor) {
         if (BoardInfoHelper.runningOnRaspberryPi()) {
-            SerialPort port = SerialPort.getCommPort(runningOnPi5() ? "/dev/ttyAMA0" : "/dev/ttyS0");;
+            SerialPort port = SerialPort.getCommPort(portDescriptor);
             port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0); //no read timeout
             port.setComPortParameters(baudRate, 8, 1, SerialPort.NO_PARITY);     // Set baud rate, data bits, stop bits, and parity
 

@@ -36,7 +36,7 @@ public class SerialGps extends SerialSensor {
      */
     public SerialGps(Consumer<GeoPosition> onNewPosition,
                      Consumer<Double>      onNewAltitude) {
-        super(9600);
+        super(9600, "/dev/ttyAMA0");
         this.onNewPosition = onNewPosition;
         this.onNewAltitude = onNewAltitude;
         startReading(this::handleNewData);
