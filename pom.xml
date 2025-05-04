@@ -55,10 +55,10 @@
         <pi.startScript>start.sh</pi.startScript>
 
         <!-- Java Compiler Version -->
-        <java.version>21</java.version>
+        <java.version>24</java.version>
 
         <!-- Project Dependencies -->
-        <pi4j.version>3.0.0-SNAPSHOT</pi4j.version>
+        <pi4j.version>3.0.1</pi4j.version>
         <jSerialComm.version>2.11.0</jSerialComm.version>
 
         <junit.version>5.12.0</junit.version>
