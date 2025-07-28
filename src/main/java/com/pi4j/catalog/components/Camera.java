@@ -8,13 +8,13 @@ import java.time.LocalDateTime;
 import com.pi4j.catalog.components.base.Component;
 
 /**
- * FHNW implementation of a camera, works with the raspberry-pi v2 camera module and
+ * FHNW implementation of a camera, works with the raspberry-pi v2 and v3 camera module and
  * the Pi4J-Basic-OS image on the raspberry-pi.
  * <p>
  * Maybe works on other camera-modules too, but is not yet tested.
  * <p>
- * It uses the libcamera-still and libcamera-vid bash commands. those are pre-installed
- * on all raspbian-versions after Buster.
+ * It uses the rpicam-still and rpicam-vid bash commands. Those are pre-installed
+ * on all raspbian-versions from Bookworm on.
  */
 public class Camera extends Component {
     public static PicConfig.Builder newPictureConfigBuilder(){
@@ -125,7 +125,7 @@ public class Camera extends Component {
         logDebug("initialisation of camera");
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("bash", "-c", "libcamera-still");
+        processBuilder.command("bash", "-c", "rpicam-still");
 
         try {
             callBash(processBuilder);
@@ -254,7 +254,7 @@ public class Camera extends Component {
          * @return a string that can be called from the bash
          */
         public String asCommand() {
-            StringBuilder command = new StringBuilder("libcamera-still");
+            StringBuilder command = new StringBuilder("rpicam-still");
             if (useDate) {
                 command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "jpg").append("'");
             } else {
@@ -407,7 +407,7 @@ public class Camera extends Component {
          * @return a string that can be called from the bash
          */
         public String asCommand() {
-            StringBuilder command = new StringBuilder("libcamera-vid -t " + recordTime);
+            StringBuilder command = new StringBuilder("rpicam-vid -t " + recordTime);
             if (useDate) {
                 command.append(" -o '").append(outputPath).append(LocalDateTime.now()).append(".").append((encoding != null) ? encoding : "h264").append("'");
             } else {
