@@ -13,11 +13,26 @@ public class RfidReaderApp {
 
         final RfidReader reader = new RfidReader(pi4j);
 
-        //We register an event listener to detect cards in proximity
+        /**
+         * Differences between onCardDetected, waitForNewCard, and waitForAnyCard:
+         *
+         * - onCardDetected(EventHandler<RfidCard> handler):
+         *   Registers a handler that is called every time a new card is detected.
+         *   The handler remains active until you unregister it (by passing null).
+         *   This is asynchronous and persistent.
+         *
+         * - waitForNewCard(EventHandler<RfidCard> handler):
+         *   Blocks the current thread until a new card is detected, then calls the handler once and returns.
+         *   Only new cards (not previously detected) are considered.
+         *   This is synchronous and one-shot.
+         *
+         * - waitForAnyCard(EventHandler<RfidCard> handler):
+         *   Blocks the current thread until any card (new or previously detected) is detected,
+         *   then calls the handler once and returns.
+         *   This is synchronous and one-shot.
+         */
         reader.onCardDetected(card -> {
-            //Print some informations
             System.out.println("Detected card with serial number: " + card.getSerial() + " and capacity: " + card.getCapacity() + " bytes.");
-
         });
     }
 }
