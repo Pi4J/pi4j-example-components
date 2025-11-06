@@ -10,7 +10,6 @@ import com.pi4j.catalog.components.base.rfid.RfidCard;
 import com.pi4j.io.gpio.digital.DigitalOutput;
 import com.pi4j.io.gpio.digital.DigitalOutputConfig;
 import com.pi4j.io.gpio.digital.DigitalState;
-import com.pi4j.io.spi.Spi;
 import com.pi4j.io.spi.SpiConfig;
 
 import java.time.Duration;
@@ -88,8 +87,10 @@ public class RfidReader extends MFRC522 {
      */
     public RfidReader(Context pi4j, PIN gpioResetPin, int spiChannel, int spiBaud) {
         super(
-                pi4j.create(buildResetPinConfig(pi4j, gpioResetPin.getPin())),
-                pi4j.create(buildSpiConfig(pi4j, spiChannel, spiBaud))
+                // build and pass a DigitalOutput instance and SpiConfig to the MFRC522 constructor
+                createResetPin(pi4j, gpioResetPin.getPin()),
+                pi4j,
+                buildSpiConfig(pi4j, spiChannel, spiBaud)
         );
 
         this.cardDetectedHandler = new AtomicReference<>();
@@ -211,8 +212,8 @@ public class RfidReader extends MFRC522 {
      *
      * @return SPI instance
      */
-    protected Spi getSpi() {
-        return this.spi;
+    protected SpiConfig getSpi() {
+        return null; // spi is managed by base class; if callers need Spi instance they should use context.create(config) themselves
     }
 
     /**
@@ -232,6 +233,11 @@ public class RfidReader extends MFRC522 {
                 .build();
     }
 
+    private static DigitalOutput createResetPin(Context pi4j, int address) {
+        final var config = buildResetPinConfig(pi4j, address);
+        return pi4j.create(config);
+    }
+
     /**
      * Builds a new SPI configuration for the RFID component
      *
@@ -241,7 +247,7 @@ public class RfidReader extends MFRC522 {
      * @return SPI configuration
      */
     private static SpiConfig buildSpiConfig(Context pi4j, int channel, int baud) {
-        return Spi.newConfigBuilder(pi4j)
+        return SpiConfig.newBuilder(pi4j)
                 .id("SPI" + channel)
                 .name("RFID SPI")
                 .address(channel)
