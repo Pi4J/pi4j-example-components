@@ -1,11 +1,13 @@
 package com.pi4j.catalog.components.base.rfid;
 
-import com.pi4j.catalog.components.base.Component;
+import com.pi4j.catalog.components.base.RegisterBasedSpiDevice;
 import com.pi4j.catalog.components.base.rfid.exceptions.RfidCollisionException;
 import com.pi4j.catalog.components.base.rfid.exceptions.RfidException;
 import com.pi4j.catalog.components.base.rfid.exceptions.RfidTimeoutException;
 import com.pi4j.catalog.components.base.rfid.exceptions.RfidUnsupportedCardException;
 import com.pi4j.io.gpio.digital.DigitalOutput;
+import com.pi4j.context.Context;
+import com.pi4j.io.spi.SpiConfig;
 import com.pi4j.io.spi.Spi;
 
 import java.time.Duration;
@@ -14,56 +16,99 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * Implementation of MFRC522 RFID Reader/Writer used for interacting with RFID cards.
- * Uses SPI via Pi4J for communication with the PCD (Proximity Coupling Device).
- * The official name for cards is PICC (Proximity Integrated Circuit Card).
+ * Implementation of MFRC522 RFID Reader/Writer using RegisterBasedSpiDevice as transport.
  */
-public class MFRC522 extends Component {
+public class MFRC522 extends RegisterBasedSpiDevice {
     /**
      * Pi4J digital output optionally used as reset pin for the MFRC522
      */
     protected final DigitalOutput resetPin;
 
     /**
-     * Pi4J SPI instance
+     * Local SPI instance (optional reference for callers); the base class already manages SPI access.
      */
     protected final Spi spi;
 
-    /**
-     * Timeout in milliseconds when calculating CRC_A checksums on the PCD
-     */
     private static final long PCD_CHECKSUM_TIMEOUT_MS = 100;
-
-    /**
-     * Timeout in milliseconds for communication with a PICC
-     */
     private static final long PICC_COMMAND_TIMEOUT_MS = 250;
-
-    /**
-     * Well-known value used by MIFARE PICCs as ACKnowledge response
-     */
     private static final byte PICC_MIFARE_ACK = 0xA;
 
     /**
-     * Creates a new MFRC522 instance without a reset pin for the given SPI instance from Pi4J.
-     *
-     * @param spi SPI instance
+     * Deprecated constructor kept for compatibility with older callers that provided an Spi directly.
+     * Prefer using {@link #MFRC522(DigitalOutput, Context, SpiConfig)} instead.
      */
     public MFRC522(Spi spi) {
-        this(null, spi);
+        this(null, null, null);
+        throw new IllegalArgumentException("Use constructor with Context and SpiConfig when using RegisterBasedSpiDevice");
     }
 
     /**
-     * Creates a new MFRC522 instance using the given reset pin and SPI instance from Pi4J.
-     *
-     * @param resetPin Digital output used as reset pin for MFRC522, high is considered as power-on, low as power-off
-     * @param spi      SPI instance
+     * Primary constructor which accepts a reset pin, Pi4J context and an SpiConfig for creating the transport.
      */
-    public MFRC522(DigitalOutput resetPin, Spi spi) {
+    public MFRC522(DigitalOutput resetPin, Context pi4j, SpiConfig spiConfig) {
+        super(pi4j, spiConfig);
         this.resetPin = resetPin;
-        this.spi = spi;
-        this.reset();
+        // create local Spi instance for callers that expect access; pi4j may return a cached instance
+        this.spi = (pi4j != null && spiConfig != null) ? pi4j.create(spiConfig) : null;
+        reset();
     }
+
+    // --- small wrappers to map PcdRegister -> underlying register methods ---
+
+    private byte readRegister(PcdRegister register) {
+        return readRegister(register.getWriteAddress());
+    }
+
+    private byte[] readRegister(PcdRegister register, int length, int rxAlignBits) {
+        if (length == 0) return new byte[]{};
+
+        // if no alignment requested, reuse register-based bulk read
+        if (rxAlignBits == 0) {
+            return readRegisters(register.getWriteAddress(), length);
+        }
+
+        // build tx buffer for a bit-aligned read and use spiTransfer directly
+        final var txBuffer = new byte[length + 1];
+        txBuffer[0] = (byte) (register.getWriteAddress() | READ_BIT_MASK);
+        for (int i = 1; i < txBuffer.length; i++) {
+            txBuffer[i] = 0;
+        }
+
+        final var rxBuffer = spiTransfer(txBuffer);
+
+        final var result = new byte[length];
+        int resultIndex = 0;
+        int bufferIndex = 1;
+
+        // adjust first received byte for rxAlignBits
+        byte mask = (byte) ((0xFF << rxAlignBits) & 0xFF);
+        result[resultIndex++] = (byte) (rxBuffer[bufferIndex++] & ~mask);
+
+        // copy remaining bytes
+        System.arraycopy(rxBuffer, bufferIndex, result, resultIndex, length - resultIndex);
+
+        return result;
+    }
+
+    private void writeRegister(PcdRegister register, byte value) {
+        writeRegister(register.getWriteAddress(), value);
+    }
+
+    private void writeRegister(PcdRegister register, byte[] values) {
+        // The base class does not provide an array overload for writeRegister; write by sending register + values using spiWrite
+        final var buffer = new byte[values.length + 1];
+        buffer[0] = register.getWriteAddress();
+        System.arraycopy(values, 0, buffer, 1, values.length);
+        spiWrite(buffer);
+    }
+
+    private void writeRegister(PcdRegister high, PcdRegister low, short value) {
+        int tmp = value & 0xFFFF;
+        writeRegister(high, (byte) ((tmp >> 8) & 0xFF));
+        writeRegister(low, (byte) (tmp & 0xFF));
+    }
+
+    // --- rest of MFRC522 logic re-uses the same methods but calls the wrappers above ---
 
     /**
      * Resets the PCD into a well-known state and calls {@link #init()} to achieve a well-known state.
@@ -620,7 +665,6 @@ public class MFRC522 extends Component {
         final var payload = new byte[]{PiccCommand.HLTA.getValue(), 0};
         final var checksum = calculateCrc(payload);
 
-        // Build buffer based on payload and CRC_A checksum
         final var buffer = new byte[payload.length + checksum.length];
         System.arraycopy(payload, 0, buffer, 0, payload.length);
         System.arraycopy(checksum, 0, buffer, payload.length, checksum.length);
@@ -815,107 +859,6 @@ public class MFRC522 extends Component {
         writeRegister(PcdRegister.COMMAND_REG, command.getValue());
     }
 
-    /**
-     * Writes a single byte to the specified PCD register.
-     *
-     * @param register PCD register to write
-     * @param value    Byte to be written
-     */
-    private void writeRegister(PcdRegister register, byte value) {
-        spi.transfer(new byte[]{register.getWriteAddress(), value});
-    }
-
-    /**
-     * Writes one or more bytes to the specified PCD register.
-     *
-     * @param register PCD register to write
-     * @param values   Bytes to be written
-     */
-    private void writeRegister(PcdRegister register, byte[] values) {
-        final var buffer = new byte[values.length + 1];
-        buffer[0] = register.getWriteAddress();
-        System.arraycopy(values, 0, buffer, 1, values.length);
-
-        spi.transfer(buffer);
-    }
-
-    /**
-     * Writes a short to the specified PCD registers by splitting into two bytes.
-     *
-     * @param registerHigh PCD register where upper half (MSB) is stored
-     * @param registerLow  PCD register where lower half (LSB) is stored
-     * @param value        Short to be written to registers
-     */
-    private void writeRegister(PcdRegister registerHigh, PcdRegister registerLow, short value) {
-        int tmp = value & 0xFFFF;
-        writeRegister(registerHigh, (byte) ((tmp >> 8) & 0xFF));
-        writeRegister(registerLow, (byte) (tmp & 0xFF));
-    }
-
-    /**
-     * Reads a single byte from the specified PCD register.
-     *
-     * @param register PCD register to read
-     * @return Byte read from register
-     */
-    private byte readRegister(PcdRegister register) {
-        final var buffer = new byte[]{register.getReadAddress(), 0};
-        spi.transfer(buffer);
-        return buffer[1];
-    }
-
-    /**
-     * Reads the specified amount of bytes from the specified PCD register.
-     * Supports bit-oriented frames where the first relevant bit is shifted accordingly.
-     *
-     * @param register    PCD register to read
-     * @param length      Amount of bytes to read from the PCD including the partial byte (only applicable if rxAlignBits != 0)
-     * @param rxAlignBits Position of first bit which is relevant, specify 0 to consider all 8 bits valid
-     * @return Byte array with retrieved data
-     */
-    private byte[] readRegister(PcdRegister register, int length, int rxAlignBits) {
-        // Break out early if zero-length was given
-        if (length == 0) {
-            return new byte[]{};
-        }
-
-        // Create buffer for retrieving data
-        final var buffer = new byte[length + 1];
-        for (int i = 0; i < length; i++) {
-            buffer[i] = register.getReadAddress();
-        }
-        buffer[buffer.length - 1] = 0;
-
-        // Transfer buffer
-        spi.transfer(buffer);
-
-        // Prepare result buffer
-        final var result = new byte[length];
-        int resultIndex = 0;
-
-        // Start at buffer position 1 as the first byte (where the command was stored) is always zero
-        int bufferIndex = 1;
-
-        // Adjust first byte for bit-oriented frames
-        if (rxAlignBits != 0) {
-            // Create bitmask where LSB is shifted by given amount
-            byte mask = (byte) ((0xFF << rxAlignBits) & 0xFF);
-            // Mask received first byte and store into result buffer
-            result[resultIndex++] = (byte) (buffer[bufferIndex++] & ~mask);
-        }
-
-        // Copy all pending bytes into the result buffer
-        System.arraycopy(buffer, bufferIndex, result, resultIndex, length - bufferIndex + 1);
-
-        return result;
-    }
-
-    /**
-     * Manipulates the specified PCD register by setting all bits according to the bitmask
-     *
-     * @param register PCD register to manipulate
-     * @param mask     Bitmask to set
-     */
     private void setBitMask(PcdRegister register, byte mask) {
         final byte oldValue = readRegister(register);
         final byte newValue = (byte) (oldValue | mask);
@@ -924,12 +867,6 @@ public class MFRC522 extends Component {
         }
     }
 
-    /**
-     * Manipulates the specified PCD register by clearing all bits according to the bitmask
-     *
-     * @param register PCD register to manipulate
-     * @param mask     Bitmask to clear
-     */
     private void clearBitMask(PcdRegister register, byte mask) {
         final byte oldValue = readRegister(register);
         final byte newValue = (byte) (oldValue & ~mask);
