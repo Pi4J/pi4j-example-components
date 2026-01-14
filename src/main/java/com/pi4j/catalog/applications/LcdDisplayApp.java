@@ -5,6 +5,7 @@ import java.time.Duration;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.LcdDisplay;
 
 /**
@@ -26,26 +27,26 @@ public class LcdDisplayApp {
         lcd.displayLineOfText("World!", 1, 3);
 
         // Wait a little to have some time to read it
-        delay(Duration.ofSeconds(3));
+        Component.delay(Duration.ofSeconds(3));
 
         lcd.clearDisplay();
 
         lcd.centerTextInLine("Hi", 0);
 
-        delay(Duration.ofSeconds(1));
+        Component.delay(Duration.ofSeconds(1));
 
         // To write some text there are different methods. The simplest one is this one which automatically inserts
         // linebreaks if needed.
         lcd.displayText("Boohoo that's so simple to use!");
-        delay(Duration.ofSeconds(3));
+        Component.delay(Duration.ofSeconds(3));
 
         // Of course, it is also possible to use linebreaks
         lcd.displayText("Some big text \nwith a new line\nonly displayed on 4 row LCD");
-        delay(Duration.ofSeconds(4));
+        Component.delay(Duration.ofSeconds(4));
 
         // Long text are cut to the bone
         lcd.displayText("Some big text with no new lines, just to test how many lines will get filled");
-        delay(Duration.ofSeconds(4));
+        Component.delay(Duration.ofSeconds(4));
 
         // Clear the display to start next parts
         lcd.clearDisplay();
@@ -61,17 +62,17 @@ public class LcdDisplayApp {
         lcd.writeCharacter('\3', 1, 1);
         lcd.writeCharacter('\4', 1, 2);
 
-        delay(Duration.ofSeconds(3));
+        Component.delay(Duration.ofSeconds(3));
 
         // we've built a rolling home
         for (int i = 0; i < 5; i++) {
             lcd.scrollRight();
-            delay(Duration.ofSeconds(1));
+            Component.delay(Duration.ofSeconds(1));
         }
 
         for (int i = 0; i < 5; i++) {
             lcd.scrollLeft();
-            delay(Duration.ofSeconds(1));
+            Component.delay(Duration.ofSeconds(1));
         }
 
         lcd.shutdown();
@@ -126,19 +127,5 @@ public class LcdDisplayApp {
                 0b11111,
                 0b11111
         });
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds.
-     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
-     *
-     * @param duration Time to sleep
-     */
-    private static void delay(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

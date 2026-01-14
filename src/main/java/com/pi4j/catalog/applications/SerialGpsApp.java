@@ -2,6 +2,7 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.SerialGps;
 
 public class SerialGpsApp {
@@ -14,24 +15,10 @@ public class SerialGpsApp {
 
 
         //provide positions for 15 sec
-        delay(Duration.ofSeconds(60));
+        Component.delay(Duration.ofSeconds(60));
 
         gps.shutdown();
 
         System.out.println("GPS demo finished");
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds.
-     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
-     *
-     * @param duration Time to sleep
-     */
-    private static void delay(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

@@ -182,8 +182,12 @@ public class MFRC522 extends RegisterBasedSpiDevice {
             }
             return true;
         } catch (RfidCollisionException ignored) {
+            // Collision during card detection is expected when multiple cards are present
+            // and can be safely ignored - return true to indicate card was detected
             return true;
         } catch (Exception ignored) {
+            // Other exceptions during card detection indicate a failure
+            // Return false to indicate no card was successfully detected
             return false;
         }
     }

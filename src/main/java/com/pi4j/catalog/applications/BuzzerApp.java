@@ -6,6 +6,7 @@ import java.util.List;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.base.PIN;
 import com.pi4j.catalog.components.Buzzer;
 
@@ -73,7 +74,7 @@ public class BuzzerApp {
         System.out.println("start playing melody");
         buzzer.playMelody(60, melody);
 
-        delay(Duration.ofSeconds(3));
+        Component.delay(Duration.ofSeconds(3));
 
         //first melody is stopped and second is played
         buzzer.playMelody(103, imperialMarch);
@@ -84,19 +85,5 @@ public class BuzzerApp {
         buzzer.shutdown();
 
         System.out.println("buzzer demo finished");
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds.
-     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
-     *
-     * @param duration Time to sleep
-     */
-    private static  void delay(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

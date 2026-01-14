@@ -21,7 +21,7 @@ public class SimpleLed extends DigitalActuator {
                       .name("LED #" + address)
                       .address(address.getPin())
                       .build());
-        logDebug("Created new SimpleLed component");
+        logDebug("Created new SimpleLed component on pin %s", address);
         digitalOutput.off();
     }
 

@@ -59,7 +59,7 @@ public abstract class Component {
      *
      * @param duration Time to sleep
      */
-    protected void delay(Duration duration) {
+    public static void delay(Duration duration) {
         try {
             long nanos = duration.toNanos();
             long millis = nanos / 1_000_000;

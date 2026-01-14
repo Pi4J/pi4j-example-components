@@ -73,6 +73,7 @@ public class JoystickAnalog extends Component {
         this.yAxis         = potentiometerY;
         this.push          = push;
         this.normThreshold = normThreshold;
+        logDebug("Created new JoystickAnalog component");
     }
 
     public void onMove(PositionConsumer onMove, Runnable onCenter){

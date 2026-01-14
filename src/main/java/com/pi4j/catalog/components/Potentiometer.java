@@ -50,7 +50,7 @@ public final class Potentiometer extends Component {
         this.range = range;
         this.channel = channel;
 
-        logDebug("Potentiometer initialized");
+        logDebug("Created new Potentiometer component on channel %s", channel);
     }
 
     /**

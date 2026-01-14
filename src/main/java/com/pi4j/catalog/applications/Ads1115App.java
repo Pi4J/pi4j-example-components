@@ -5,6 +5,7 @@ import java.time.Duration;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.Ads1115;
 
 /**
@@ -57,24 +58,10 @@ public class Ads1115App {
         adc.startContinuousReading(0.1);
 
         // continue reading for 30 seconds
-        delay(Duration.ofSeconds(30));
+        Component.delay(Duration.ofSeconds(30));
 
         adc.stopContinuousReading();
 
         System.out.println("Continuous read done.");
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds.
-     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
-     *
-     * @param duration Time to sleep
-     */
-    private static  void delay(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

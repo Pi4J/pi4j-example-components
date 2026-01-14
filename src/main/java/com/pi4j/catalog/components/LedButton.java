@@ -53,6 +53,7 @@ public class LedButton extends Component  {
     public LedButton(SimpleButton button, SimpleLed led){
         this.button = button;
         this.led = led;
+        logDebug("Created new LedButton component");
     }
 
 

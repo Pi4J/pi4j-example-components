@@ -34,7 +34,7 @@ public abstract class DigitalActuator extends Component {
 
     public MockDigitalOutput[] mock(DigitalOutput[] digitalOutputs) {
         return Arrays.stream(digitalOutputs)
-                .map(d -> asMock(MockDigitalOutput.class, digitalOutput))
+                .map(d -> asMock(MockDigitalOutput.class, d))
                 .toArray(MockDigitalOutput[]::new);
     }
 

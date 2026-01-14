@@ -39,6 +39,7 @@ public class SerialGps extends SerialSensor {
         super(9600, "/dev/ttyAMA0");
         this.onNewPosition = onNewPosition;
         this.onNewAltitude = onNewAltitude;
+        logDebug("Created new SerialGps component");
         startReading(this::handleNewData);
     }
 

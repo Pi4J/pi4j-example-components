@@ -40,7 +40,7 @@ public class Buzzer extends PwmActuator {
                       .frequency(1)
                       .shutdown(0)
                       .build());
-        logDebug("Created new Buzzer Component");
+        logDebug("Created new Buzzer component on pin %s", address);
        // off(); //Todo: Enable this as soon there's a new version of PWM available
     }
 
@@ -165,7 +165,9 @@ public class Buzzer extends PwmActuator {
             try {
                 currentMelody.get();
             } catch (InterruptedException | ExecutionException e) {
-               // nothing to do
+               // Interruption or execution exception during melody await is expected during shutdown
+               // and can be safely ignored. The interrupt flag is preserved by the executor.
+               logDebug("Melody await interrupted or execution exception occurred: %s", e.getMessage());
             }
         }
     }

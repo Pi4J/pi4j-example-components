@@ -5,6 +5,7 @@ import java.time.Duration;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.LedStrip;
 
 /**
@@ -27,7 +28,7 @@ public class LedStripApp {
         int leds = 25;  //
         final LedStrip ledStrip = new LedStrip(pi4j, leds);
 
-        delay(sec1);
+        Component.delay(sec1);
 
         System.out.println("LED strip shines purple");
         ledStrip.setStripColor(LedStrip.LedColor.PURPLE);
@@ -57,7 +58,7 @@ public class LedStripApp {
             ledStrip.setPixelColor(i - 1, LedStrip.LedColor.PURPLE);
             ledStrip.render(ms50);
         }
-        delay(ms500);
+        Component.delay(ms500);
 
         System.out.println("setting the brightness to full and show the first LED as white");
         ledStrip.allOff();
@@ -69,19 +70,5 @@ public class LedStripApp {
         ledStrip.shutdown();
 
         System.out.println("LED strip demo finished.");
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds.
-     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
-     *
-     * @param duration Time to sleep
-     */
-    private static void delay(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

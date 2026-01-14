@@ -15,6 +15,7 @@ public class SerialSensor extends Component {
 
     public SerialSensor(int baudRate, String portDescriptor) {
         port = createPort(baudRate, portDescriptor);
+        logDebug("Created new SerialSensor component on port %s with baud rate %d", portDescriptor, baudRate);
     }
 
     public void startReading(Consumer<String> onNewLine){

@@ -57,6 +57,7 @@ public class Joystick extends Component {
         else {
             bPush = null;
         }
+        logDebug("Created new Joystick component");
     }
 
     /**

@@ -5,6 +5,7 @@ import java.time.Duration;
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.Ads1115;
 import com.pi4j.catalog.components.Potentiometer;
 
@@ -23,6 +24,7 @@ public class PotentiometerApp {
         Ads1115 ads1115 = new Ads1115(pi4j);
 
         Potentiometer poti = new Potentiometer(ads1115, Ads1115.Channel.A0);
+        System.out.println("Potentiometer demo started ...");
 
         //read current value from poti one time
         System.out.printf("P0 raw value is %.2f V%n", poti.readCurrentVoltage());
@@ -42,28 +44,14 @@ public class PotentiometerApp {
 
         System.out.println("Move the potentiometer to see it in action!");
         // Wait while handling events before exiting
-        delay(Duration.ofSeconds(15));
+        Component.delay(Duration.ofSeconds(15));
 
         ads1115.stopContinuousReading();
 
         System.out.println("No new values should be reported");
-        delay(Duration.ofSeconds(5));
+        Component.delay(Duration.ofSeconds(5));
 
         ads1115.shutdown();
         System.out.println("Potentiometer demo finished");
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds.
-     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
-     *
-     * @param duration Time to sleep
-     */
-    private static void delay(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

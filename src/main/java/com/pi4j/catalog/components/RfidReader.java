@@ -303,6 +303,8 @@ public class RfidReader extends MFRC522 {
                 try {
                     uninitializeCard();
                 } catch (RfidException ignored) {
+                    // Exception during card uninitialization is expected during shutdown
+                    // or when card is already in HALT state - can be safely ignored
                 }
             }
         }

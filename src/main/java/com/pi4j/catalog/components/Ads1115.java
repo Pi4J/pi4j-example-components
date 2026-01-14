@@ -79,6 +79,7 @@ public class Ads1115 extends I2CDevice {
         int compQue           = COMP_QUE.DISABLE_COMP.getCompQue();
 
         configRegisterTemplate = operationalStatus | pga.gain | dataRate.getConf() | compMode | compPol | latching | compQue;
+        logDebug("Created new Ads1115 component");
     }
 
     @Override

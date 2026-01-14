@@ -109,6 +109,7 @@ public class ServoMotor extends PwmActuator {
         this.maxAngle = maxAngle;
         this.minDutyCycle = minDutyCycle;
         this.maxDutyCycle = maxDutyCycle;
+        logDebug("Created new ServoMotor component on pin %s", address);
     }
 
     @Override

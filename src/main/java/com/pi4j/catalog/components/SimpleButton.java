@@ -81,6 +81,8 @@ public class SimpleButton extends DigitalSensor {
 
         this.inverted = inverted;
 
+        logDebug("Created new SimpleButton component on pin %s", address);
+
         /*
          * Gets a DigitalStateChangeEvent directly from the Provider, as this
          * Class is a listener. This runs in a different Thread than main.

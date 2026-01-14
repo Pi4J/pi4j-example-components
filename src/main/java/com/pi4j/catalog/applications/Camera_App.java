@@ -2,6 +2,7 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.Camera;
 
 /**
@@ -34,7 +35,7 @@ public class Camera_App  {
         camera.recordPicture(config);
 
         System.out.println("Waiting for camera to take pic");
-        delay(Duration.ofSeconds(4));
+        Component.delay(Duration.ofSeconds(4));
 
         System.out.println("Taking a video for 3 seconds");
         var vidconfig = Camera.newVidConfigBuilder()
@@ -46,19 +47,5 @@ public class Camera_App  {
 
         camera.shutdown();
         System.out.println("Camera demo finished");
-    }
-
-    /**
-     * Utility function to sleep for the specified amount of milliseconds.
-     * An {@link InterruptedException} will be catched and ignored while setting the interrupt flag again.
-     *
-     * @param duration Time to sleep
-     */
-    private static  void delay(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }
