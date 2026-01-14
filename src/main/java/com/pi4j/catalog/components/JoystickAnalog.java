@@ -73,6 +73,7 @@ public class JoystickAnalog extends Component {
         this.yAxis         = potentiometerY;
         this.push          = push;
         this.normThreshold = normThreshold;
+        logDebug("Created new JoystickAnalog component");
     }
 
     public void onMove(PositionConsumer onMove, Runnable onCenter){
@@ -156,11 +157,11 @@ public class JoystickAnalog extends Component {
      * disables all the handlers on joystick events
      */
     @Override
-    public void reset() {
+    public void shutdown() {
         ads1115.stopContinuousReading();
-        xAxis.reset();
-        yAxis.reset();
-        push.reset();
+        xAxis.shutdown();
+        yAxis.shutdown();
+        push.shutdown();
     }
 
     @FunctionalInterface

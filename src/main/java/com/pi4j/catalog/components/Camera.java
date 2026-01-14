@@ -30,6 +30,7 @@ public class Camera extends Component {
      * calling the init function to test if a camera is active
      */
     public Camera() {
+        logDebug("Created new Camera component");
         init();
     }
 

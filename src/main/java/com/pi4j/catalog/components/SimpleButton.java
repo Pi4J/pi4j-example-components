@@ -16,7 +16,7 @@ import static com.pi4j.io.gpio.digital.DigitalInput.DEFAULT_DEBOUNCE;
 
 public class SimpleButton extends DigitalSensor {
     /**
-     * Specifies if button state is inverted, e.g. HIGH = depressed, LOW = pressed
+     * Specifies if button state is inverted, e.g., HIGH = depressed, LOW = pressed
      * This will also automatically switch the pull resistance to PULL_UP
      */
     private final boolean inverted;
@@ -38,7 +38,7 @@ public class SimpleButton extends DigitalSensor {
     private Duration whilePressedDelay;
 
     /**
-     * what needs to be done while button is pressed (and whilePressed is != null)
+     * what needs to be done while the button is pressed (and whilePressed is != null)
      */
     private final Runnable whileDownWorker = () -> {
         while (isDown()) {
@@ -81,13 +81,15 @@ public class SimpleButton extends DigitalSensor {
 
         this.inverted = inverted;
 
+        logDebug("Created new SimpleButton component on pin %s", address);
+
         /*
          * Gets a DigitalStateChangeEvent directly from the Provider, as this
          * Class is a listener. This runs in a different Thread than main.
          * Calls the methods onUp, onDown and whilePressed. WhilePressed gets
          * executed in an own Thread, as to not block other resources.
          */
-        digitalInput.addListener(digitalStateChangeEvent -> {
+        digitalInput.addListener(stateChangeEvent -> {
             DigitalState state = getState();
 
             logDebug("Button switched to '%s'", state);
@@ -169,6 +171,7 @@ public class SimpleButton extends DigitalSensor {
      * Only a single event handler can be registered at once.
      *
      * @param task Event handler to call or null to disable
+     * @param delay delay between two executions of task
      */
     public void whilePressed(Runnable task, Duration delay) {
         whileDown = task;
@@ -189,7 +192,7 @@ public class SimpleButton extends DigitalSensor {
      * disables all the handlers for the onUp, onDown and WhileDown Events
      */
     @Override
-    public void reset() {
+    public void shutdown() {
         onDown    = null;
         onUp      = null;
         whileDown = null;

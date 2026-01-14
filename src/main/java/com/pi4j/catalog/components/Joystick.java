@@ -9,7 +9,7 @@ import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.base.PIN;
 
 /**
- * Implementation of a joystick using 5 GPIO up, left, down, right and push  with Pi4J
+ * Implementation of a joystick using 5 GPIO up, left, down, right and push with Pi4J
  */
 public class Joystick extends Component {
 
@@ -44,7 +44,7 @@ public class Joystick extends Component {
      * @param addrEast  GPIO address of button right
      * @param addrPush  GPIO address of button push
      */
-    public Joystick (Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest, PIN addrPush){
+    public Joystick(Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest, PIN addrPush){
         bNorth = new SimpleButton(pi4j, addrNorth, false);
         bWest  = new SimpleButton(pi4j, addrWest,  false);
         bSouth = new SimpleButton(pi4j, addrSouth, false);
@@ -57,6 +57,7 @@ public class Joystick extends Component {
         else {
             bPush = null;
         }
+        logDebug("Created new Joystick component");
     }
 
     /**
@@ -68,7 +69,7 @@ public class Joystick extends Component {
      * @param addrSouth  GPIO address of button down
      * @param addrEast  GPIO address of button right
      */
-    public Joystick (Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest){
+    public Joystick(Context pi4j, PIN addrNorth, PIN addrEast, PIN addrSouth, PIN addrWest){
         this(pi4j, addrNorth, addrEast, addrSouth, addrWest, null);
     }
 
@@ -267,13 +268,13 @@ public class Joystick extends Component {
 
 
     @Override
-    public void reset(){
-        bNorth.reset();
-        bWest.reset();
-        bSouth.reset();
-        bEast.reset();
+    public void shutdown(){
+        bNorth.shutdown();
+        bWest.shutdown();
+        bSouth.shutdown();
+        bEast.shutdown();
         if(pushIsPresent()){
-            bPush.reset();
+            bPush.shutdown();
         }
     }
 

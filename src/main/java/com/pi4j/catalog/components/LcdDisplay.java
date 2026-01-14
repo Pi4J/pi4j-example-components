@@ -351,7 +351,7 @@ public class LcdDisplay extends I2CDevice {
     }
 
     @Override
-    public void reset() {
+    public void shutdown() {
         clearDisplay();
         off();
     }

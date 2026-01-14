@@ -32,14 +32,14 @@ public class Ads1115 extends I2CDevice {
     /**
      * programmable gain amplifier
      */
-    private final Ads1115.GAIN pga;
+    private final GAIN pga;
     /**
      * sampling rate of device
      */
     private final DataRate dataRate;
 
     /**
-     * old values from last successful read of conversion register (raw data)
+     * old values from the last successful read of conversion register (raw data)
      */
     private final Map<Channel, Double> oldVoltages = new HashMap<>();
 
@@ -69,8 +69,8 @@ public class Ads1115 extends I2CDevice {
         super(pi4j, device.address, "ADS1115");
         this.pi4j = pi4j;
 
-        this.pga = gain;
-        this.dataRate = DataRate.SPS_128;
+        pga = gain;
+        dataRate = DataRate.SPS_128;
 
         int operationalStatus = OperationalStatus.WRITE_START.getOperationalStatus();
         int compMode          = COMP_MODE.TRAD_COMP.getCompMode();
@@ -78,16 +78,17 @@ public class Ads1115 extends I2CDevice {
         int latching          = COMP_LAT.NON_LATCH.getLatching();
         int compQue           = COMP_QUE.DISABLE_COMP.getCompQue();
 
-        this.configRegisterTemplate = operationalStatus | pga.gain | dataRate.getConf() | compMode | compPol | latching | compQue;
-    }
-
-    Context getPi4j() {
-        return pi4j;
+        configRegisterTemplate = operationalStatus | pga.gain | dataRate.getConf() | compMode | compPol | latching | compQue;
+        logDebug("Created new Ads1115 component");
     }
 
     @Override
     protected void init(I2C i2c) {
         //nothing to init
+    }
+
+    public Context getPi4j() {
+        return pi4j;
     }
 
     public void onValueChange(Channel channel, Consumer<Double> onChange) {
@@ -161,7 +162,7 @@ public class Ads1115 extends I2CDevice {
      * stops continuous reading
      */
     public void stopContinuousReading() {
-         continuousReadingActive = false;
+        continuousReadingActive = false;
 
         logDebug("Continuous reading stopped");
     }
@@ -170,7 +171,7 @@ public class Ads1115 extends I2CDevice {
      * disables all handlers
      */
     @Override
-    public void reset() {
+    public void shutdown() {
         stopContinuousReading();
         delay(Duration.ofMillis(channelsInUse.size() * 16L));
         channelsInUse.clear();
@@ -262,8 +263,8 @@ public class Ads1115 extends I2CDevice {
         return valueRanges.computeIfAbsent(channel, (c) -> new RawValueRange());
     }
 
-    private static class RawValueRange{
-        double minRawValue = 0.1;
+    private static class RawValueRange {
+        double minRawValue = 1.5;
         double maxRawValue = 3.2;
     }
 
@@ -463,7 +464,7 @@ public class Ads1115 extends I2CDevice {
          * @return comparator queue configuration
          */
         public int getCompQue() {
-            return this.compQue;
+            return compQue;
         }
 
     }
@@ -566,7 +567,7 @@ public class Ads1115 extends I2CDevice {
          * @return comparator polarisation
          */
         public int getCompPol() {
-            return this.compPol;
+            return compPol;
         }
     }
 
@@ -604,10 +605,10 @@ public class Ads1115 extends I2CDevice {
         /**
          * Set mode for comparator configuration
          *
-         * @param compMOde comparator mode for configuration
+         * @param compMode comparator mode for configuration
          */
-        COMP_MODE(int compMOde) {
-            this.compMode = compMOde;
+        COMP_MODE(int compMode) {
+            this.compMode = compMode;
         }
 
         /**
@@ -616,7 +617,7 @@ public class Ads1115 extends I2CDevice {
          * @return configuration of comparator mode
          */
         public int getCompMode() {
-            return this.compMode;
+            return compMode;
         }
 
     }
@@ -706,7 +707,7 @@ public class Ads1115 extends I2CDevice {
          * @return sampling rate
          */
         public int getSpS() {
-            return this.sps;
+            return sps;
         }
 
         /**
@@ -715,7 +716,7 @@ public class Ads1115 extends I2CDevice {
          * @return sampling rate for configuration
          */
         public int getConf() {
-            return this.conf;
+            return conf;
         }
     }
 
@@ -823,10 +824,10 @@ public class Ads1115 extends I2CDevice {
         /**
          * Set configuration for programmable gain amplifier
          *
-         * @param pag Programmable gain amplifier configuration
+         * @param pga Programmable gain amplifier configuration
          */
-        PGA(int pag) {
-            this.pga = pag;
+        PGA(int pga) {
+            this.pga = pga;
         }
 
         /**
@@ -835,7 +836,7 @@ public class Ads1115 extends I2CDevice {
          * @return Programmable gain amplifier configuration
          */
         public int getPga() {
-            return this.pga;
+            return pga;
         }
 
     }

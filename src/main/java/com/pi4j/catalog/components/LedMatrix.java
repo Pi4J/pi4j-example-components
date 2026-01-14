@@ -35,13 +35,14 @@ public class LedMatrix extends Component {
         this.rows = rows;
         this.columns = columns;
         this.ledStrip = new LedStrip(pi4j, rows*columns);
+        logDebug("Created new LedMatrix component with %d rows and %d columns", rows, columns);
     }
 
 
     @Override
-    public void reset() {
-        super.reset();
-        ledStrip.reset();
+    public void shutdown() {
+        super.shutdown();
+        ledStrip.shutdown();
     }
 
     /**

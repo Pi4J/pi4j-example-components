@@ -1,6 +1,7 @@
 package com.pi4j.catalog.components.base;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalOutput;
@@ -14,6 +15,9 @@ public abstract class DigitalActuator extends Component {
     protected final DigitalOutput digitalOutput;
 
     protected DigitalActuator(Context pi4j, DigitalOutputConfig config) {
+        Objects.requireNonNull(pi4j);
+        Objects.requireNonNull(config);
+
         digitalOutput = pi4j.create(config);
     }
 
@@ -30,7 +34,7 @@ public abstract class DigitalActuator extends Component {
 
     public MockDigitalOutput[] mock(DigitalOutput[] digitalOutputs) {
         return Arrays.stream(digitalOutputs)
-                .map(d -> asMock(MockDigitalOutput.class, digitalOutput))
+                .map(d -> asMock(MockDigitalOutput.class, d))
                 .toArray(MockDigitalOutput[]::new);
     }
 

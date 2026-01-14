@@ -3,10 +3,7 @@ package com.pi4j.catalog.components;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import com.pi4j.context.Context;
-
-import com.pi4j.catalog.components.base.Component;
-import com.pi4j.catalog.components.base.SerialDevice;
+import com.pi4j.catalog.components.base.SerialSensor;
 
 /**
  * This component sends GPS information as NMEA sentence over the serial UART bus.
@@ -19,11 +16,9 @@ import com.pi4j.catalog.components.base.SerialDevice;
  * SerialGps just converts the Strings delivered by SerialReader to Positions, consisting of longitude, latitude, altitude
  *
  */
-public class SerialGps extends Component {
+public class SerialGps extends SerialSensor {
     //only if the sensor has moved significantly, the new position will be reported
     private static final double MIN_DISTANCE_M = 1.0;
-
-    private final SerialDevice device;
 
     private final Consumer<GeoPosition> onNewPosition;
     private final Consumer<Double>      onNewAltitude;
@@ -36,34 +31,16 @@ public class SerialGps extends Component {
 
     /**
      *
-     * @param pi4j the good old Pi4J context
      * @param onNewPosition will be called if device has moved significantly
      * @param onNewAltitude will be called if device has a new altitude
      */
-    public SerialGps(Context pi4j,
-                     Consumer<GeoPosition> onNewPosition,
-                     Consumer<Double>      onNewAltitude
-                     ) {
+    public SerialGps(Consumer<GeoPosition> onNewPosition,
+                     Consumer<Double>      onNewAltitude) {
+        super(9600, "/dev/ttyAMA0");
         this.onNewPosition = onNewPosition;
         this.onNewAltitude = onNewAltitude;
-        device = new SerialDevice(pi4j, this::handleNewData);
-    }
-
-    public void start() {
-        device.startReading();
-        logInfo("reading GPS data started");
-    }
-
-    public void stop() {
-        device.stopReading();
-        logInfo("Stopped reading GPS data");
-    }
-
-    @Override
-    public void reset() {
-        device.reset();
-        super.reset();
-        logInfo("Stopped reading GPS data");
+        logDebug("Created new SerialGps component");
+        startReading(this::handleNewData);
     }
 
     /**
@@ -74,7 +51,6 @@ public class SerialGps extends Component {
      * @param line the String delivered by the SerialReader
      */
     private void handleNewData(String line) {
-        logDebug("Serial reader delivered: '%s'", line);
         String[] data = line.split(",");
         switch (data[0]) {
             case "$GPGGA" -> handleFixData(data);

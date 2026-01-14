@@ -103,7 +103,7 @@ public class SimpleButtonTest extends ComponentTest {
         assertEquals(2, counter.count);
 
         //when
-        button.reset();
+        button.shutdown();
 
         //then
         assertTrue(button.isInInitialState());
@@ -187,7 +187,7 @@ public class SimpleButtonTest extends ComponentTest {
         button.whilePressed(task, Duration.ofMillis(10));
 
         //when
-        button.reset();
+        button.shutdown();
 
         //then
         assertTrue(button.isInInitialState());

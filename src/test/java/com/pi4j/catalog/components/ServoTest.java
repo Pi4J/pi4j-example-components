@@ -13,18 +13,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ServoTest extends ComponentTest {
     private ServoMotor servo;
     private MockPwm pwm;
-    private final PIN address = PIN.PWM18;
 
     @BeforeEach
     public void setUp() {
-        servo = new ServoMotor(pi4j, address);
+        servo = new ServoMotor(pi4j, PIN.PWM18);
         pwm = servo.mock();
     }
 
     @Test
     public void test_init(){
         //when
-        servo = new ServoMotor(pi4j, PIN.PWM19, 0, 180, 2, 12);
+        servo = new ServoMotor(pi4j, PIN.PWM18, 0, 180, 2, 12);
 
         //then
         assertEquals(0, servo.getMinAngle());

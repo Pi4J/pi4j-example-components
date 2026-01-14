@@ -1,0 +1,74 @@
+package com.pi4j.catalog.applications;
+
+import java.time.Duration;
+
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+
+import com.pi4j.catalog.components.base.Component;
+import com.pi4j.catalog.components.LedStrip;
+
+/**
+ * This example shows how to use the LEDStrip component by setting the LEDs on the strip to different colors.
+ * <p>
+ * see <a href="https://pi4j.com/examples/components/ledstrip/">Description on Pi4J website</a>
+ */
+public class LedStripApp {
+
+    public static void main(String[] args) {
+        final Context pi4j = Pi4J.newAutoContext();
+
+        System.out.println("LED strip app started ...");
+
+        // Initialize the strip
+        Duration ms50  = Duration.ofMillis(50);
+        Duration ms500 = Duration.ofMillis(500);
+        Duration sec1  = Duration.ofSeconds(1);
+
+        int leds = 25;  //
+        final LedStrip ledStrip = new LedStrip(pi4j, leds);
+
+        Component.delay(sec1);
+
+        System.out.println("LED strip shines purple");
+        ledStrip.setStripColor(LedStrip.LedColor.PURPLE);
+        ledStrip.render(sec1);
+
+        System.out.println("turn strip off");
+        ledStrip.allOff();
+        ledStrip.render(sec1);
+
+        System.out.println("toggle between GREEN and RED");
+        ledStrip.alternate(LedStrip.LedColor.GREEN, LedStrip.LedColor.RED, ms500, 3);
+
+        System.out.println("setting the LEDs to blue and the first one to purple");
+        ledStrip.setStripColor(LedStrip.LedColor.BLUE);
+        ledStrip.setPixelColor(0, LedStrip.LedColor.PURPLE);
+        ledStrip.render(ms500);
+
+        System.out.println("Start a kind of animation");
+        for(int i = 0; i < leds -1; i++){
+            ledStrip.setPixelColor(i, LedStrip.LedColor.BLUE);
+            ledStrip.setPixelColor(i+1, LedStrip.LedColor.PURPLE);
+            ledStrip.render(ms50);
+        }
+
+        for(int i = leds -1; i > 0; i--){
+            ledStrip.setPixelColor(i, LedStrip.LedColor.BLUE);
+            ledStrip.setPixelColor(i - 1, LedStrip.LedColor.PURPLE);
+            ledStrip.render(ms50);
+        }
+        Component.delay(ms500);
+
+        System.out.println("setting the brightness to full and show the first LED as white");
+        ledStrip.allOff();
+        ledStrip.setMaxBrightness(1);
+        ledStrip.setPixelColor(0, LedStrip.LedColor.WHITE);
+        ledStrip.render(Duration.ofSeconds(2));
+
+        //finishing and closing
+        ledStrip.shutdown();
+
+        System.out.println("LED strip demo finished.");
+    }
+}

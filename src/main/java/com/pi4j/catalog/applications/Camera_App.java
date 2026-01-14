@@ -2,18 +2,17 @@ package com.pi4j.catalog.applications;
 
 import java.time.Duration;
 
-import com.pi4j.context.Context;
-
-import com.pi4j.catalog.Application;
+import com.pi4j.catalog.components.base.Component;
 import com.pi4j.catalog.components.Camera;
 
 /**
  * <p>
  * see <a href="https://pi4j.com/examples/components/camera/">Description on Pi4J website</a>
  */
-public class Camera_App implements Application {
-    @Override
-    public void execute(Context pi4j) {
+public class Camera_App  {
+
+    public static void main(String[] args) {
+
         System.out.println("Camera demo started");
 
         Camera camera = new Camera();
@@ -36,7 +35,7 @@ public class Camera_App implements Application {
         camera.recordPicture(config);
 
         System.out.println("Waiting for camera to take pic");
-        delay(Duration.ofSeconds(4));
+        Component.delay(Duration.ofSeconds(4));
 
         System.out.println("Taking a video for 3 seconds");
         var vidconfig = Camera.newVidConfigBuilder()
@@ -46,7 +45,7 @@ public class Camera_App implements Application {
                 .build();
         camera.recordVideo(vidconfig);
 
-        camera.reset();
+        camera.shutdown();
         System.out.println("Camera demo finished");
     }
 }

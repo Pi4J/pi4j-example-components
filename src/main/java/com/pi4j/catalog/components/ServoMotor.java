@@ -13,12 +13,12 @@ public class ServoMotor extends PwmActuator {
     /**
      * Default PWM frequency of the servo, based on values for SG92R
      */
-    protected final static int DEFAULT_FREQUENCY = 50;
+    protected static final int DEFAULT_FREQUENCY = 50;
 
     /**
      * Default minimum angle of the servo motor, based on values for SG92R
      */
-    protected final static float DEFAULT_MIN_ANGLE = -90;
+    protected static final float DEFAULT_MIN_ANGLE = -90;
     /**
      * Default maximum angle of the servo motor, based on values for SG92R
      */
@@ -27,11 +27,11 @@ public class ServoMotor extends PwmActuator {
     /**
      * Default minimum PWM duty cycle to put the PWM into the minimum angle position
      */
-    protected final static float DEFAULT_MIN_DUTY_CYCLE = 2;
+    protected static final float DEFAULT_MIN_DUTY_CYCLE = 2;
     /**
      * Maximum PWM duty cycle to put the PWM into the maximum angle position
      */
-    protected final static float DEFAULT_MAX_DUTY_CYCLE = 12;
+    protected static final float DEFAULT_MAX_DUTY_CYCLE = 12;
 
     /**
      * Minimum angle of the servo motor used for this instance, should match previously tested real world values
@@ -99,7 +99,7 @@ public class ServoMotor extends PwmActuator {
                 Pwm.newConfigBuilder(pi4j)
                 .id("BCM-" + address)
                 .name("Servo Motor " + address)
-                .address(address.getPin())
+                .address(getAddress(address))
                 .pwmType(PwmType.HARDWARE)
                 .frequency(frequency)
                 .initial(0)
@@ -109,13 +109,14 @@ public class ServoMotor extends PwmActuator {
         this.maxAngle = maxAngle;
         this.minDutyCycle = minDutyCycle;
         this.maxDutyCycle = maxDutyCycle;
+        logDebug("Created new ServoMotor component on pin %s", address);
     }
 
     @Override
-    public void reset() {
+    public void shutdown() {
         setAngle(0);
         delay(Duration.ofSeconds(1));
-        super.reset();
+        super.shutdown();
     }
 
     /**
@@ -169,8 +170,8 @@ public class ServoMotor extends PwmActuator {
      * @param maxValue Maximum range value
      */
     public void setRange(float minValue, float maxValue) {
-        this.minRange = minValue;
-        this.maxRange = maxValue;
+        minRange = minValue;
+        maxRange = maxValue;
     }
 
     /**

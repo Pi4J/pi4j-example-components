@@ -53,6 +53,7 @@ public class LedButton extends Component  {
     public LedButton(SimpleButton button, SimpleLed led){
         this.button = button;
         this.led = led;
+        logDebug("Created new LedButton component");
     }
 
 
@@ -131,9 +132,9 @@ public class LedButton extends Component  {
     }
 
     @Override
-    public void reset(){
-        button.reset();
-        led.reset();
+    public void shutdown(){
+        button.shutdown();
+        led.shutdown();
     }
 
     // --------------- for testing --------------------
