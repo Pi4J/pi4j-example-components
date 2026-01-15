@@ -1,8 +1,8 @@
 EditPi4J V2 :: Java I/O Library for Raspberry Pi :: Example applications for various components
 ===============================================================================================
 
-GitHub Actions:
-![Maven build](https://github.com/pi4j/pi4j-example-serial/workflows/Maven/badge.svg)
+> [!WARNING]  
+> This project is archived. It will be further maintained and used by the [FHNW University here](https://gitlab.fhnw.ch/ip_12_preparation/pi4j-example-components).
 
 ## PROJECT OVERVIEW
 
